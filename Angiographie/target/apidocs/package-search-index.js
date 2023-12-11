@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.hmd.angio"},{"l":"org.hmd.angio.ihm"}];updateSearchResults();
