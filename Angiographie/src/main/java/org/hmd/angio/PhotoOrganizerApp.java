@@ -53,11 +53,11 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.hmd.angio.conf.ConfigEditorUI;
 import org.hmd.angio.dto.Person;
 import org.hmd.angio.dto.PersonDAO;
 import org.hmd.angio.enuma.PDRectangleEnum;
-import org.hmd.angio.exception.PhotoLoadException;
-import org.hmd.angio.ihm.ConfigEditorUI;
+import org.hmd.angio.exception.PhotoLoadException; 
 import org.hmd.angio.ihm.HistogramEQ;
 import org.hmd.angio.ihm.PersonInfoEntryUI;
 import org.hmd.angio.pdf.PDFGenerationGUI;

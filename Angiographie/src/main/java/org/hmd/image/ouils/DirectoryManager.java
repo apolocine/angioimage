@@ -9,19 +9,23 @@ import java.util.Date;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
-import org.hmd.angio.dto.Person;
-import org.hmd.angio.ihm.Config;
+import org.hmd.angio.conf.Config;
+import org.hmd.angio.dto.Person; 
  
 public class DirectoryManager {
 
-	private static final String CONFIG_FILE = "config.properties";
-	private static Config config;
 	
 	
 	public static String getWorkspaceDirectory( ) {
-		config = new Config(CONFIG_FILE);
+	 
 		// Utilisez la configuration chargée, par exemple :
-		String directory = config.getProperty("directory");
+		String directory = null;
+		try {
+			directory = Config.getProperty("directory");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	//	System.out.println("Directory: " + directory);
 		return directory+"\\";
 	}

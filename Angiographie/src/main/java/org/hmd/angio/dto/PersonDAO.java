@@ -9,18 +9,24 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hmd.angio.install.sgbd.DatabaseManager;
+
 public class PersonDAO {
 
-    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/angiographie";
-    private static final String USER = "root";
-    private static final String PASSWORD = "";
+//    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/angiographie";
+//    private static final String USER = "root";
+//    private static final String PASSWORD = "";
 
 //    String dDate="Sat Apr 11 12:16:44 IST 2015"; 
 //    DateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
 //    Date cDate = df.parse(dDate); 
     
     public static void createTableIfNotExists() {
-        try (Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD)) {
+        try (Connection connection = 
+        		DatabaseManager.getConnection()
+        		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+        		
+        		) {
             String createTableSQL = "CREATE TABLE IF NOT EXISTS personne ("
                     + "id INT AUTO_INCREMENT PRIMARY KEY,"
                     + "nom VARCHAR(255),"
@@ -32,14 +38,17 @@ public class PersonDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     }
 
-
- 
-
     public static int insertPerson(Person person) {
-        try (Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD)) {
+        try (Connection connection = 
+        		DatabaseManager.getConnection()
+        		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+        		) {
             String insertSQL = "INSERT INTO personne (nom, prenom, date_naissance) VALUES (?, ?, ? )";
             try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, person.getNom());
@@ -60,14 +69,18 @@ public class PersonDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
         return -1; // Retourne -1 en cas d'échec
     }
 
-    
-    
-    public void createPerson(Person person) {
-        try (Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD)) {
+   public void createPerson(Person person) {
+        try (Connection connection = 
+        		DatabaseManager.getConnection()
+        		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+        		) {
             PersonDAO.createTableIfNotExists();
             
             
@@ -78,7 +91,7 @@ public class PersonDAO {
             	  preparedStatement.setInt(1, person.getId());
             	  preparedStatement.setString(2, person.getNom());
                     preparedStatement.setString(3, person.getPrenom());
-                preparedStatement.setDate(4, new java.sql.Date(person.getDateNaissance().getTime()));
+                preparedStatement.setDate(4, sqlDate/*new java.sql.Date(person.getDateNaissance().getTime())*/);
                 
 
                 preparedStatement.executeUpdate();
@@ -92,12 +105,20 @@ public class PersonDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     }
 
+    
+    
     public static Person readPerson(int personId) {
         Person person = null;
-        try (Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD)) {
+        try (Connection connection = 
+        		DatabaseManager.getConnection()
+        		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+        		) {
             String selectSQL = "SELECT * FROM personne WHERE id = ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectSQL)) {
                 preparedStatement.setInt(1, personId);
@@ -116,13 +137,19 @@ public class PersonDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
         return person;
     }
 
     public static List<Person> listAllPersons() {
         List<Person> persons = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD)) {
+        try (Connection connection = 
+        		DatabaseManager.getConnection()
+        		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+        		) {
             String selectAllSQL = "SELECT * FROM personne";
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectAllSQL)) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -138,14 +165,20 @@ public class PersonDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
         return persons;
     }
 
  
     
     public void updatePerson(Person person) {
-    	 try (Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD)) {
+    	 try (Connection connection = 
+         		DatabaseManager.getConnection()
+         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+         		) {
             String query = "UPDATE personne SET nom=?, prenom=?, date_naissance=?  WHERE id=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setString(1, person.getNom());
@@ -159,13 +192,19 @@ public class PersonDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             // Gérer les exceptions SQL
-        }
+        } catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     }
 
     public void deletePerson(int personId) {
     	
   
-        try (Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD)) {
+        try (Connection connection = 
+        		DatabaseManager.getConnection()
+        		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+        		) {
             String sql = "DELETE FROM personne WHERE id=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, personId);
@@ -173,14 +212,20 @@ public class PersonDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        } catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     }
 
     
     // Méthode pour supprimer une personne de la base de données
     public void deletePerson(Person person) {
     	
-    	  try (Connection connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD)) {
+    	  try (Connection connection = 
+          		DatabaseManager.getConnection()
+          		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+          		) {
               String sql = "DELETE FROM personne WHERE id=?";
               try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                   preparedStatement.setInt(1, person.getId());
@@ -188,7 +233,10 @@ public class PersonDAO {
               }
           } catch (SQLException e) {
               e.printStackTrace();
-          }
+          } catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     	  
      
     }
@@ -205,7 +253,49 @@ public class PersonDAO {
         }
     }
 
-        public static void main(String[] args) {
+    
+
+    public List<Person> findAll() {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        List<Person> people = new ArrayList<>();
+
+        try {
+           
+            connection =
+            		DatabaseManager.getConnection()
+            		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+            		;/* obtenir une connexion à votre base de données */;
+            String query = "SELECT * FROM personne";
+            statement = connection.prepareStatement(query);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Person person = new Person();
+                person.setId(resultSet.getInt("id"));
+                person.setNom(resultSet.getString("nom"));
+                person.setPrenom(resultSet.getString("prenom"));
+                // ... autres propriétés ...
+
+                people.add(person);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Gérer les erreurs d'accès à la base de données
+        } catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+            // Fermer les ressources (ResultSet, PreparedStatement, Connection)
+            // ... assurez-vous de gérer correctement les exceptions ici
+        }
+
+        return people;
+    }
+    
+     
+    
+   public static void main(String[] args) {
             PersonDAO.createTableIfNotExists();
 
             // Exemple d'insertion
@@ -226,38 +316,6 @@ public class PersonDAO {
         
         
        
-        public List<Person> findAll() {
-            Connection connection = null;
-            PreparedStatement statement = null;
-            ResultSet resultSet = null;
-            List<Person> people = new ArrayList<>();
-
-            try {
-               
-                connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD);/* obtenir une connexion à votre base de données */;
-                String query = "SELECT * FROM personne";
-                statement = connection.prepareStatement(query);
-                resultSet = statement.executeQuery();
-
-                while (resultSet.next()) {
-                    Person person = new Person();
-                    person.setId(resultSet.getInt("id"));
-                    person.setNom(resultSet.getString("nom"));
-                    person.setPrenom(resultSet.getString("prenom"));
-                    // ... autres propriétés ...
-
-                    people.add(person);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace(); // Gérer les erreurs d'accès à la base de données
-            } finally {
-                // Fermer les ressources (ResultSet, PreparedStatement, Connection)
-                // ... assurez-vous de gérer correctement les exceptions ici
-            }
-
-            return people;
-        }
-        
         
     }
  
