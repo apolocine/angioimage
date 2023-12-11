@@ -13,6 +13,10 @@ import org.hmd.angio.install.sgbd.DatabaseManager;
 
 public class PersonDAO {
 
+	
+	private static String tb_personne ="tb_patients";
+	
+	
 //    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/angiographie";
 //    private static final String USER = "root";
 //    private static final String PASSWORD = "";
@@ -27,11 +31,11 @@ public class PersonDAO {
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		
         		) {
-            String createTableSQL = "CREATE TABLE IF NOT EXISTS personne ("
+            String createTableSQL = "CREATE TABLE IF NOT EXISTS "+tb_personne+" ("
                     + "id INT AUTO_INCREMENT PRIMARY KEY,"
                     + "nom VARCHAR(255),"
                     + "prenom VARCHAR(255),"
-                    + "date_naissance DATE"
+                    + "naissance DATE"
                     + ")";
             try (PreparedStatement preparedStatement = connection.prepareStatement(createTableSQL)) {
                 preparedStatement.executeUpdate();
@@ -49,7 +53,7 @@ public class PersonDAO {
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-            String insertSQL = "INSERT INTO personne (nom, prenom, date_naissance) VALUES (?, ?, ? )";
+            String insertSQL = "INSERT INTO "+tb_personne+" (nom, prenom, naissance) VALUES (?, ?, ? )";
             try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, person.getNom());
                 preparedStatement.setString(2, person.getPrenom());
@@ -86,7 +90,7 @@ public class PersonDAO {
             
             java.sql.Date sqlDate = new java.sql.Date(person.getDateNaissance().getTime());
 
-            String sql = "INSERT INTO personne (id, nom, prenom, date_naissance ) VALUES (?,?, ?,   ?)";
+            String sql = "INSERT INTO "+tb_personne+" (id, nom, prenom, naissance ) VALUES (?,?, ?,   ?)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             	  preparedStatement.setInt(1, person.getId());
             	  preparedStatement.setString(2, person.getNom());
@@ -119,7 +123,7 @@ public class PersonDAO {
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-            String selectSQL = "SELECT * FROM personne WHERE id = ?";
+            String selectSQL = "SELECT * FROM "+tb_personne+" WHERE id = ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectSQL)) {
                 preparedStatement.setInt(1, personId);
 
@@ -129,8 +133,8 @@ public class PersonDAO {
                         person.setId(resultSet.getInt("id"));
                         person.setNom(resultSet.getString("nom"));
                         person.setPrenom(resultSet.getString("prenom"));
-                        // Vérifier si la colonne date_naissance est NULL
-                        Date dateNaissance = resultSet.getDate("date_naissance");
+                        // Vérifier si la colonne naissance est NULL
+                        Date dateNaissance = resultSet.getDate("naissance");
                         person.setDateNaissance(dateNaissance != null ? dateNaissance : null);
                     }
                 }
@@ -150,7 +154,7 @@ public class PersonDAO {
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-            String selectAllSQL = "SELECT * FROM personne";
+            String selectAllSQL = "SELECT * FROM "+tb_personne+"";
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectAllSQL)) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
@@ -158,7 +162,7 @@ public class PersonDAO {
                         person.setId(resultSet.getInt("id"));
                         person.setNom(resultSet.getString("nom"));
                         person.setPrenom(resultSet.getString("prenom"));
-                        person.setDateNaissance(resultSet.getDate("date_naissance"));
+                        person.setDateNaissance(resultSet.getDate("naissance"));
                         persons.add(person);
                     }
                 }
@@ -179,7 +183,7 @@ public class PersonDAO {
          		DatabaseManager.getConnection()
          		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
          		) {
-            String query = "UPDATE personne SET nom=?, prenom=?, date_naissance=?  WHERE id=?";
+            String query = "UPDATE "+tb_personne+" SET nom=?, prenom=?, naissance=?  WHERE id=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setString(1, person.getNom());
                 preparedStatement.setString(2, person.getPrenom());
@@ -205,7 +209,7 @@ public class PersonDAO {
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-            String sql = "DELETE FROM personne WHERE id=?";
+            String sql = "DELETE FROM "+tb_personne+" WHERE id=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, personId);
                 preparedStatement.executeUpdate();
@@ -226,7 +230,7 @@ public class PersonDAO {
           		DatabaseManager.getConnection()
           		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
           		) {
-              String sql = "DELETE FROM personne WHERE id=?";
+              String sql = "DELETE FROM "+tb_personne+" WHERE id=?";
               try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                   preparedStatement.setInt(1, person.getId());
                   preparedStatement.executeUpdate();
@@ -267,7 +271,7 @@ public class PersonDAO {
             		DatabaseManager.getConnection()
             		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
             		;/* obtenir une connexion à votre base de données */;
-            String query = "SELECT * FROM personne";
+            String query = "SELECT * FROM "+tb_personne+"";
             statement = connection.prepareStatement(query);
             resultSet = statement.executeQuery();
 
@@ -295,25 +299,25 @@ public class PersonDAO {
     
      
     
-   public static void main(String[] args) {
-            PersonDAO.createTableIfNotExists();
-
-            // Exemple d'insertion
-            Person person1 = new Person("Nom1", "Prenom1", Date.valueOf("1990-01-01"));
-            Person person2 = new Person("Nom2", "Prenom2", Date.valueOf("1995-02-15"));
-
-            PersonDAO.insertPerson(person1);
-            PersonDAO.insertPerson(person2);
-
-            // Exemple de récupération de toutes les personnes
-            List<Person> allPersons = PersonDAO.listAllPersons();
-            for (Person person : allPersons) {
-                System.out.println("Personne : " + person);
-            }
-
-            // ... Ajoutez d'autres opérations ici ...
-        }
-        
+//   public static void main(String[] args) {
+//            PersonDAO.createTableIfNotExists();
+//
+//            // Exemple d'insertion
+//            Person person1 = new Person("Nom1", "Prenom1", Date.valueOf("1990-01-01"));
+//            Person person2 = new Person("Nom2", "Prenom2", Date.valueOf("1995-02-15"));
+//
+//            PersonDAO.insertPerson(person1);
+//            PersonDAO.insertPerson(person2);
+//
+//            // Exemple de récupération de toutes les personnes
+//            List<Person> allPersons = PersonDAO.listAllPersons();
+//            for (Person person : allPersons) {
+//                System.out.println("Personne : " + person);
+//            }
+//
+//            // ... Ajoutez d'autres opérations ici ...
+//        }
+//        
         
        
         

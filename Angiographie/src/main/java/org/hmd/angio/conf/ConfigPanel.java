@@ -18,6 +18,7 @@ public class ConfigPanel extends JPanel{
 	private DefaultTableModel tableModel;
     private boolean controleurDeModifications = false;
     
+    private boolean savedData;
     
     
     public ConfigPanel( ) {
@@ -49,6 +50,8 @@ public class ConfigPanel extends JPanel{
             public void actionPerformed(ActionEvent e) {
             	 savePropertiesTable(); 
             	 controleurDeModifications = false;
+            	 
+            	 
             }
 
 		
@@ -151,6 +154,8 @@ public class ConfigPanel extends JPanel{
         
         Config.saveProperties();
         
+        setSavedData(true);
+        
         // Affichez un message de confirmation
         JOptionPane.showMessageDialog(this, "Changes saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         
@@ -211,6 +216,20 @@ public class ConfigPanel extends JPanel{
         
          
     }
+
+
+
+
+	public boolean isSavedData() {
+		return savedData;
+	}
+
+
+
+
+	public void setSavedData(boolean savedData) {
+		this.savedData = savedData;
+	}
     
 	
 }

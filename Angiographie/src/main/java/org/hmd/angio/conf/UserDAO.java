@@ -36,10 +36,13 @@ public class UserDAO {
 			User user = getUser(  username,  password);
 			// String cryptedPasword  =  encrypt(password  );
 		
+			if(user!=null) {
+				 return user.getPassword().equals(password);
+			}else
+				return false ;
+			  
 			
-			//return user.getPassword().equals(password);  
-			
-			return true;
+			 
 	}
     public static User getUser(String username,String password) {
     
@@ -57,15 +60,14 @@ public class UserDAO {
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
             String selectSQL = "SELECT * FROM "+tableName+" WHERE `username` = ? AND password=?";
-//            	System.out.println("selectSQL ="+selectSQL); 
-//            	System.out.println("password "+password);
-//            	  String cryptedPasword  =  encrypt(password  );
-//            	  System.out.println("cryptedPasword "+cryptedPasword);
+        	System.out.println("selectSQL = \n"+selectSQL); 
+ 
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectSQL)) {
             	 
                 preparedStatement.setString(1, username);  
                 preparedStatement.setString(2, password);
                 
+                System.out.println("selectSQL = \n"+preparedStatement.toString());
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
                     	  user = new User();

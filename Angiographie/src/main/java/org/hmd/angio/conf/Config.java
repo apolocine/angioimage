@@ -103,6 +103,11 @@ public class Config {
         return properties.getProperty("db.password");
     }
     
-    
+    public static String getDatabaseName() {
+        return properties.getProperty("db.name");
+    }
+    public static String getDatabaseUserTablename() {
+        return properties.getProperty("db.tb.name");
+    }
     // Ajoutez d'autres méthodes selon les besoins, par exemple pour parcourir les propriétés existantes
 }
