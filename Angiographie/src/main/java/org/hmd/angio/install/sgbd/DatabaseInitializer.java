@@ -18,11 +18,14 @@ public class DatabaseInitializer {
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-         String selectSQL ="SELECT COUNT(*)  AS row_count \r\n"
-         		+ "FROM INFORMATION_SCHEMA.TABLES\r\n"
-         		+ "WHERE TABLE_SCHEMA = '"+dbSch+"'\r\n"
-         		+ "AND TABLE_NAME = '"+table+"'\r\n"
-         		+ "LIMIT 0 , 30";
+        	
+        	 
+               String selectSQL = "SELECT COUNT(*) AS row_count FROM "+tableName+";";
+//         String selectSQL ="SELECT COUNT(*)  AS row_count "
+//         		+ "FROM INFORMATION_SCHEMA.TABLES"
+//         		+ "WHERE TABLE_SCHEMA = '"+dbSch+"'"
+//         		+ "AND TABLE_NAME = '"+table+"'"
+//         		+ "LIMIT 0 , 30";
          
  
              System.out.println(selectSQL); 
@@ -63,35 +66,38 @@ public class DatabaseInitializer {
 //             statement.executeUpdate("USE db_angioimage;");
              
              
-             statement.executeUpdate("CREATE TABLE IF NOT EXISTS `tb_config` (\r\n"
-             		+ "  `id` int(11) NOT NULL AUTO_INCREMENT,\r\n"
-             		+ "  `key` varchar(255) NOT NULL,\r\n"
-             		+ "  `value` varchar(255) NOT NULL,\r\n"
-             		+ "  PRIMARY KEY (`id`)\r\n"
+             statement.executeUpdate("CREATE TABLE IF NOT EXISTS `tb_config` ("
+             		+ "  `id` int(11) NOT NULL AUTO_INCREMENT,"
+             		+ "  `key` varchar(255) NOT NULL,"
+             		+ "  `value` varchar(255) NOT NULL,"
+             		+ "  PRIMARY KEY (`id`)"
              		+ ") ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;");
-              statement.executeUpdate("CREATE TABLE IF NOT EXISTS `tb_patients` (\r\n"
-              		+ "  `id` int(11) NOT NULL AUTO_INCREMENT,\r\n"
-              		+ "  `nom` varchar(255) NOT NULL,\r\n"
-              		+ "  `prenom` varchar(255) NOT NULL,\r\n"
-              		+ "  `naissance` date NOT NULL,\r\n"
-              		+ "  PRIMARY KEY (`id`)\r\n"
+              statement.executeUpdate("CREATE TABLE IF NOT EXISTS `tb_patients` ("
+              		+ "  `id` int(11) NOT NULL AUTO_INCREMENT,"
+              		+ "  `nom` varchar(255) NOT NULL,"
+              		+ "  `prenom` varchar(255) NOT NULL,"
+              		+ "  `naissance` date NOT NULL,"
+              		+ "  PRIMARY KEY (`id`)"
               		+ ") ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;");
              
-             statement.executeUpdate("CREATE TABLE IF NOT EXISTS `tb_utilisateur` (\r\n"
-               		+ "  `id` int(11) NOT NULL AUTO_INCREMENT,\r\n"
-              		+ "  `nom` varchar(250) NOT NULL,\r\n"
-              		+ "  `prenom` varchar(250) NOT NULL,\r\n"
-              		+ "  `naissance` date NOT NULL,\r\n"
-              		+ "  `username` varchar(250) NOT NULL,\r\n"
-              		+ "  `password` varchar(250) DEFAULT NULL,\r\n"
-              		+ "  `fonction` varchar(250) DEFAULT NULL,\r\n"
-              		+ "  `description` varchar(250) DEFAULT NULL,\r\n"
-              		+ "  PRIMARY KEY (`id`),\r\n"
-              		+ "  UNIQUE KEY `username` (`username`)\r\n"
+             statement.executeUpdate("CREATE TABLE IF NOT EXISTS `tb_utilisateur` ("
+               		+ "  `id` int(11) NOT NULL AUTO_INCREMENT,"
+              		+ "  `nom` varchar(250) NOT NULL,"
+              		+ "  `prenom` varchar(250) NOT NULL,"
+              		+ "  `naissance` date NOT NULL,"
+              		+ "  `username` varchar(250) NOT NULL,"
+              		+ "  `password` varchar(250) DEFAULT NULL,"
+              		+ "  `fonction` varchar(250) DEFAULT NULL,"
+              		+ "  `description` varchar(250) DEFAULT NULL,"
+              		+ "  PRIMARY KEY (`id`),"
+              		+ "  UNIQUE KEY `username` (`username`)"
               		+ ") ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;");
 
-             statement.executeUpdate("INSERT INTO `tb_utilisateur` (`id`, `nom`, `prenom`, `naissance`, `username`, `password`, `fonction`, `description`) VALUES\r\n"
+             statement.executeUpdate("INSERT INTO `tb_utilisateur` (`id`, `nom`, `prenom`, `naissance`, `username`, `password`, `fonction`, `description`) VALUES"
              		+ "(1, 'MADANI', 'Hamid', '1972-10-03', 'drmdh@msn.com', 'azerty@26', 'Ophtalmologue', 'PoXviCZNZBHGyTsac6XdKQ==:lTbS2WuC5p/tMyEVhLPfNA==');");
+             
+             connection.getAutoCommit();
+             
     }
     
     

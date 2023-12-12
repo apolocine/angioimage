@@ -13,13 +13,15 @@ public class Config {
 	 
 	 static {
 	        properties = new Properties();
-	        
+	        addDefaultProperties() ;
 	             
 	        try (
 	        		//InputStream input = AppConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)
 	        		InputStream input = new FileInputStream(CONFIG_FILE)
 	        		
 	        		) {
+	        	
+	        	
 	            properties.load(input);
 	        } catch (Exception e) {
 	            e.printStackTrace();
@@ -28,42 +30,65 @@ public class Config {
 	 
 	 
 	 
-//    public Config(String configFileName) {
-//        if (properties == null) {
-//			properties = new Properties();
-//		}
-//		loadProperties(configFileName);
-//    }
-//    public Config() {
-//        if (properties == null) {
-//			properties = new Properties();
-//		}
-//		loadProperties(CONFIG_FILE);
-//    }
-//    private void loadProperties(String configFileName) {
-//    	
-//    	
-//        try (
-//        		//InputStream input = AppConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)
-//        		InputStream input = new FileInputStream(configFileName)) {
-//            properties.load(input);
-//        } catch (FileNotFoundException e) {
-//            // Si le fichier n'existe pas, ajoutez des propriétés génériques
-//            addDefaultProperties();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            // Gérer les erreurs de lecture du fichier de configuration
-//        }
-//    }
+    public Config(String configFileName) {
+        if (properties == null) {
+			properties = new Properties();
+		}
+		loadProperties(configFileName);
+    }
+    public Config() {
+        if (properties == null) {
+			properties = new Properties();
+		}
+		loadProperties(CONFIG_FILE);
+    }
+    private void loadProperties(String configFileName) {
+    	
+    	
+        try (
+        		//InputStream input = AppConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)
+        		InputStream input = new FileInputStream(configFileName)) {
+            properties.load(input);
+        } catch (FileNotFoundException e) {
+            // Si le fichier n'existe pas, ajoutez des propriétés génériques
+            addDefaultProperties();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Gérer les erreurs de lecture du fichier de configuration
+        }
+    }
 
-    private void addDefaultProperties() {
+    private static void addDefaultProperties() {
         // Ajoutez des propriétés génériques
         properties.setProperty("directory", "C:\\Users\\DELL\\Documents\\0APng");
-        properties.setProperty("username", "utilisateur");
-        properties.setProperty("password", "motdepasse");
+        
+        
+        properties.setProperty("db.url", "jdbc:mysql://localhost:3306/dbangiographie");
+        properties.setProperty("db.user", "root");
+        properties.setProperty("db.password", "");
+        
+//        properties.setProperty("db.url", "jdbc:h2:./data/dbangiographi");
+//        properties.setProperty("db.user", "sa");
+//        properties.setProperty("db.password", "");
+        
+      
+        		
+        properties.setProperty("db.name", "dbangiographie");
+        properties.setProperty("db.tb.name", "tb_utilisateur");
+        properties.setProperty("username", "drmdh@msn.com");
+        properties.setProperty("password", "azery@26");
+        properties.setProperty("medecinUtilisateur", "Dr Hamid MADANI");
+        properties.setProperty("adresse.cabinet", "\\ Cit\\u00E9 50 Logements Mesra Mostaganem");
 
-        // Sauvegardez les propriétés dans le fichier
-        saveProperties();
+        
+		File file = new File(CONFIG_FILE);
+
+		// ne pas forcer l'initialisation du fichier s'il existe déja
+		// Sauvegardez les propriétés dans le fichier
+		if (!file.exists()) {
+			saveProperties();
+		}        
+      
     }
 
     public static void saveProperties() {

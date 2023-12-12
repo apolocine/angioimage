@@ -130,7 +130,7 @@ public class ApplicationGUI extends JFrame {
 		panel.add(loginUsername);
 
 		panel.add(new JLabel("Mot de passe:"));
-		loginPassword = new JPasswordField("azerty@265");
+		loginPassword = new JPasswordField("azerty@26");
 		panel.add(loginPassword);
 		
 		JLabel messageLabel = 	new JLabel("");
@@ -257,7 +257,7 @@ public class ApplicationGUI extends JFrame {
 					try {
 						DatabaseInitializer.initialize();
 					} catch (Exception e2) {
-						// TODO: handle exception
+						 e2.printStackTrace();
 					}
 					 finally {
 						 tabbedPane.setSelectedIndex(LOGIN_TAB);
