@@ -99,7 +99,10 @@ public class PhotoOrganizerApp {
 	JComboBox<String> orientationComboBox = new JComboBox<>(new String[] { "Portrait", "Paysage" });
 	JComboBox<Integer> photosPerLineComboBox = new JComboBox<>(new Integer[] { 1, 2, 3, 4, 5, 6, 8, 9, 10 });
 	JComboBox<Integer> widthByPhotosSizeComboBox = new JComboBox<>(new Integer[] { 150, 200, 300, 400, 500 });
+	JComboBox<PDRectangleEnum> rectangleComboBox = new JComboBox<>(PDRectangleEnum.values());
+	
 
+	
 	JSlider xMarginSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
 	JSlider yMarginSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
 	JSlider sideMarginSlider = new JSlider(0, 100, 10);
@@ -109,7 +112,7 @@ public class PhotoOrganizerApp {
 	JButton showPDFButton = new JButton("Show PDF");
 	JButton printePDFButton = new JButton("Print PDF");
 
-	JComboBox<PDRectangleEnum> rectangleComboBox = new JComboBox<>(PDRectangleEnum.values());
+
 
 	private PDFGenerationGUI pdfGenerationGUI = new PDFGenerationGUI();
 
@@ -169,6 +172,18 @@ public class PhotoOrganizerApp {
 						isPDFGenerated = true;
 						showPDFButton.setEnabled(true);
 						printePDFButton.setEnabled(true);
+						//premier viewer 
+						displayPDF(pdfFilePath, pdfPanel);
+						// Add zoom functionality
+						pdfPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, pdfPanel));
+						pdfPanel.addMouseListener(new ContextMenuMouseListener(pdfFilePath, pdfPanel));
+						
+						
+						//premier viewer
+						displayPDF(pdfFilePath, previewPDFPanel);
+						// Add zoom functionality
+						previewPDFPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, previewPDFPanel));
+						previewPDFPanel.addMouseListener(new ContextMenuMouseListener(pdfFilePath, previewPDFPanel));
 					}
 
 				}
@@ -1070,6 +1085,20 @@ public class PhotoOrganizerApp {
 		optionsPanel.add(new JLabel("Marge latérale:"));
 		optionsPanel.add(xMarginSlider);
 
+		rectangleComboBox.setSelectedItem(PDRectangleEnum.A5);
+ 		pageCountSpinner.setValue(5);
+		orientationComboBox.setSelectedIndex(1);
+		
+		photosPerLineComboBox.setSelectedIndex(2);
+		widthByPhotosSizeComboBox.setSelectedIndex(0);
+		
+ 		xMarginSlider.setValue(10);
+ 		yMarginSlider.setValue(10);
+ 		sideMarginSlider.setValue(5);
+		
+		
+		
+		
 //		optionsPanel.add(new JLabel("Nombre de pages:")); // Nouveau ajout
 //		optionsPanel.add(pageCountSpinner); // Nouveau ajout
 
@@ -1304,57 +1333,7 @@ public class PhotoOrganizerApp {
 
 	}
 
-//	/**
-//	 * 
-//	 * @param filePath
-//	 * @param pdfPanel_
-//	 */
-//	public void displayPDF(String filePath, JPanel pdfPanel_) {
-//
-//		File pdfToDysplaynew = new File(filePath);
-//
-//		if (pdfToDysplaynew.exists()) {
-//
-//			pdfPanel_.removeAll();
-//
-//			PDDocument document = null;
-//			try {
-//				document = PDDocument.load(pdfToDysplaynew);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			PDFRenderer pdfRenderer = new PDFRenderer(document);
-//
-//			for (int pageIndex = 0; pageIndex < document.getNumberOfPages(); pageIndex++) {
-//				BufferedImage image = null;
-//				try {
-//					image = pdfRenderer.renderImageWithDPI(pageIndex, 100);
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				JLabel label = new JLabel(new ImageIcon(image));
-//				pdfPanel_.add(label);
-//			}
-//
-//			try {
-//				document.close();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//
-//			pdfPanel_.setLayout(new GridLayout(0, 1));
-//			pdfPanel_.revalidate();
-//			pdfPanel_.repaint();
-//
-//		}
-//
-//	}
-//
-//	
-
+ 
 	public void displayPDF(String filePath, JPanel pdfPanel) {
 
 		
@@ -1457,6 +1436,10 @@ public class PhotoOrganizerApp {
             JMenuItem nextPageItem = new JMenuItem("Next Page");
             JMenuItem prevPageItem = new JMenuItem("Previous Page");
 
+            JMenuItem openItem = new JMenuItem("Open File");
+            JMenuItem printItem = new JMenuItem("Print Page");
+            
+
             zoomInItem.addActionListener(e -> {
                 zoomFactor *= 1.1;
                 displayPDF(_pdfFile,panel);
@@ -1481,11 +1464,27 @@ public class PhotoOrganizerApp {
                 }
             });
 
+            printItem.addActionListener(e -> {
+              
+            	File pdfFilePerson = new File(_pdfFile); 
+    			PDFCreator.printPDF(pdfFilePerson);
+                
+            });
+            
+            openItem.addActionListener(e -> {
+                 
+      			DirectoryManager.browseDirectory(_pdfFile);
+                  
+              });
+            
             popupMenu.add(zoomInItem);
             popupMenu.add(zoomOutItem);
             popupMenu.addSeparator();
             popupMenu.add(nextPageItem);
             popupMenu.add(prevPageItem);
+            popupMenu.addSeparator();
+            popupMenu.add(openItem);
+            popupMenu.add(printItem);
 
             return popupMenu;
         }
