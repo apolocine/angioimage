@@ -1,5 +1,6 @@
 package org.hmd.angio.pdf;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.HeadlessException;
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterException;
@@ -24,11 +25,26 @@ import org.hmd.angio.enuma.PDRectangleEnum;
 
 import net.coobird.thumbnailator.Thumbnails;
 
-public class PhotoPDFCreator {
+public class PDFCreator {
 
 
-    
- 
+     // Spécifiez le chemin du fichier PDF à ouvrir 
+    public static void openBrowseFile(String filePath ) {
+       
+        // Vérifiez si Desktop est pris en charge sur la plate-forme actuelle
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+
+            try {
+                // Ouvrez le fichier PDF avec l'application par défaut
+                desktop.open(new File(filePath));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Desktop n'est pas pris en charge sur cette plate-forme.");
+        }
+    }
 	
     /**
      * 

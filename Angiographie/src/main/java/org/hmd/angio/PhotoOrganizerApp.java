@@ -5,10 +5,14 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -57,11 +61,11 @@ import org.hmd.angio.conf.ConfigEditorUI;
 import org.hmd.angio.dto.Person;
 import org.hmd.angio.dto.PersonDAO;
 import org.hmd.angio.enuma.PDRectangleEnum;
-import org.hmd.angio.exception.PhotoLoadException; 
-import org.hmd.angio.ihm.HistogramEQ;
+import org.hmd.angio.exception.PhotoLoadException;
+import org.hmd.angio.ihm.HistogramEQBtn;
 import org.hmd.angio.ihm.PersonInfoEntryUI;
 import org.hmd.angio.pdf.PDFGenerationGUI;
-import org.hmd.angio.pdf.PhotoPDFCreator;
+import org.hmd.angio.pdf.PDFCreator;
 import org.hmd.image.ouils.DirectoryManager;
 import org.hmd.image.ouils.ThumbnailRenderer;
 
@@ -81,7 +85,13 @@ public class PhotoOrganizerApp {
 	private DefaultListModel<File> listModel;
 
 	private JPanel pdfPanel;
+	JPanel previewPDFPanel  ;
 	private JScrollPane pdfScrollPane;
+	boolean isPDFGenerated = false;
+
+	private float zoomFactor = 1.0f;
+    private int currentPage = 0;
+ 
 
 	/**
 	 * PDF generator IHM
@@ -91,13 +101,13 @@ public class PhotoOrganizerApp {
 	JComboBox<Integer> widthByPhotosSizeComboBox = new JComboBox<>(new Integer[] { 150, 200, 300, 400, 500 });
 
 	JSlider xMarginSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
-
 	JSlider yMarginSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
-
 	JSlider sideMarginSlider = new JSlider(0, 100, 10);
 	JSpinner pageCountSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1)); // Nouveau ajout
+
 	JButton generatePDFButton = new JButton("Générer PDF");
-	JButton printePDFButton = new JButton("Print  PDF");
+	JButton showPDFButton = new JButton("Show PDF");
+	JButton printePDFButton = new JButton("Print PDF");
 
 	JComboBox<PDRectangleEnum> rectangleComboBox = new JComboBox<>(PDRectangleEnum.values());
 
@@ -139,11 +149,30 @@ public class PhotoOrganizerApp {
 		peopleJList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+
 				if (e.getClickCount() == 2) {
 					// Double-clic détecté
 					displayPhotosForPerson();
 
 				}
+
+				if (e.getClickCount() == 1) {
+					Person selectedPerson = peopleJList.getSelectedValue();
+
+					if (!photoList.isSelectionEmpty()) {
+					}
+
+					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+					File pdfFilePerson = new File(pdfFilePath);
+
+					if (pdfFilePerson.exists()) {
+						isPDFGenerated = true;
+						showPDFButton.setEnabled(true);
+						printePDFButton.setEnabled(true);
+					}
+
+				}
+
 			}
 
 		});
@@ -224,16 +253,37 @@ public class PhotoOrganizerApp {
 		// Ajoutez les éléments du menu
 		JMenuItem reloadPersonPhotosItem = new JMenuItem("Reload Photos");
 		JMenuItem removePersonItem = new JMenuItem("Remove Person");
-
+		JMenuItem browseDirecty = new JMenuItem("Browse Directy");
 		// Ajoutez des actions aux éléments du menu
 		reloadPersonPhotosItem.addActionListener(e -> reloadPhotosAction());
 		removePersonItem.addActionListener(e -> removePersonAction());
+		browseDirecty.addActionListener(e -> browseDirectyAction());
 
+		int selectedPersonIndex = peopleJList.getSelectedIndex();
+		if (selectedPersonIndex != -1) {
+			// Ajoutez les éléments au menu contextuel
+			popupMenu.add(reloadPersonPhotosItem);
+			popupMenu.add(removePersonItem);
+			popupMenu.add(browseDirecty);
+		}
 		// Ajoutez les éléments au menu contextuel
-		popupMenu.add(reloadPersonPhotosItem);
-		popupMenu.add(removePersonItem);
+//		popupMenu.add(reloadPersonPhotosItem);
+//		popupMenu.add(removePersonItem);
+//		popupMenu.add(browseDirecty);
 
 		return popupMenu;
+	}
+
+	/**
+	 * 
+	 */
+	private void browseDirectyAction() {
+		int selectedPersonIndex = peopleJList.getSelectedIndex();
+		if (selectedPersonIndex != -1) {
+			Person selectedPerson = peopleListModel.getElementAt(selectedPersonIndex);
+			String directory = DirectoryManager.getPersonWorkspaceDirectory(selectedPerson);
+			DirectoryManager.browseDirectory(directory);
+		}
 	}
 
 	/**
@@ -364,16 +414,16 @@ public class PhotoOrganizerApp {
 //		// Ajoutez votre liste de photos (par exemple, photoList) ici
 //		// ...
 
-		// Ajoutez un bouton pour afficher les photos de la personne sélectionnée
-		JButton showPhotosButton = new JButton("Afficher les Photos");
-		showPhotosButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				displayPhotosForPerson();
-
-			}
-		});
-		peoplePanel.add(showPhotosButton, BorderLayout.SOUTH);
+//		// Ajoutez un bouton pour afficher les photos de la personne sélectionnée
+//		JButton showPhotosButton = new JButton("Afficher les Photos");
+//		showPhotosButton.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				displayPhotosForPerson();
+//
+//			}
+//		});
+//		peoplePanel.add(showPhotosButton, BorderLayout.SOUTH);
 
 		listModel = new DefaultListModel<>();
 		photoList = new JList<>(listModel);
@@ -411,7 +461,7 @@ public class PhotoOrganizerApp {
 					File selectedFile = photoList.getSelectedValue();
 					if (selectedFile != null) {
 						try {
-							 
+
 							displayImage(selectedFile);
 
 						} finally {
@@ -442,9 +492,6 @@ public class PhotoOrganizerApp {
 		directoryImagePanel.add(new JScrollPane(photoList), BorderLayout.CENTER);
 
 		initializeMenu();
-
-		pdfPanel = new JPanel();
-		pdfScrollPane = new JScrollPane(pdfPanel);
 
 		JScrollPane photoScrollPane = new JScrollPane(directoryImagePanel);
 
@@ -482,9 +529,6 @@ public class PhotoOrganizerApp {
 		reloadPersonPhotosItem.addActionListener(e -> reloadPhotosAction());
 		removePersonItem.addActionListener(e -> deletePersonAction());
 
-	
-		
-		
 		// Ajoutez des actions aux éléments du menu
 		modifierHistogrameItem.addActionListener(e -> {
 
@@ -564,39 +608,37 @@ public class PhotoOrganizerApp {
 
 		// Ajoutez les éléments au menu contextuel
 		popupMenu.add(modifierHistogrameItem);
-		popupMenu.add(modifierRVBItem);	 
-		popupMenu.add(reloadPersonPhotosItem); 
+		popupMenu.add(modifierRVBItem);
+		popupMenu.add(reloadPersonPhotosItem);
 		popupMenu.add(removePersonItem);
-		
+
 		popupMenu.add(printPDFPersonItem);
 
 		return popupMenu;
 	}
 
 	private void deletePersonAction() {
-		
-		
+
 //		JOptionPane.showMessageDialog(null, "Not yet implemented .", "Delete selected Photos",
 //				JOptionPane.INFORMATION_MESSAGE);
 //		
-		List<File> files  = photoList.getSelectedValuesList();
-		File selectedDirectory = null;  
-		
+		List<File> files = photoList.getSelectedValuesList();
+		File selectedDirectory = null;
+
 		for (File file : files) {
-			  selectedDirectory =file.getParentFile();
+			selectedDirectory = file.getParentFile();
 			file.delete();
 		}
-		
-		 					
+
 		try {
 			loadPhotos(selectedDirectory);
-		} 
+		}
 
 		catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 //		int selectedPersonIndex = peopleJList.getSelectedIndex();
 //		if (selectedPersonIndex != -1) {
 //			Person selectedPerson = peopleListModel.getElementAt(selectedPersonIndex);
@@ -613,7 +655,7 @@ public class PhotoOrganizerApp {
 //			}
 //		}
 	}
- 
+
 	private void openConfigEditorUI() {
 		// Ouvrez l'IHM de modification de la configuration en passant l'instance de
 		// Config
@@ -633,16 +675,9 @@ public class PhotoOrganizerApp {
 	 */
 	private void displayImageEQ(File file) throws IOException {
 		BufferedImage originalImage = ImageIO.read(file);
-
 		// Redimensionnez l'image à une largeur maximale de 500 pixels
 		BufferedImage resizedImage = Thumbnails.of(originalImage).width(500).keepAspectRatio(true).asBufferedImage();
-
-		
-		
 		SwingUtilities.invokeLater(() -> new org.hmd.angio.ihm.HistogramEQRVB(file, resizedImage));
-		
-		
-		
 
 	}
 
@@ -662,66 +697,49 @@ public class PhotoOrganizerApp {
 			JLabel imageLabel = new JLabel(new ImageIcon(resizedImage));
 			imageFrame.add(imageLabel);
 
-			
-			
-			
-
 			imageFrame.addWindowListener(new WindowAdapter() {
-	            @Override
-	            public void windowClosing(WindowEvent e) {
-	            	
-	                if ( controleurDeModifications ) {
-	                    int result = JOptionPane.showConfirmDialog(
-	                            null,
-	                            "Do you want to save changes before closing?",
-	                            "Save Changes",
-	                            JOptionPane.YES_NO_CANCEL_OPTION);
+				@Override
+				public void windowClosing(WindowEvent e) {
 
-	                    if (result == JOptionPane.YES_OPTION) {
-	                    	
-	                    	
-	                    	System.out.println("Saving changes.by . local DirectoryManager.saveModifiedCopy.");
-	                    	DirectoryManager.saveModifiedCopy(file, modifiedImage /* resizedImage */ );
+					if (controleurDeModifications) {
+						int result = JOptionPane.showConfirmDialog(null, "Do you want to save changes before closing?",
+								"Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
 
-							File selectedDirectory = file.getParentFile();						
+						if (result == JOptionPane.YES_OPTION) {
+
+							System.out.println("Saving changes.by . local DirectoryManager.saveModifiedCopy.");
+							DirectoryManager.saveModifiedCopy(file, modifiedImage /* resizedImage */ );
+
+							File selectedDirectory = file.getParentFile();
 							try {
 								loadPhotos(selectedDirectory);
-							} 
-	
+							}
+
 							catch (IOException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
-							
-							
-							
+
 //							
 //	                        // Save changes (replace this with your save logic)
 //	                        System.out.println("Saving changes.by . local saveModifiedCopy.");
 //	                        saveModifiedCopy(originalFile, equalized);
 //	                        
-	                    	imageFrame.dispose(); // Close the frame after saving
-	                        
-	                        
-	                        
-	                        
-	                        
-	                        
-	                    } else if (result == JOptionPane.NO_OPTION) {
-	                    	imageFrame.dispose(); // Close the frame without saving
-	                    }
-	                    // If the user clicks "Cancel," do nothing and keep the frame open
-	                } else {
-	                    // No unsaved changes, simply close the frame
-	                	imageFrame.dispose();
-	                }
-	            }
-	        });
+							imageFrame.dispose(); // Close the frame after saving
+
+						} else if (result == JOptionPane.NO_OPTION) {
+							imageFrame.dispose(); // Close the frame without saving
+						}
+						// If the user clicks "Cancel," do nothing and keep the frame open
+					} else {
+						// No unsaved changes, simply close the frame
+						imageFrame.dispose();
+					}
+				}
+			});
 
 			imageFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-			
-			
-			
+
 			// Ajoutez des boutons pour les opérations spécifiques
 			JPanel buttonPanel = new JPanel();
 
@@ -814,7 +832,7 @@ public class PhotoOrganizerApp {
 //        RenderedOp equalizedImage = EqualizeDescriptor.create(PlanarImage.wrapRenderedImage(originalImage), null);
 //        return equalizedImage.getAsBufferedImage();
 
-		BufferedImage result = HistogramEQ.computeHistogramEQ(originalImage);
+		BufferedImage result = HistogramEQBtn.computeHistogramEQ(originalImage);
 
 		return result;
 	}
@@ -1036,7 +1054,7 @@ public class PhotoOrganizerApp {
 		yMarginSlider.setPaintTicks(true);
 		yMarginSlider.setPaintLabels(true);
 
-		pdfPanel = new JPanel();
+///**		pdfPanel = new JPanel();
 
 		JPanel optionsPanel = new JPanel(new GridLayout(8, 2)); // Ajout d'une rangée pour le nombre de pages
 		optionsPanel.add(new JLabel("Orientation de la page:"));
@@ -1063,24 +1081,38 @@ public class PhotoOrganizerApp {
 		JPanel panelOptionsView = new JPanel();
 
 		panelOptionsView.add(generatePDFButton);
+		panelOptionsView.add(showPDFButton);
 		panelOptionsView.add(printePDFButton);
 
-		JTextArea previewTextArea = new JTextArea();
+		
 
-		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelOptionsView, previewTextArea);
+		previewPDFPanel = new JPanel();
+		previewPDFPanel.setLayout(new GridLayout(0, 1));
+		JScrollPane previewScrollPane = new JScrollPane(previewPDFPanel);
+		previewScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		previewScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelOptionsView, previewScrollPane);
+		
 
 		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optionsPanel, splitTextArea);
+ 
 
-		// JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-		// optionsPanel, splitTextArea);
-
-		pdfPanel = new JPanel(); // Nouveau ajout
+		if (pdfPanel == null) {
+			pdfPanel = new JPanel();
+		}
 		pdfPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		pdfPanel.setPreferredSize(new Dimension(400, 400));
 		pdfPanel.setLayout(new BorderLayout());
+		pdfPanel.setLayout(new GridLayout(0, 1));
 
-		pdfScrollPane = new JScrollPane(pdfPanel);
-		pdfScrollPane.setAutoscrolls(true);
+		 
+
+		JScrollPane pdfScrollPane = new JScrollPane(pdfPanel);
+		pdfScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		pdfScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+		// pdfScrollPane.setAutoscrolls(true);
 
 		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions, pdfScrollPane);
 
@@ -1093,18 +1125,51 @@ public class PhotoOrganizerApp {
 
 				Person selectedPerson = peopleJList.getSelectedValue();
 				if (selectedPerson != null) {
-
+					boolean pdfGenerated = generatePDF(selectedPerson);
 					try {
-						generatePDF(selectedPerson);
+						if (pdfGenerated) {
+							isPDFGenerated = true;
+							showPDFButton.setEnabled(true);
+							printePDFButton.setEnabled(true);
+						}
+
 					} finally {
+						if (pdfGenerated) {
+							String  generatedPDFFile = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
 
-						String pdfAbsoluteFileName = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
-
-						displayPDF(pdfAbsoluteFileName, pdfPanel);
+							
+							//premier viewer 
+							displayPDF(generatedPDFFile, pdfPanel);
+							// Add zoom functionality
+							pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
+							pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
+							
+							
+							//premier viewer
+							displayPDF(generatedPDFFile, previewPDFPanel);
+							// Add zoom functionality
+							previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, previewPDFPanel));
+							previewPDFPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
+						}
 
 					}
 				} else {
 
+				}
+
+			}
+		});
+
+		showPDFButton.setEnabled(false);
+		printePDFButton.setEnabled(false);
+		showPDFButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (isPDFGenerated) {
+					Person selectedPerson = peopleJList.getSelectedValue();
+					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+					PDFCreator.openBrowseFile(pdfFilePath);
 				}
 
 			}
@@ -1123,7 +1188,7 @@ public class PhotoOrganizerApp {
 					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
 					File pdfFilePerson = new File(pdfFilePath);
 
-					PhotoPDFCreator.printPDF(pdfFilePerson);
+					PDFCreator.printPDF(pdfFilePerson);
 				}
 
 			}
@@ -1132,7 +1197,12 @@ public class PhotoOrganizerApp {
 		return splitViewPdf;
 	}
 
-	private void generatePDF(Person selectedPerson) {
+	/***
+	 * 
+	 * @param selectedPerson
+	 * @return
+	 */
+	private boolean generatePDF(Person selectedPerson) {
 
 		if (selectedPerson == null) {
 
@@ -1141,7 +1211,7 @@ public class PhotoOrganizerApp {
 					"Vous devez choisir une personne en suite selectionner les photos à mofifier\n"
 							+ " (au moins une photo à modifier)",
 					"pas de Modification", JOptionPane.INFORMATION_MESSAGE);
-
+			return false;
 		} else {
 
 			if (!photoList.isSelectionEmpty()) {
@@ -1160,7 +1230,7 @@ public class PhotoOrganizerApp {
 					try {
 						if (pdfFilePerson.createNewFile()) {
 
-							PhotoPDFCreator.createPdf(
+							PDFCreator.createPdf(
 
 									orientationComboBox.getSelectedItem().equals("Portrait"),
 
@@ -1214,70 +1284,214 @@ public class PhotoOrganizerApp {
 //			e.printStackTrace();
 //		}
 
-				displayPDF(pdfFilePath, pdfPanel);
-
+				/**
+				 * @todo displayPDF
+				 */
+//				displayPDF(pdfFilePath, pdfPanel);//
+//				pdfPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, pdfPanel));
+//				pdfPanel.addMouseListener(new ContextMenuMouseListener(pdfFilePath, pdfPanel));
+				
+				
+				return true;
 			} else {
-
 				// Image non encore modifiée
 				JOptionPane.showMessageDialog(null, "Vous devez choisir au moins une photo à modifier",
 						"pas de Modification", JOptionPane.INFORMATION_MESSAGE);
+				return false;
 			}
 
 		}
 
 	}
 
-	/**
-	 * 
-	 * @param filePath
-	 * @param pdfPanel_
-	 */
-	public void displayPDF(String filePath, JPanel pdfPanel_) {
+//	/**
+//	 * 
+//	 * @param filePath
+//	 * @param pdfPanel_
+//	 */
+//	public void displayPDF(String filePath, JPanel pdfPanel_) {
+//
+//		File pdfToDysplaynew = new File(filePath);
+//
+//		if (pdfToDysplaynew.exists()) {
+//
+//			pdfPanel_.removeAll();
+//
+//			PDDocument document = null;
+//			try {
+//				document = PDDocument.load(pdfToDysplaynew);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			PDFRenderer pdfRenderer = new PDFRenderer(document);
+//
+//			for (int pageIndex = 0; pageIndex < document.getNumberOfPages(); pageIndex++) {
+//				BufferedImage image = null;
+//				try {
+//					image = pdfRenderer.renderImageWithDPI(pageIndex, 100);
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				JLabel label = new JLabel(new ImageIcon(image));
+//				pdfPanel_.add(label);
+//			}
+//
+//			try {
+//				document.close();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//
+//			pdfPanel_.setLayout(new GridLayout(0, 1));
+//			pdfPanel_.revalidate();
+//			pdfPanel_.repaint();
+//
+//		}
+//
+//	}
+//
+//	
 
-		File pdfToDysplaynew = new File(filePath);
+	public void displayPDF(String filePath, JPanel pdfPanel) {
 
-		if (pdfToDysplaynew.exists()) {
+		
+		if(filePath != null) {
+		File pdfToDisplay = new File(filePath);
 
-			pdfPanel_.removeAll();
+		if (pdfToDisplay.exists()) {
+			pdfPanel.removeAll();
 
-			PDDocument document = null;
-			try {
-				document = PDDocument.load(pdfToDysplaynew);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			PDFRenderer pdfRenderer = new PDFRenderer(document);
+			try (PDDocument document = PDDocument.load(pdfToDisplay)) {
+				PDFRenderer pdfRenderer = new PDFRenderer(document);
 
-			for (int pageIndex = 0; pageIndex < document.getNumberOfPages(); pageIndex++) {
-				BufferedImage image = null;
-				try {
-					image = pdfRenderer.renderImageWithDPI(pageIndex, 100);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				for (int pageIndex = 0; pageIndex < document.getNumberOfPages(); pageIndex++) {
+					BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, 100);
+
+					// Calculate scaled dimensions based on zoom factor
+					int scaledWidth = (int) (image.getWidth() * zoomFactor);
+					int scaledHeight = (int) (image.getHeight() * zoomFactor);
+
+					Image scaledImage = image.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+					JLabel label = new JLabel(new ImageIcon(scaledImage));
+					pdfPanel.add(label);
 				}
-				JLabel label = new JLabel(new ImageIcon(image));
-				pdfPanel_.add(label);
-			}
 
-			try {
-				document.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-			pdfPanel_.setLayout(new GridLayout(0, 1));
-			pdfPanel_.revalidate();
-			pdfPanel_.repaint();
 
 			pdfPanel.revalidate();
 			pdfPanel.repaint();
 		}
-
+			
+		}
+		
+		
+		
 	}
 
+	private class ZoomHandler  implements MouseWheelListener  {
+		private JPanel panel;
+		private String _pdfFile;
+
+		public ZoomHandler(String pdfFile, JPanel panel) {
+			this.panel = panel;
+			this._pdfFile = pdfFile;
+
+		}
+ 
+		
+		
+		@Override
+		public void mouseWheelMoved(MouseWheelEvent e) {
+			if (e.getWheelRotation() < 0) {
+				// Zoom in
+				zoomFactor *= 1.1;
+			} else {
+				// Zoom out
+				zoomFactor /= 1.1;
+			}
+//		       displayPDF("C:\\Users\\DELL\\Documents\\0APng\\19_madani_khallil\\19_madani.pdf",panel);
+			   displayPDF(_pdfFile,panel);
+		}
+ 
+	}
+
+	
+	
+	private class ContextMenuMouseListener extends MouseAdapter {
+		private JPanel panel;
+		private String _pdfFile;
+
+		public ContextMenuMouseListener(String pdfFile, JPanel panel) {
+			this.panel = panel;
+			this._pdfFile = pdfFile;
+
+		}
+		
+        @Override
+        public void mousePressed(MouseEvent e) {
+            showPopupMenu(e);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            showPopupMenu(e);
+        }
+
+        private void showPopupMenu(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                JPopupMenu popupMenu = createPopupMenu();
+                popupMenu.show(e.getComponent(), e.getX(), e.getY());
+            }
+        }
+
+        private JPopupMenu createPopupMenu() {
+            JPopupMenu popupMenu = new JPopupMenu();
+
+            JMenuItem zoomInItem = new JMenuItem("Zoom In");
+            JMenuItem zoomOutItem = new JMenuItem("Zoom Out");
+            JMenuItem nextPageItem = new JMenuItem("Next Page");
+            JMenuItem prevPageItem = new JMenuItem("Previous Page");
+
+            zoomInItem.addActionListener(e -> {
+                zoomFactor *= 1.1;
+                displayPDF(_pdfFile,panel);
+            });
+
+            zoomOutItem.addActionListener(e -> {
+                zoomFactor /= 1.1;
+                displayPDF(_pdfFile,panel);
+            });
+
+            nextPageItem.addActionListener(e -> {
+                if (currentPage < pdfPanel.getComponentCount() - 1) {
+                    currentPage++;
+                    pdfPanel.scrollRectToVisible(pdfPanel.getComponent(currentPage).getBounds());
+                }
+            });
+
+            prevPageItem.addActionListener(e -> {
+                if (currentPage > 0) {
+                    currentPage--;
+                    pdfPanel.scrollRectToVisible(pdfPanel.getComponent(currentPage).getBounds());
+                }
+            });
+
+            popupMenu.add(zoomInItem);
+            popupMenu.add(zoomOutItem);
+            popupMenu.addSeparator();
+            popupMenu.add(nextPageItem);
+            popupMenu.add(prevPageItem);
+
+            return popupMenu;
+        }
+    }
+	
+	
 	///////////////////////////// -----------------------------------------------------------/*//////////////
 	private JTree tree;
 	private DefaultTreeModel treeModel;
@@ -1417,27 +1631,27 @@ public class PhotoOrganizerApp {
 	 * @throws IOException
 	 */
 	private void loadPhotos(File directory) throws IOException {
-		
-if(directory!=null) {
-	listModel.clear();
-	File[] files = directory.listFiles();
-		if (files != null) {
-			for (File file : files) {
-				if (isImageFile(file)) {
-					listModel.addElement(file);
-					// Mettez à jour peopleList pour refléter les changements
-					photoList.updateUI();
+
+		if (directory != null) {
+			listModel.clear();
+			File[] files = directory.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					if (isImageFile(file)) {
+						listModel.addElement(file);
+						// Mettez à jour peopleList pour refléter les changements
+						photoList.updateUI();
+					}
 				}
 			}
-		}
 
 //		else {
 //			String message = "Erreur lors du chargement des photos : le répertoire est vide ou inaccessible.";
 //
 //			throw new PhotoLoadException(message);
 //		}
-}
-		
+		}
+
 	}
 
 	private boolean isImageFile(File file) {
@@ -1531,7 +1745,7 @@ if(directory!=null) {
 			String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
 			File pdfFilePerson = new File(pdfFilePath);
 
-			PhotoPDFCreator.printPDF(pdfFilePerson);
+			PDFCreator.printPDF(pdfFilePerson);
 
 		} else {
 			// Image non encore modifiée

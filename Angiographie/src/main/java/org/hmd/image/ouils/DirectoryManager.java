@@ -1,5 +1,6 @@
 package org.hmd.image.ouils;
 
+import java.awt.Desktop;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +17,36 @@ public class DirectoryManager {
 
 	
 	
+	// Spécifiez le chemin du répertoire que vous souhaitez ouvrir
+       
+    public static void browseDirectory( String directoryPath) {
+        
+
+        // Vérifiez si Desktop est pris en charge sur cette plateforme
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+
+            // Créez un objet File pour représenter le répertoire
+            File directory = new File(directoryPath);
+
+            // Vérifiez si le répertoire existe avant de l'ouvrir
+            if (directory.exists()) {
+                try {
+                    // Ouvrir le répertoire avec l'application par défaut
+                    desktop.open(directory);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Le répertoire n'existe pas.");
+            }
+        } 
+        else {
+            System.out.println("Desktop n'est pas pris en charge sur cette plateforme.");
+        }
+    }
+    
+    
 	public static String getWorkspaceDirectory( ) {
 	 
 		// Utilisez la configuration chargée, par exemple :

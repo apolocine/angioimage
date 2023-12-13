@@ -191,7 +191,7 @@ public class PDFGenerationGUI extends JFrame {
 					
 					
 				} finally {  
-					PhotoPDFCreator.printPDF( new File(absolutePath));
+					PDFCreator.printPDF( new File(absolutePath));
 				}
 
 			}
@@ -233,7 +233,7 @@ public class PDFGenerationGUI extends JFrame {
 				+ xMarginSlider.getValue() + "\n" + "Marge latérale: " + sideMarginSlider.getValue() + "\n"
 				+ "Nombre de pages: " + pageCountSpinner.getValue());
 		
-		PhotoPDFCreator.createPdf(
+		PDFCreator.createPdf(
 				
 
 	  			 

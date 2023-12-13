@@ -250,8 +250,8 @@ public class ApplicationGUI extends JFrame {
 	protected void installOrUpdate() {
 		 int result = JOptionPane.showConfirmDialog(
                  null,
-                 "Do you want to save changes before closing?",
-                 "Save Changes",
+                 "Do you want to Install Database & init data ?",
+                 "Install Database",
                  JOptionPane.YES_NO_CANCEL_OPTION);
 
          if (result == JOptionPane.YES_OPTION) {

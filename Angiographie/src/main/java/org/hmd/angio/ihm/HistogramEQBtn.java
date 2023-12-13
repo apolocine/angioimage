@@ -16,7 +16,7 @@ import javax.imageio.ImageIO;
  *
  */
 
-public class HistogramEQ {
+public class HistogramEQBtn {
 
     private static BufferedImage original, equalized;
 
