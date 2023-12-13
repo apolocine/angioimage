@@ -5,27 +5,74 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.hmd.angio.conf.Config;
+
 public class DatabaseInitializer {
 	
-	private static String tableName="tb_utilisateur";
-	private static String dbangiographie = "angiographie";
+	private static String tableName=Config.getDatabaseUserTablename();
 	
+	
+	
+	
+	public static boolean isDataBaseExiste(String dbSch) throws Exception {
+		 
+		ResultSet rs = null;
+		Connection connection = DatabaseManager.getConnection(Config.getSGBDURL(), Config.getDatabaseUser(), Config.getDatabasePassword());
+		
+		if(connection != null){
+			
+			System.out.println("check if a database exists using java");
+
+			rs = connection.getMetaData().getCatalogs();
+
+			while(rs.next()){
+				String catalogs = rs.getString(1);
+				
+				if(dbSch.equals(catalogs)){
+					System.out.println("the database "+dbSch+" exists");
+					return true;
+					
+				}
+			}
+
+		}
+		else{
+			System.out.println("unable to create database connection");
+		}
+		
+		
+		return false;
+		
+		
+	}
 	
 	public static boolean isTableExiste(String dbSch, String table) {
 		
-	 
-        try (Connection connection = 
-        		DatabaseManager.getConnection()
-        		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+		 
+				try {
+					if(! isDataBaseExiste(  dbSch)) {
+						
+						
+						return false;
+						
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+					
+					
+			 
+        try (
+        		
+        		Connection connection = DatabaseManager.getConnection()
+        		// Connection connection = DatabaseManager.getConnection(Config.getSGBDURL(), Config.getDatabaseUser(), Config.getDatabasePassword())
+    	//    	DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+        		
         		) {
         	
         	 
                String selectSQL = "SELECT COUNT(*) AS row_count FROM "+tableName+";";
-//         String selectSQL ="SELECT COUNT(*)  AS row_count "
-//         		+ "FROM INFORMATION_SCHEMA.TABLES"
-//         		+ "WHERE TABLE_SCHEMA = '"+dbSch+"'"
-//         		+ "AND TABLE_NAME = '"+table+"'"
-//         		+ "LIMIT 0 , 30";
          
  
              System.out.println(selectSQL); 
@@ -57,13 +104,15 @@ public class DatabaseInitializer {
 	
     public static void initialize() throws Exception {
     	 
- Connection connection = DatabaseManager.getConnection();
+    		Connection connection = DatabaseManager.getConnection(Config.getSGBDURL(), Config.getDatabaseUser(), Config.getDatabasePassword());
              Statement statement = connection.createStatement() ;
 
             // Exécutez ici la requête SQL pour créer la base de données et les tables
              
-//              statement.executeUpdate("CREATE DATABASE IF NOT EXISTS db_angioimage;");
-//             statement.executeUpdate("USE db_angioimage;");
+             
+              statement.executeUpdate("CREATE DATABASE IF NOT EXISTS "+Config.getDatabaseName()+";");
+              
+             statement.executeUpdate("USE "+Config.getDatabaseName()+";");
              
              
              statement.executeUpdate("CREATE TABLE IF NOT EXISTS `tb_config` ("

@@ -19,5 +19,6 @@
 	<classpathentry kind="var" path="M2_REPO/net/coobird/thumbnailator/0.4.20/thumbnailator-0.4.20.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.49-bin.jar"/>
 	<classpathentry kind="lib" path="lib/dpotapi-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/h2-2.2.224.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

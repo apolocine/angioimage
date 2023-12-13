@@ -62,7 +62,7 @@ public class Config {
         // Ajoutez des propriétés génériques
         properties.setProperty("directory", "C:\\Users\\DELL\\Documents\\0APng");
         
-        
+        properties.setProperty("db.sgbd", "jdbc:mysql://localhost:3306/");
         properties.setProperty("db.url", "jdbc:mysql://localhost:3306/dbangiographie");
         properties.setProperty("db.user", "root");
         properties.setProperty("db.password", "");
@@ -75,6 +75,7 @@ public class Config {
         		
         properties.setProperty("db.name", "dbangiographie");
         properties.setProperty("db.tb.name", "tb_utilisateur");
+        
         properties.setProperty("username", "drmdh@msn.com");
         properties.setProperty("password", "azery@26");
         properties.setProperty("medecinUtilisateur", "Dr Hamid MADANI");
@@ -115,7 +116,11 @@ public class Config {
     public static Properties getProperties() {
         return properties;
     }
-
+    
+    public static String getDatabaseTestURL() {
+        return properties.getProperty("db.url.test");
+    }
+    
     public static String getDatabaseURL() {
         return properties.getProperty("db.url");
     }
@@ -135,4 +140,8 @@ public class Config {
         return properties.getProperty("db.tb.name");
     }
     // Ajoutez d'autres méthodes selon les besoins, par exemple pour parcourir les propriétés existantes
+	public static String getSGBDURL() {
+		// TODO Auto-generated method stub
+		return properties.getProperty("db.sgbd");
+	}
 }

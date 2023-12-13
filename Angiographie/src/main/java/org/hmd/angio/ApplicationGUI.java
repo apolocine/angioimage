@@ -95,7 +95,9 @@ public class ApplicationGUI extends JFrame {
 	
 	boolean isConnectedToDB() {
 
-		try (Connection connection = DatabaseManager.getConnection()
+		try (
+				Connection connection = DatabaseManager.getConnection(Config.getSGBDURL(), Config.getDatabaseUser(), Config.getDatabasePassword())
+				//Connection connection = DatabaseManager.getConnection()
 		// DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
 
 		) {
@@ -197,9 +199,10 @@ public class ApplicationGUI extends JFrame {
 				String tb_utilisateur =  Config.getDatabaseUserTablename();
 				
 				
-				try (Connection connection = DatabaseManager.getConnection()
+				try (
+						//Connection connection = DatabaseManager.getConnection()
 				// DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
-
+						Connection connection = DatabaseManager.getConnection(Config.getSGBDURL(), Config.getDatabaseUser(), Config.getDatabasePassword());
 				) {
 
 					applicationLoginSuccessful = connection != null ? true : false;
@@ -211,9 +214,9 @@ public class ApplicationGUI extends JFrame {
 						if(DatabaseInitializer.isTableExiste(dbangiographie,tb_utilisateur)) {
 							tabbedPane.setSelectedIndex(LOGIN_TAB);
 						}else {
-							 
 							 tabbedPane.setSelectedIndex(DB_INSTALL_TAB);
 							installOrUpdate(); 
+							
 						}
 						 
 					} else {

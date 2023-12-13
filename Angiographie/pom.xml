@@ -20,6 +20,9 @@
 
     <build>
         <plugins>
+			
+			
+          
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -83,6 +86,35 @@
         </plugins>
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
             <plugins>
+               
+               
+<!--          jpackager     -->
+<!--               <plugin>-->
+<!--            <groupId>com.github.akman</groupId>-->
+<!--            <artifactId>jpackage-maven-plugin</artifactId>-->
+<!--            <version>0.1.5</version>-->
+<!--          </plugin>-->
+          
+          
+           <plugin>
+        <groupId>com.github.akman</groupId>
+        <artifactId>jpackage-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>jpackage</goal>
+            </goals>
+            <configuration>
+              <!-- put your configurations here -->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+          
+               
+               
+               
                 <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
@@ -228,7 +260,18 @@
     <version>5.1.41</version>
     <scope>runtime</scope>
 </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+<dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+   <!--    <version>1.4.200</version>   Vérifiez la dernière version sur Maven Central -->
+        <version>2.2.224</version>
+    <scope>test</scope>
+    
+    </dependency>
 
-    	
+ 
+
     </dependencies>
 </project>
