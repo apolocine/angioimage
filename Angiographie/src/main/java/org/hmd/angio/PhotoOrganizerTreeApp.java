@@ -64,6 +64,7 @@ import org.hmd.angio.dto.PersonDAO;
 import org.hmd.angio.enuma.PDRectangleEnum;
 import org.hmd.angio.exception.PhotoLoadException;
 import org.hmd.angio.ihm.HistogramEQBtn;
+import org.hmd.angio.ihm.PersonInfoEntryTreeUI;
 import org.hmd.angio.ihm.PersonInfoEntryUI;
 import org.hmd.angio.ihm.tree.PhotoDirectoryUtils;
 import org.hmd.angio.pdf.PDFGenerationGUI;
@@ -73,7 +74,7 @@ import org.hmd.image.ouils.ThumbnailRenderer;
 
 import net.coobird.thumbnailator.Thumbnails;
 
-public class PhotoOrganizerApp {
+public class PhotoOrganizerTreeApp {
 
 	private PersonDAO personDAO; // Ajouter l'instance de PersonDAO
 
@@ -125,11 +126,11 @@ public class PhotoOrganizerApp {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			new PhotoOrganizerApp();
+			new PhotoOrganizerTreeApp();
 		});
 	}
 
-	public PhotoOrganizerApp() {
+	public PhotoOrganizerTreeApp() {
 		initPeopleListe();
 		initialize();
 		
@@ -518,20 +519,14 @@ public class PhotoOrganizerApp {
 
 		// splite vertivcale liste des patients
 		// liste des photois du patient selectioné
-		JSplitPane splitPeoplePhotoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, peoplePanel, photoScrollPane);
-
-		/*
-		 * Jtree pear
-		 */
-		/*
-				
+//		JSplitPane splitPeoplePhotoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, peoplePanel, photoScrollPane);
+ 
 		JPanel splitPeoplePhotoPane = new  JPanel( );
 		splitPeoplePhotoPane.add(peoplePanel);
 		splitPeoplePhotoPane.add(photoScrollPane);
 		splitPeoplePhotoPane.add(initializePeopleTree());
 		
 		
-		 */
 		JSplitPane splitViewPdf = getsplitPanel();
 
 		JSplitPane dashBoardSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, splitPeoplePhotoPane, splitViewPdf);
@@ -898,7 +893,7 @@ public class PhotoOrganizerApp {
 		// Ajoutez l'élément de menu "Ajouter Personne"
 		JMenuItem ajouterPersonneItem = new JMenuItem("Ajouter Personne");
 
-		PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
+		PersonInfoEntryTreeUI personInfoEntryUI = new PersonInfoEntryTreeUI(this);
 
 		ajouterPersonneItem.addActionListener(new ActionListener() {
 
