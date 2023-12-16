@@ -18,19 +18,19 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.hmd.angio.PhotoOrganizerApp;
+import org.hmd.angio.PhotoOrganizer;
 import org.hmd.angio.dto.Person;
 import org.hmd.angio.dto.PersonDAO;
 import org.hmd.image.ouils.DatePicker;
 import org.hmd.image.ouils.DirectoryManager;
 
-public class PersonInfoEntryUI extends JFrame {
+public class PersonInfoEntryUI  extends JFrame {
 
 	
 	
 	private PersonDAO personDAO; // Ajouter l'instance de PersonDAO
    
-   private PhotoOrganizerApp photoOrganizerApp;
+   private PhotoOrganizer photoOrganizerApp;
  
 	private static final long serialVersionUID = 1L;
 	private JTextField nomField;
@@ -49,7 +49,7 @@ public class PersonInfoEntryUI extends JFrame {
 //    private JButton enregistrerButton;
     
  
-    public PersonInfoEntryUI(PhotoOrganizerApp photoOrganizerApp) {
+    public PersonInfoEntryUI(PhotoOrganizer photoOrganizerApp) {
 		this.photoOrganizerApp = photoOrganizerApp;
 	     initialize();
 	}

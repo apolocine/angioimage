@@ -3,6 +3,7 @@ package org.hmd.angio;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -18,6 +19,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -47,10 +50,12 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.JTree;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -67,13 +72,14 @@ import org.hmd.angio.ihm.HistogramEQBtn;
 import org.hmd.angio.ihm.PersonInfoEntryUI;
 import org.hmd.angio.ihm.tree.PhotoDirectoryUtils;
 import org.hmd.angio.pdf.PDFGenerationGUI;
+import org.hmd.angio.search.SearchPersonUI;
 import org.hmd.angio.pdf.PDFCreator;
 import org.hmd.image.ouils.DirectoryManager;
 import org.hmd.image.ouils.ThumbnailRenderer;
 
 import net.coobird.thumbnailator.Thumbnails;
 
-public class PhotoOrganizerApp {
+public class PhotoOrganizerApp implements PhotoOrganizer {
 
 	private PersonDAO personDAO; // Ajouter l'instance de PersonDAO
 
@@ -514,11 +520,11 @@ public class PhotoOrganizerApp {
 
 		initializeMenu();
 
-		JScrollPane photoScrollPane = new JScrollPane(directoryImagePanel);
+	//	JScrollPane photoScrollPane = new JScrollPane(directoryImagePanel);
 
 		// splite vertivcale liste des patients
 		// liste des photois du patient selectioné
-		JSplitPane splitPeoplePhotoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, peoplePanel, photoScrollPane);
+		JSplitPane splitPeoplePhotoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, peoplePanel, directoryImagePanel);
 
 		/*
 		 * Jtree pear
@@ -541,6 +547,9 @@ public class PhotoOrganizerApp {
 		frame.setVisible(true);
 	}
 
+	
+	
+	
 	/**
 	 * MENU CONTEXTUEL
 	 * 
@@ -883,14 +892,15 @@ public class PhotoOrganizerApp {
 
 		// Ajoutez l'élément de menu "Rechercher Personne"
 		JMenuItem rechercherPersonneItem = new JMenuItem("Rechercher Personne");
+		SearchPersonUI search = new SearchPersonUI(this);
+		
 		rechercherPersonneItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				updatePeopleList();
-
-				// Ajoutez votre logique de recherche de personne ici
-				JOptionPane.showMessageDialog(frame, "Fonctionnalité de recherche de personne à implémenter.");
+				// Appel de la classe PersonInfoEntryUI
+				SwingUtilities.invokeLater(() -> search.setVisible(true));
+				
 			}
 		});
 		personnesMenu.add(rechercherPersonneItem);
@@ -925,45 +935,7 @@ public class PhotoOrganizerApp {
 			}
 		});
 
-		// Élément de menu "Choose Directory"
-		JMenuItem chooseDirectoryItem = new JMenuItem("Choose Directory");
-		chooseDirectoryItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				String directory = DirectoryManager.getWorkspaceDirectory();
-				File workingDirectory = new File(directory);
-				chooseDirectory(workingDirectory);
-
-			}
-		});
-
-		// Élément de menu "Create PDF"
-		JMenuItem createPdfItem = new JMenuItem("Create PDF");
-		createPdfItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				try {
-					createPDF();
-
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
-			}
-		});
-
-		// Élément de menu "Print PDF"
-		JMenuItem printPdfItem = new JMenuItem("Print PDF");
-		printPdfItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				printPDF();
-			}
-		});
-
+	 
 		// Élément de menu "Exit"
 		JMenuItem exitItem = new JMenuItem("Exit");
 		exitItem.addActionListener(new ActionListener() {
@@ -974,25 +946,73 @@ public class PhotoOrganizerApp {
 		});
 
 		// Ajout des éléments au menu "File"
-		fileMenu.add(openConfigButton);
-		fileMenu.addSeparator();
-		fileMenu.add(chooseDirectoryItem);
-		fileMenu.addSeparator();
-		fileMenu.add(createPdfItem);
-		fileMenu.addSeparator();
-		fileMenu.add(printPdfItem);
-		fileMenu.addSeparator();
+		
+//		fileMenu.add(personnesMenu); 
+//		fileMenu.addSeparator(); 
+		fileMenu.add(ajouterPersonneItem);
+		fileMenu.add(rechercherPersonneItem);
+		fileMenu.addSeparator();  
+		fileMenu.add(openConfigButton); 
+		fileMenu.addSeparator();  
 		fileMenu.add(exitItem);
 
 		// Ajout du menu "File" à la barre de menu
 		menuBar.add(fileMenu);
 
 		// Ajoutez le menu "Personnes" à la barre de menu
-		menuBar.add(personnesMenu);
+		//menuBar.add(personnesMenu);
+		
+		  // Menu "Help"
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem helpItem = new JMenuItem("Help Contents");
+        helpMenu.add(helpItem);
 
-		frame.setJMenuBar(menuBar);
+        // Menu "About"
+        JMenu aboutMenu = new JMenu("About");
+        JMenuItem aboutItem = new JMenuItem("About Us");
 
+        aboutItem.addActionListener(e -> showAboutUsDialog(frame)); 
+        aboutMenu.add(aboutItem);
+
+        // Ajout des menus à la barre de menu
+        menuBar.add(Box.createHorizontalGlue()); // Pour aligner les menus à droite
+        menuBar.add(helpMenu);
+        menuBar.add(aboutMenu); 
+		 frame.setJMenuBar(menuBar);
+ 
 	}
+
+ 
+	
+	private static void showAboutUsDialog(JFrame parentFrame) {
+        JTextPane textPane = new JTextPane();
+        textPane.setContentType("text/html");
+        textPane.setEditable(false);
+
+        String aboutText = "<html><b>About Us</b><br>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ<br>" +
+                "Welcome to our application!"
+             + "\r\n"+ 
+             "Contact us: <a href=\"mailto:drmdh@msncom\">drmdh@msncom</a><br>" +
+             "Visit our website: <a href=\"http://amia.fr\">http://amia.fr</a></html>";
+
+        textPane.setText(aboutText);
+        textPane.addHyperlinkListener(e -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                try {
+                    Desktop.getDesktop().browse(new URI(e.getURL().toString()));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(textPane);
+        scrollPane.setPreferredSize(new Dimension(400, 200));
+
+        JOptionPane.showMessageDialog(parentFrame, scrollPane, "About Us", JOptionPane.INFORMATION_MESSAGE);
+    }
+	
+	
 
 	private void chooseDirectory() throws PhotoLoadException, IOException {
 		JFileChooser fileChooser = new JFileChooser();
@@ -1035,6 +1055,28 @@ public class PhotoOrganizerApp {
 		}
 	}
 
+	
+	
+	
+	@Override
+	public void showPerson(Person person) {
+		 
+
+		peopleListModel.removeAllElements();
+		
+		// Ajoutez la personne à la liste
+		peopleListModel.addElement(person);
+
+		// Mettez à jour peopleList pour refléter les changements
+		peopleJList.updateUI();
+
+		// Affichez le répertoire de photos de la personne dans photoList
+		loadPhotosForPerson(person);
+	}
+	
+	
+	
+	@Override
 	public void addPerson(Person person) {
 		// Ajoutez la personne à la base de données
 		personDAO.saveOrUpdatePerson(person);
