@@ -89,7 +89,7 @@ public class PhotoDirectoryUtils {
         }
     }
 
-    public static JTree createPhotoTree(DefaultMutableTreeNode root, Person person) {
+	public static PersonTreeNode createPhotoTree(DefaultMutableTreeNode root, Person person) {
     	
    	 String parentDirectory = DirectoryManager.getPersonWorkspaceDirectory(person);  
    	 // Ajouter quelques personnes pour l'exemple
@@ -97,6 +97,7 @@ public class PhotoDirectoryUtils {
        List<String> directories=  PhotoDirectoryUtils.getPhotoDirectories(parentDirectory); 
        for (String dir : directories) {
     	   File localdir = new File(dir);
+    	   
     	   person1.addPhotoDirectory(localdir.getName());
     	    
     	   List<String> files=  PhotoDirectoryUtils.getListPhotoDirectories(dir);
@@ -105,11 +106,9 @@ public class PhotoDirectoryUtils {
     		   person1.addPhoto(localfile.getName());
 		} 
 	}
-        root.add(person1);
-
-        //JTree tree=   new JTree(new DefaultTreeModel(root));
-        
-        return null;
+        root.add(person1); 
+        JTree tree=   new JTree(new DefaultTreeModel(root)); 
+        return person1;
     }
    
     
