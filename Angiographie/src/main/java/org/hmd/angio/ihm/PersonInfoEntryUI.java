@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -57,7 +58,7 @@ public class PersonInfoEntryUI  extends JFrame {
 	private void initialize() {
     	
     	   // Initialisez l'instance de PersonDAO
-        personDAO = new PersonDAO();
+        personDAO = new PersonDAO(); 
         
         
         
@@ -181,6 +182,11 @@ public class PersonInfoEntryUI  extends JFrame {
         
     }
 
+    
+    public void showForm(JFrame parentFrame,JScrollPane scrollPane) {
+    	
+    	JOptionPane.showMessageDialog(parentFrame,    JOptionPane.INFORMATION_MESSAGE);
+    }
     
     /**
      * 

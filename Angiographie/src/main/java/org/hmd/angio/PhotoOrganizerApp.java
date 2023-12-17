@@ -51,6 +51,7 @@ import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
@@ -136,6 +137,15 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 	}
 
 	public PhotoOrganizerApp() {
+		
+		
+		frame = new JFrame("Photo Organizer");
+		frame.setSize(800, 600);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JToolBar toolBar =  getToolBar();
+	    // Configuration de la barre d'outils
+		frame.add(toolBar, BorderLayout.PAGE_START);
+		
 		initPeopleListe();
 		initialize();
 		
@@ -146,9 +156,13 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 		   
 
-	}
+	} 
 
 	private void initPeopleListe() {
+		
+		
+		 
+		
 		// Initialisez l'instance de PersonDAO
 		personDAO = new PersonDAO();
 
@@ -194,7 +208,7 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 						//premier viewer
 						displayPDF(pdfFilePath, previewPDFPanel);
 						// Add zoom functionality
-						previewPDFPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, previewPDFPanel));
+					//	previewPDFPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, previewPDFPanel));
 						previewPDFPanel.addMouseListener(new ContextMenuMouseListener(pdfFilePath, previewPDFPanel));
 					}
 
@@ -414,7 +428,11 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 	}
 
 	private void initialize() {
-
+		
+		
+	
+	 
+		
 		// Au démarrage, chargez la configuration depuis le fichier
 		// lecture directed des informationsà partir du ficher nous avons pas besoins de
 		// l'interface utilisateur
@@ -426,9 +444,6 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 			selectedDirectory = new File(directory);
 		}
 
-		frame = new JFrame("Photo Organizer");
-		frame.setSize(800, 600);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// Ajoutez la liste des personnes au-dessus de la liste de photos
 		JPanel peoplePanel = new JPanel(new BorderLayout());
@@ -897,7 +912,7 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 		rechercherPersonneItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+ 
 				// Appel de la classe PersonInfoEntryUI
 				SwingUtilities.invokeLater(() -> search.setVisible(true));
 				
@@ -917,6 +932,7 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 				// Appel de la classe PersonInfoEntryUI
 				SwingUtilities.invokeLater(() -> personInfoEntryUI.setVisible(true));
+				 
 
 			}
 		});
@@ -1237,7 +1253,7 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 							//premier viewer
 							displayPDF(generatedPDFFile, previewPDFPanel);
 							// Add zoom functionality
-							previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, previewPDFPanel));
+							// previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, previewPDFPanel));
 							previewPDFPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
 						}
 
@@ -1251,6 +1267,8 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 		showPDFButton.setEnabled(false);
 		printePDFButton.setEnabled(false);
+		
+		
 		showPDFButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -1270,15 +1288,15 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 				Person selectedPerson = peopleJList.getSelectedValue();
 
-				try {
-					generatePDF(selectedPerson);
-
-				} finally {
+//				try {
+//					generatePDF(selectedPerson);
+//				}  				
+//				finally {
+				
 					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
 					File pdfFilePerson = new File(pdfFilePath);
-
 					PDFCreator.printPDF(pdfFilePerson);
-				}
+//				}
 
 			}
 		});
@@ -1852,5 +1870,100 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 	}
 
-	 
+
+	private JToolBar getToolBar() {
+	
+
+        // Barre d'outils
+        JToolBar toolBar = new JToolBar();
+        int iconSize = 32; // Taille des icônes 
+        
+        ImageIcon openIcon = createResizedIcon("images/patient.png", iconSize, iconSize);
+        ImageIcon searchIcon = createResizedIcon("images/search.png", iconSize, iconSize);
+        ImageIcon pdfIcon = createResizedIcon("images/pdf.png", iconSize, iconSize);  
+        ImageIcon reloadIcon = createResizedIcon("images/reload.png", iconSize, iconSize);
+        ImageIcon sortiedurgenceIcon = createResizedIcon("images/sortie-durgence.png", iconSize, iconSize);
+
+        JButton openToolBarButton = new JButton(openIcon);
+        JButton searchToolBarButton = new JButton(searchIcon);
+        JButton pdfToolBarButton = new JButton(pdfIcon);
+        JButton reloadUrgenceButton = new JButton(reloadIcon); 
+        JButton sortiUrgenceButton = new JButton(sortiedurgenceIcon);
+
+        toolBar.add(openToolBarButton);
+        toolBar.add(searchToolBarButton);
+        toolBar.addSeparator(); // Séparateur
+        toolBar.add(pdfToolBarButton); 
+        toolBar.add(reloadUrgenceButton);
+        toolBar.addSeparator(); // Séparateur
+        toolBar.add(sortiUrgenceButton); 
+        
+        
+    	SearchPersonUI search = new SearchPersonUI(this);
+    	
+    	// Appel de la classe PersonInfoEntryUI
+       PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
+            	 
+        // Configuration des actions pour les boutons de la barre d'outils
+        openToolBarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) { 
+				// Appel de la classe PersonInfoEntryUI
+				SwingUtilities.invokeLater(() -> personInfoEntryUI.setVisible(true));
+				
+				// aboutItem.addActionListener(e -> showAboutUsDialog(frame)); 
+				 
+			 
+				 
+				 
+
+            }
+        });
+
+        searchToolBarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	SwingUtilities.invokeLater(() -> search.setVisible(true));
+            }
+        });
+
+        
+        pdfToolBarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	if (isPDFGenerated) {
+					Person selectedPerson = peopleJList.getSelectedValue();
+					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+					PDFCreator.openBrowseFile(pdfFilePath);
+				}
+            }
+        });
+        
+        
+        reloadUrgenceButton.addActionListener(e -> reloadPhotosAction());
+        
+//		reloadUrgenceButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//            	SwingUtilities.invokeLater(() -> search.setVisible(true));
+//            }
+//        });
+     
+
+        sortiUrgenceButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	System.exit(0);
+            }
+        });
+
+      return toolBar;
+	}
+
+	private ImageIcon createResizedIcon(String path, int width, int height) {
+        ImageIcon icon = new ImageIcon(path);
+        Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(img);
+    }
+
 }

@@ -1,12 +1,12 @@
 package org.hmd.angio.dto;
-import java.sql.Connection;
-import java.sql.Date;
+import java.sql.Connection; 
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hmd.angio.install.sgbd.DatabaseManager;
@@ -297,7 +297,68 @@ public class PersonDAO {
         return people;
     }
     
-     
+    public List<Person> searchPersons(String nom, String prenom, Date dateNaissance) throws Exception {
+        List<Person> result = new ArrayList<>();
+
+        try ( Connection connection =
+        		DatabaseManager.getConnection()) {
+            StringBuilder query = new StringBuilder("SELECT * FROM  "+tb_personne+ " WHERE 1=1");
+
+            if (nom != null && !nom.isEmpty()) {
+                query.append(" AND nom LIKE ?");
+            }
+
+            if (prenom != null && !prenom.isEmpty()) {
+                query.append(" AND prenom LIKE ?");
+            }
+ 
+            if (dateNaissance != null) {
+                query.append(" AND naissance = ?");
+            }
+
+            
+            
+            System.out.println(query);
+            
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query.toString())) {
+                int parameterIndex = 1;
+
+                if (nom != null && !nom.isEmpty()) {
+                    preparedStatement.setString(parameterIndex++, "%" + nom + "%");
+                }
+
+                if (prenom != null && !prenom.isEmpty()) {
+                    preparedStatement.setString(parameterIndex++, "%" + prenom + "%");
+                }
+
+                if (dateNaissance != null) {
+                    preparedStatement.setDate(parameterIndex, new java.sql.Date(dateNaissance.getTime()));
+                }
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        // Construire des objets Person à partir des résultats et les ajouter à la liste result
+                    	// Extraire les valeurs de chaque colonne
+                        int id = resultSet.getInt("id");
+                        String resultNom = resultSet.getString("nom");
+                        String resultPrenom = resultSet.getString("prenom");
+                        Date resultDateNaissance = resultSet.getDate("naissance");
+
+                        // Créer une instance de la classe Person
+                        Person person = new Person(id, resultNom, resultPrenom, resultDateNaissance);
+
+                        // Ajouter l'objet Person à la liste result
+                        result.add(person);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     
 //   public static void main(String[] args) {
 //            PersonDAO.createTableIfNotExists();
