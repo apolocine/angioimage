@@ -3,7 +3,9 @@ package org.hmd.angio;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -18,6 +20,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -47,10 +51,13 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -64,17 +71,18 @@ import org.hmd.angio.dto.PersonDAO;
 import org.hmd.angio.enuma.PDRectangleEnum;
 import org.hmd.angio.exception.PhotoLoadException;
 import org.hmd.angio.ihm.HistogramEQBtn;
-import org.hmd.angio.ihm.PersonInfoEntryTreeUI;
 import org.hmd.angio.ihm.PersonInfoEntryUI;
+import org.hmd.angio.ihm.tree.PersonTreeNode;
 import org.hmd.angio.ihm.tree.PhotoDirectoryUtils;
 import org.hmd.angio.pdf.PDFGenerationGUI;
+import org.hmd.angio.search.SearchPersonUI;
 import org.hmd.angio.pdf.PDFCreator;
 import org.hmd.image.ouils.DirectoryManager;
 import org.hmd.image.ouils.ThumbnailRenderer;
 
 import net.coobird.thumbnailator.Thumbnails;
 
-public class PhotoOrganizerTreeApp {
+public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 
 	private PersonDAO personDAO; // Ajouter l'instance de PersonDAO
 
@@ -131,19 +139,57 @@ public class PhotoOrganizerTreeApp {
 	}
 
 	public PhotoOrganizerTreeApp() {
-		initPeopleListe();
-		initialize();
 		
 		
+		frame = new JFrame("Photo Organizer");
+		frame.setSize(800, 600);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JToolBar toolBar = getToolBar();
+		// Configuration de la barre d'outils
+		frame.add(toolBar, BorderLayout.PAGE_START);
+
+		initializeMenu();
+
+		
+		
+		
+		JPanel peoplePanel = new JPanel(new BorderLayout());
+		peoplePanel.add(new JLabel("Liste des   personne "), BorderLayout.NORTH);
+		peoplePanel.add(new JScrollPane(initPeopleListe()), BorderLayout.CENTER);
+
+		// Ajoutez la liste des personnes au-dessus de la liste de photos
+		JPanel directoryImagePanel = new JPanel(new BorderLayout());
+		directoryImagePanel.add(new JLabel("Liste des Photos"), BorderLayout.NORTH);
+		directoryImagePanel.add(new JScrollPane(initializePhotoList()), BorderLayout.CENTER); 
+		
+		
+		// splite vertivcale liste des patients
+		// liste des photois du patient selectioné
+		JSplitPane splitPeoplePhotoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,initializePeopleTree() , directoryImagePanel);
+
+		JSplitPane dashBoardSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, splitPeoplePhotoPane,
+				getsplitPanel());
+
+		frame.add(dashBoardSplitPane, BorderLayout.CENTER);
+
+		frame.setVisible(true);
+
 		// Ajoutez le JScrollPane de l'arborescence à votre interface utilisateur
-// 				frame.add(initializeJTree(), BorderLayout.WEST);
-// 				frame.add(initializePeopleTree(), BorderLayout.WEST);
+	  
+//		frame.add(peoplePanel, BorderLayout.WEST);
 
-		   
+	} 
 
-	}
-
-	private void initPeopleListe() {
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private JList<Person>  initPeopleListe() {
+		
+		
+		 
+		
 		// Initialisez l'instance de PersonDAO
 		personDAO = new PersonDAO();
 
@@ -189,7 +235,7 @@ public class PhotoOrganizerTreeApp {
 						//premier viewer
 						displayPDF(pdfFilePath, previewPDFPanel);
 						// Add zoom functionality
-						previewPDFPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, previewPDFPanel));
+					//	previewPDFPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, previewPDFPanel));
 						previewPDFPanel.addMouseListener(new ContextMenuMouseListener(pdfFilePath, previewPDFPanel));
 					}
 
@@ -234,6 +280,9 @@ public class PhotoOrganizerTreeApp {
 			}
 		});
 
+		
+		return peopleJList;
+		
 	}
 
 	// Méthode pour mettre à jour la liste des personnes
@@ -408,8 +457,8 @@ public class PhotoOrganizerTreeApp {
 
 	}
 
-	private void initialize() {
-
+	private JList initializePhotoList() { 
+		
 		// Au démarrage, chargez la configuration depuis le fichier
 		// lecture directed des informationsà partir du ficher nous avons pas besoins de
 		// l'interface utilisateur
@@ -421,14 +470,8 @@ public class PhotoOrganizerTreeApp {
 			selectedDirectory = new File(directory);
 		}
 
-		frame = new JFrame("Photo Organizer");
-		frame.setSize(800, 600);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		// Ajoutez la liste des personnes au-dessus de la liste de photos
-		JPanel peoplePanel = new JPanel(new BorderLayout());
-		peoplePanel.add(new JLabel("Liste des Personnes"), BorderLayout.NORTH);
-		peoplePanel.add(new JScrollPane(peopleJList), BorderLayout.CENTER);
+	
 
 //		// Ajoutez la liste de photos
 //		JPanel photosPanel = new JPanel(new BorderLayout());
@@ -509,33 +552,13 @@ public class PhotoOrganizerTreeApp {
 
 		});
 
-		JPanel directoryImagePanel = new JPanel(new BorderLayout());
-		directoryImagePanel.add(new JLabel("Liste des Images / personne "), BorderLayout.NORTH);
-		directoryImagePanel.add(new JScrollPane(photoList), BorderLayout.CENTER);
-
-		initializeMenu();
-
-		JScrollPane photoScrollPane = new JScrollPane(directoryImagePanel);
-
-		// splite vertivcale liste des patients
-		// liste des photois du patient selectioné
-//		JSplitPane splitPeoplePhotoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, peoplePanel, photoScrollPane);
- 
-		JPanel splitPeoplePhotoPane = new  JPanel( );
-		splitPeoplePhotoPane.add(peoplePanel);
-		splitPeoplePhotoPane.add(photoScrollPane);
-		splitPeoplePhotoPane.add(initializePeopleTree());
-		
-		
-		JSplitPane splitViewPdf = getsplitPanel();
-
-		JSplitPane dashBoardSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, splitPeoplePhotoPane, splitViewPdf);
-
-		frame.add(dashBoardSplitPane, BorderLayout.CENTER);
-
-		frame.setVisible(true);
+	
+		return photoList;
 	}
 
+	
+	
+	
 	/**
 	 * MENU CONTEXTUEL
 	 * 
@@ -878,14 +901,15 @@ public class PhotoOrganizerTreeApp {
 
 		// Ajoutez l'élément de menu "Rechercher Personne"
 		JMenuItem rechercherPersonneItem = new JMenuItem("Rechercher Personne");
+		SearchPersonUI search = new SearchPersonUI(this);
+		
 		rechercherPersonneItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
-				updatePeopleList();
-
-				// Ajoutez votre logique de recherche de personne ici
-				JOptionPane.showMessageDialog(frame, "Fonctionnalité de recherche de personne à implémenter.");
+ 
+				// Appel de la classe PersonInfoEntryUI
+				SwingUtilities.invokeLater(() -> search.setVisible(true));
+				
 			}
 		});
 		personnesMenu.add(rechercherPersonneItem);
@@ -893,7 +917,7 @@ public class PhotoOrganizerTreeApp {
 		// Ajoutez l'élément de menu "Ajouter Personne"
 		JMenuItem ajouterPersonneItem = new JMenuItem("Ajouter Personne");
 
-		PersonInfoEntryTreeUI personInfoEntryUI = new PersonInfoEntryTreeUI(this);
+		PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
 
 		ajouterPersonneItem.addActionListener(new ActionListener() {
 
@@ -902,6 +926,7 @@ public class PhotoOrganizerTreeApp {
 
 				// Appel de la classe PersonInfoEntryUI
 				SwingUtilities.invokeLater(() -> personInfoEntryUI.setVisible(true));
+				 
 
 			}
 		});
@@ -920,45 +945,7 @@ public class PhotoOrganizerTreeApp {
 			}
 		});
 
-		// Élément de menu "Choose Directory"
-		JMenuItem chooseDirectoryItem = new JMenuItem("Choose Directory");
-		chooseDirectoryItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				String directory = DirectoryManager.getWorkspaceDirectory();
-				File workingDirectory = new File(directory);
-				chooseDirectory(workingDirectory);
-
-			}
-		});
-
-		// Élément de menu "Create PDF"
-		JMenuItem createPdfItem = new JMenuItem("Create PDF");
-		createPdfItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				try {
-					createPDF();
-
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
-			}
-		});
-
-		// Élément de menu "Print PDF"
-		JMenuItem printPdfItem = new JMenuItem("Print PDF");
-		printPdfItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				printPDF();
-			}
-		});
-
+	 
 		// Élément de menu "Exit"
 		JMenuItem exitItem = new JMenuItem("Exit");
 		exitItem.addActionListener(new ActionListener() {
@@ -969,25 +956,73 @@ public class PhotoOrganizerTreeApp {
 		});
 
 		// Ajout des éléments au menu "File"
-		fileMenu.add(openConfigButton);
-		fileMenu.addSeparator();
-		fileMenu.add(chooseDirectoryItem);
-		fileMenu.addSeparator();
-		fileMenu.add(createPdfItem);
-		fileMenu.addSeparator();
-		fileMenu.add(printPdfItem);
-		fileMenu.addSeparator();
+		
+//		fileMenu.add(personnesMenu); 
+//		fileMenu.addSeparator(); 
+		fileMenu.add(ajouterPersonneItem);
+		fileMenu.add(rechercherPersonneItem);
+		fileMenu.addSeparator();  
+		fileMenu.add(openConfigButton); 
+		fileMenu.addSeparator();  
 		fileMenu.add(exitItem);
 
 		// Ajout du menu "File" à la barre de menu
 		menuBar.add(fileMenu);
 
 		// Ajoutez le menu "Personnes" à la barre de menu
-		menuBar.add(personnesMenu);
+		//menuBar.add(personnesMenu);
+		
+		  // Menu "Help"
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem helpItem = new JMenuItem("Help Contents");
+        helpMenu.add(helpItem);
 
-		frame.setJMenuBar(menuBar);
+        // Menu "About"
+        JMenu aboutMenu = new JMenu("About");
+        JMenuItem aboutItem = new JMenuItem("About Us");
 
+        aboutItem.addActionListener(e -> showAboutUsDialog(frame)); 
+        aboutMenu.add(aboutItem);
+
+        // Ajout des menus à la barre de menu
+        menuBar.add(Box.createHorizontalGlue()); // Pour aligner les menus à droite
+        menuBar.add(helpMenu);
+        menuBar.add(aboutMenu); 
+		 frame.setJMenuBar(menuBar);
+ 
 	}
+
+ 
+	
+	private static void showAboutUsDialog(JFrame parentFrame) {
+        JTextPane textPane = new JTextPane();
+        textPane.setContentType("text/html");
+        textPane.setEditable(false);
+
+        String aboutText = "<html><b>About Us</b><br>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ<br>" +
+                "Welcome to our application!"
+             + "\r\n"+ 
+             "Contact us: <a href=\"mailto:drmdh@msncom\">drmdh@msncom</a><br>" +
+             "Visit our website: <a href=\"http://amia.fr\">http://amia.fr</a></html>";
+
+        textPane.setText(aboutText);
+        textPane.addHyperlinkListener(e -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                try {
+                    Desktop.getDesktop().browse(new URI(e.getURL().toString()));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(textPane);
+        scrollPane.setPreferredSize(new Dimension(400, 200));
+
+        JOptionPane.showMessageDialog(parentFrame, scrollPane, "About Us", JOptionPane.INFORMATION_MESSAGE);
+    }
+	
+	
 
 	private void chooseDirectory() throws PhotoLoadException, IOException {
 		JFileChooser fileChooser = new JFileChooser();
@@ -1030,6 +1065,13 @@ public class PhotoOrganizerTreeApp {
 		}
 	}
 
+	
+	
+	
+
+	
+	
+	@Override
 	public void addPerson(Person person) {
 		// Ajoutez la personne à la base de données
 		personDAO.saveOrUpdatePerson(person);
@@ -1068,10 +1110,157 @@ public class PhotoOrganizerTreeApp {
 		}
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
 	public JSplitPane getsplitPanel() {
 
 		// initializeComponents();
 
+		JPanel optionsPanel = initOptionPDF();
+
+		JPanel panelOptionsView = buttonPDFAction();
+
+		JScrollPane previewScrollPane = panelPDFView();
+		JScrollPane pdfScrollPane = panelPDFView2();
+
+		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelOptionsView, previewScrollPane);
+		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optionsPanel, splitTextArea);
+		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions, pdfScrollPane);
+
+		return splitViewPdf;
+	}
+
+	
+	
+	private JScrollPane panelPDFView2() {
+		if (pdfPanel == null) {
+			pdfPanel = new JPanel();
+		}
+		pdfPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		pdfPanel.setPreferredSize(new Dimension(400, 400));
+		pdfPanel.setLayout(new BorderLayout());
+		pdfPanel.setLayout(new GridLayout(0, 1));
+
+		 
+		
+			JScrollPane pdfScrollPane = new JScrollPane(pdfPanel);
+			pdfScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+			pdfScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+			pdfScrollPane.setAutoscrolls(true);
+		return pdfScrollPane;
+	}
+
+	private JScrollPane panelPDFView() {
+		if (previewPDFPanel == null) {
+			previewPDFPanel = new JPanel();
+		}
+		 
+		previewPDFPanel.setLayout(new GridLayout(0, 1));
+		JScrollPane previewScrollPane = new JScrollPane(previewPDFPanel);
+		previewScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		previewScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		return previewScrollPane;
+	}
+
+	
+	/**
+	 * les button et leur action 
+	 * @return
+	 */
+	private JPanel buttonPDFAction() {
+		JPanel panelOptionsView = new JPanel();
+
+		panelOptionsView.add(generatePDFButton);
+		panelOptionsView.add(showPDFButton);
+		panelOptionsView.add(printePDFButton);
+
+
+		generatePDFButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				Person selectedPerson = peopleJList.getSelectedValue();
+				if (selectedPerson != null) {
+					boolean pdfGenerated = generatePDF(selectedPerson);
+					try {
+						if (pdfGenerated) {
+							isPDFGenerated = true;
+							showPDFButton.setEnabled(true);
+							printePDFButton.setEnabled(true);
+						}
+
+					} finally {
+						if (pdfGenerated) {
+							String  generatedPDFFile = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+
+							
+							//premier viewer 
+							displayPDF(generatedPDFFile, pdfPanel);
+							// Add zoom functionality
+							pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
+							pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
+							
+							
+							//premier viewer
+							displayPDF(generatedPDFFile, previewPDFPanel);
+							// Add zoom functionality
+							// previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, previewPDFPanel));
+							previewPDFPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
+						}
+
+					}
+				} else {
+
+				}
+
+			}
+		});
+
+		showPDFButton.setEnabled(false);
+		printePDFButton.setEnabled(false);
+		
+		
+		showPDFButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (isPDFGenerated) {
+					Person selectedPerson = peopleJList.getSelectedValue();
+					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+					PDFCreator.openBrowseFile(pdfFilePath);
+				}
+
+			}
+		});
+
+		printePDFButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				Person selectedPerson = peopleJList.getSelectedValue();
+
+//				try {
+//					generatePDF(selectedPerson);
+//				}  				
+//				finally {
+				
+					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+					File pdfFilePerson = new File(pdfFilePath);
+					PDFCreator.printPDF(pdfFilePerson);
+//				}
+
+			}
+		});
+		return panelOptionsView;
+	}
+
+	private JPanel initOptionPDF() {
 		xMarginSlider.setMajorTickSpacing(10);
 		xMarginSlider.setMinorTickSpacing(1);
 		xMarginSlider.setPaintTicks(true);
@@ -1108,135 +1297,7 @@ public class PhotoOrganizerTreeApp {
  		xMarginSlider.setValue(10);
  		yMarginSlider.setValue(10);
  		sideMarginSlider.setValue(5);
-		
-		
-		
-		
-//		optionsPanel.add(new JLabel("Nombre de pages:")); // Nouveau ajout
-//		optionsPanel.add(pageCountSpinner); // Nouveau ajout
-
-//			optionsPanel.add(new JLabel(""));
-//			optionsPanel.add(generatePDFButton);
-//			optionsPanel.add(new JLabel(""));
-//			optionsPanel.add(printePDFButton);
-
-		JPanel panelOptionsView = new JPanel();
-
-		panelOptionsView.add(generatePDFButton);
-		panelOptionsView.add(showPDFButton);
-		panelOptionsView.add(printePDFButton);
-
-		
-
-		previewPDFPanel = new JPanel();
-		previewPDFPanel.setLayout(new GridLayout(0, 1));
-		JScrollPane previewScrollPane = new JScrollPane(previewPDFPanel);
-		previewScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		previewScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelOptionsView, previewScrollPane);
-		
-
-		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optionsPanel, splitTextArea);
- 
-
-		if (pdfPanel == null) {
-			pdfPanel = new JPanel();
-		}
-		pdfPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		pdfPanel.setPreferredSize(new Dimension(400, 400));
-		pdfPanel.setLayout(new BorderLayout());
-		pdfPanel.setLayout(new GridLayout(0, 1));
-
-		 
-
-		JScrollPane pdfScrollPane = new JScrollPane(pdfPanel);
-		pdfScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		pdfScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-		// pdfScrollPane.setAutoscrolls(true);
-
-		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions, pdfScrollPane);
-
-//			add(optionsPanel, BorderLayout.NORTH);
-//			add(pdfScrollPane, BorderLayout.CENTER);
-
-		generatePDFButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				Person selectedPerson = peopleJList.getSelectedValue();
-				if (selectedPerson != null) {
-					boolean pdfGenerated = generatePDF(selectedPerson);
-					try {
-						if (pdfGenerated) {
-							isPDFGenerated = true;
-							showPDFButton.setEnabled(true);
-							printePDFButton.setEnabled(true);
-						}
-
-					} finally {
-						if (pdfGenerated) {
-							String  generatedPDFFile = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
-
-							
-							//premier viewer 
-							displayPDF(generatedPDFFile, pdfPanel);
-							// Add zoom functionality
-							pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
-							pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
-							
-							
-							//premier viewer
-							displayPDF(generatedPDFFile, previewPDFPanel);
-							// Add zoom functionality
-							previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, previewPDFPanel));
-							previewPDFPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
-						}
-
-					}
-				} else {
-
-				}
-
-			}
-		});
-
-		showPDFButton.setEnabled(false);
-		printePDFButton.setEnabled(false);
-		showPDFButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				if (isPDFGenerated) {
-					Person selectedPerson = peopleJList.getSelectedValue();
-					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
-					PDFCreator.openBrowseFile(pdfFilePath);
-				}
-
-			}
-		});
-
-		printePDFButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				Person selectedPerson = peopleJList.getSelectedValue();
-
-				try {
-					generatePDF(selectedPerson);
-
-				} finally {
-					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
-					File pdfFilePerson = new File(pdfFilePath);
-
-					PDFCreator.printPDF(pdfFilePerson);
-				}
-
-			}
-		});
-
-		return splitViewPdf;
+		return optionsPanel;
 	}
 
 	/***
@@ -1505,25 +1566,52 @@ public class PhotoOrganizerTreeApp {
 	
 	
 	///////////////////////////// -----------------------------------------------------------/*//////////////
-	private JTree tree;
+ 
 	private DefaultTreeModel treeModel;
-	private JTree peopleTree;
-
+	private JTree peopleJTree;
+	// Créez la racine du tree
+	DefaultMutableTreeNode root,today,inAction,allRecords  ;
+	
+	
 	private JScrollPane initializePeopleTree() {
+		
+		
 		// Initialisation de la frame et d'autres composants
 
 		// Créez la racine du tree
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
-
+		  root = new DefaultMutableTreeNode("Workspace");  
+		  today = new DefaultMutableTreeNode("Today");  
+		  inAction = new DefaultMutableTreeNode("En Action");
+		  allRecords = new DefaultMutableTreeNode("All Records");
+		  
+		  
+		
+		  
 		// Créez le modèle de l'arbre avec la racine
 		treeModel = new DefaultTreeModel(root);
 
 		// Créez le JTree avec le modèle
-		peopleTree = new JTree(treeModel);
+		peopleJTree = new JTree(treeModel);
+		peopleJTree.setRootVisible(false); // Masquer la racine de l'arborescence
+		peopleJTree.addTreeSelectionListener(new TreeSelectionListener() {
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+				DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) peopleJTree.getLastSelectedPathComponent();
 
+				if (selectedNode != null && selectedNode.getUserObject() instanceof File) {
+					File selectedFile = (File) selectedNode.getUserObject();
+					// Ajoutez votre logique pour afficher les photos du répertoire sélectionné
+					loadPhotosJTree(selectedFile);
+				}
+
+			}
+		});
+
+  
+		 
 		// Ajoutez le JTree à un JScrollPane et à la frame
-		JScrollPane treeScrollPane = new JScrollPane(peopleTree);
-//		frame.add(treeScrollPane, BorderLayout.WEST);
+		JScrollPane treeScrollPane = new JScrollPane(peopleJTree);
+ 		frame.add(treeScrollPane, BorderLayout.WEST);
 
 		
 //	    String dDate="Sat Apr 11 12:16:44 IST 2015"; 
@@ -1531,7 +1619,7 @@ public class PhotoOrganizerTreeApp {
 //	    Date cDate = df.parse(dDate); 
 		
 		
-		Person perso = new Person("John", "Doe", new Date());
+		Person perso = new Person("H", "Madani", new Date());
 		// Exemple pour ajouter une personne et une photo
 		addPersonForTree(perso);
 		// addPhoto(perso, DirectoryManager.getPersonWorkspaceDirectory(perso));
@@ -1541,30 +1629,105 @@ public class PhotoOrganizerTreeApp {
 	        
 	        for (Person person : people) {
 				
-	       	 PhotoDirectoryUtils.createPhotoTree(root, person) ; 
+	       	 PhotoDirectoryUtils.createPhotoTree(allRecords, person) ; 
 			}
-	      
+	        
+	        
+			addTextToTree("Action");
+//			addTextToNode("Action", today);
+			root.add(today);
+			root.add(allRecords);
+			root.add(inAction);
+			  
 		// Rafraîchissez le modèle du JTree
 		treeModel.reload();
 //	        // Affichez la frame
 //	        frame.setVisible(true);
 		
 		
-		
-		JTree tree=   new JTree(new DefaultTreeModel(root));
-		
-		 treeScrollPane = new JScrollPane(tree);
+		 
 		return treeScrollPane;
 	}
+	
+ 
+	@Override
+	public void showPerson(Person person) {
+		 
+		 
+		copyNodeWithChildren(inAction.getNextNode(), today );
+		 
+ // Effacer tous les enfants de la racine 
+        inAction.removeAllChildren();
+        
+		PersonTreeNode photoTre =  	PhotoDirectoryUtils.createPhotoTree(inAction, person) ;  
+		
+		 
+		peopleJTree = new JTree(new DefaultTreeModel(photoTre));
 
+		// Rafraîchissez le modèle du JTree
+		treeModel.reload();
+		peopleJTree.updateUI(); 
+		
+		 
+		// Affichez le répertoire de photos de la personne dans photoList
+		loadPhotosForPerson(person);
+	}
+	
+	private void addTextToTree(String  text ) { 
+		
+		DefaultMutableTreeNode textNode = new DefaultMutableTreeNode(text); 
+		treeModel.insertNodeInto(textNode, (DefaultMutableTreeNode) treeModel.getRoot(),
+				treeModel.getChildCount(treeModel.getRoot())); 
+	}
+	
+	
+    // Méthode pour copier un nœud avec tous ses fils
+    private void copyNodeWithChildren(DefaultMutableTreeNode selectedNode, DefaultMutableTreeNode dest ) {
+        // Récupérer le nœud sélectionné
+//        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+
+        if (selectedNode != null) {
+            // Copier le nœud et tous ses fils
+            DefaultMutableTreeNode copiedNode = copyNodeRecursive(selectedNode);
+
+            // Ajouter le nœud copié à la racine (vous pouvez choisir un autre emplacement)
+//            DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeModel.getRoot();
+            dest.add(copiedNode);
+
+            // Actualiser le modèle de l'arbre
+//            treeModel.reload();
+        }
+    }
+
+    // Méthode récursive pour copier un nœud avec tous ses fils
+    private DefaultMutableTreeNode copyNodeRecursive(DefaultMutableTreeNode originalNode) {
+        DefaultMutableTreeNode copy = new DefaultMutableTreeNode(originalNode.getUserObject());
+
+        // Copier tous les fils récursivement
+        for (int i = 0; i < originalNode.getChildCount(); i++) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) originalNode.getChildAt(i);
+            DefaultMutableTreeNode copiedChild = copyNodeRecursive(child);
+            copy.add(copiedChild);
+        }
+
+        return copy;
+    }
+    
+    
+    
+	private void addTextToNode(String  text,DefaultMutableTreeNode node) { 
+		
+		DefaultMutableTreeNode textNode = new DefaultMutableTreeNode(text);
+
+		treeModel.insertNodeInto(textNode, node,
+				treeModel.getChildCount(node));
+	}
+	
 	private void addPersonForTree(Person perso) {
-		DefaultMutableTreeNode personNode = new DefaultMutableTreeNode(perso.getNom() + " " + perso.getPrenom());
-
-		treeModel.insertNodeInto(personNode, (DefaultMutableTreeNode) treeModel.getRoot(),
-				treeModel.getChildCount(treeModel.getRoot()));
+		
+		 addTextToTree(perso.getNom() + " " + perso.getPrenom());
 		// Ajoutez les détails de la personne, par exemple, date de naissance, à
-		// personNode
-
+		// personNode 
 	}
 
 	private void addPhoto(Person perso, String photoDate, String photoPath) {
@@ -1593,54 +1756,43 @@ public class PhotoOrganizerTreeApp {
 
 	// ... Autres parties de votre code ...
 
-	private JScrollPane  initializeJTree() {
-		// ... Autres parties de votre code ...
-
-		
-		
-		personDAO = new PersonDAO();
-		List<Person> people = personDAO.findAll();		
-		DefaultMutableTreeNode toDay = new DefaultMutableTreeNode("Today");
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Workspace");
-	        
-        // Ajoutez la liste de photos (arborescence) à votre interface utilisateur
-		tree = new JTree(new DefaultTreeModel(toDay));
-		
-        for (Person person : people) {
-			
-        	 PhotoDirectoryUtils.createPhotoTree(toDay, person) ; 
-		}
-		// Ajoutez la liste de photos (arborescence) à votre interface utilisateur
-		
-		
-		 
-       
-		
-		
-		tree.setRootVisible(false); // Masquer la racine de l'arborescence
-		tree.addTreeSelectionListener(new TreeSelectionListener() {
-			@Override
-			public void valueChanged(TreeSelectionEvent e) {
-				DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-
-				if (selectedNode != null && selectedNode.getUserObject() instanceof File) {
-					File selectedFile = (File) selectedNode.getUserObject();
-					// Ajoutez votre logique pour afficher les photos du répertoire sélectionné
-					loadPhotosJTree(selectedFile);
-				}
-
-			}
-		});
-
-		JScrollPane treeScrollPane = new JScrollPane(tree);
-		treeScrollPane.setPreferredSize(new Dimension(200, 400));
-
-		
-		
-		return treeScrollPane;
-		
-		// ... Autres parties de votre code ...
-	}
+//	private JScrollPane  initializeJTree() {
+//		// ... Autres parties de votre code ...
+// 
+//		personDAO = new PersonDAO();
+//		List<Person> people = personDAO.findAll();		
+//		DefaultMutableTreeNode toDay = new DefaultMutableTreeNode("Today");
+//        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Workspace");
+//	        
+//        // Ajoutez la liste de photos (arborescence) à votre interface utilisateur
+//		tree = new JTree(new DefaultTreeModel(toDay));
+//		
+//        for (Person person : people) {
+//			
+//        	 PhotoDirectoryUtils.createPhotoTree(toDay, person) ; 
+//		}
+//		// Ajoutez la liste de photos (arborescence) à votre interface utilisateur
+//		   
+//		tree.setRootVisible(false); // Masquer la racine de l'arborescence
+//		tree.addTreeSelectionListener(new TreeSelectionListener() {
+//			@Override
+//			public void valueChanged(TreeSelectionEvent e) {
+//				DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+//
+//				if (selectedNode != null && selectedNode.getUserObject() instanceof File) {
+//					File selectedFile = (File) selectedNode.getUserObject();
+//					// Ajoutez votre logique pour afficher les photos du répertoire sélectionné
+//					loadPhotosJTree(selectedFile);
+//				}
+//
+//			}
+//		});
+//
+//		JScrollPane treeScrollPane = new JScrollPane(tree);
+//		treeScrollPane.setPreferredSize(new Dimension(200, 400));
+// 
+//		return treeScrollPane; 
+//	}
 
 	private void loadPhotosJTree(File directory) {
 		listModel.clear();
@@ -1658,10 +1810,15 @@ public class PhotoOrganizerTreeApp {
 
 	}
 
+	
+	/**
+	 * 
+	 * @param directory
+	 */
 	private void updateTree(File directory) {
 		DefaultMutableTreeNode rootNode = createTreeNode(directory);
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
-		tree.setModel(treeModel);
+		 peopleJTree.setModel(treeModel);
 	}
 
 	private DefaultMutableTreeNode createTreeNode(File directory) {
@@ -1805,5 +1962,130 @@ public class PhotoOrganizerTreeApp {
 
 	}
 
-	 
+
+	private JToolBar getToolBar() {
+	
+
+        // Barre d'outils
+        JToolBar toolBar = new JToolBar();
+        int iconSize = 32; // Taille des icônes 
+        
+        ImageIcon openIcon = createResizedIcon("images/patient.png", iconSize, iconSize);
+        ImageIcon searchIcon = createResizedIcon("images/search.png", iconSize, iconSize);
+        ImageIcon pdfIcon = createResizedIcon("images/pdf.png", iconSize, iconSize);  
+        ImageIcon reloadIcon = createResizedIcon("images/reload.png", iconSize, iconSize);
+        ImageIcon sortiedurgenceIcon = createResizedIcon("images/sortie-durgence.png", iconSize, iconSize);
+
+        JButton openToolBarButton = new JButton(openIcon);
+        JButton searchToolBarButton = new JButton(searchIcon);
+        JButton pdfToolBarButton = new JButton(pdfIcon);
+        JButton reloadUrgenceButton = new JButton(reloadIcon); 
+        JButton sortiUrgenceButton = new JButton(sortiedurgenceIcon);
+
+        toolBar.add(openToolBarButton);
+        toolBar.add(searchToolBarButton);
+        toolBar.addSeparator(); // Séparateur
+        toolBar.add(pdfToolBarButton); 
+        toolBar.add(reloadUrgenceButton);
+        toolBar.addSeparator(); // Séparateur
+        toolBar.add(sortiUrgenceButton); 
+        
+        
+    	SearchPersonUI search = new SearchPersonUI(this);
+    	
+    	// Appel de la classe PersonInfoEntryUI
+       PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
+            	 
+        // Configuration des actions pour les boutons de la barre d'outils
+        openToolBarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) { 
+				// Appel de la classe PersonInfoEntryUI
+				SwingUtilities.invokeLater(() -> personInfoEntryUI.setVisible(true));
+				
+				// aboutItem.addActionListener(e -> showAboutUsDialog(frame)); 
+				 
+			 
+				 
+				 
+
+            }
+        });
+
+        searchToolBarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	SwingUtilities.invokeLater(() -> search.setVisible(true));
+            }
+        });
+
+        
+        pdfToolBarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	if (isPDFGenerated) {
+					Person selectedPerson = peopleJList.getSelectedValue();
+					String pdfFilePath = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+					PDFCreator.openBrowseFile(pdfFilePath);
+				}
+            }
+        });
+        
+        
+        reloadUrgenceButton.addActionListener(e -> reloadPhotosAction());
+        
+//		reloadUrgenceButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//            	SwingUtilities.invokeLater(() -> search.setVisible(true));
+//            }
+//        });
+     
+
+        sortiUrgenceButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	System.exit(0);
+            }
+        });
+
+      return toolBar;
+	}
+
+	private ImageIcon createResizedIcon(String path, int width, int height) {
+        ImageIcon icon = new ImageIcon(path);
+        Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(img);
+    }
+	//
+//	= l'interieur du jar 
+//	private ImageIcon createResizedIcon(String imagePath, int width, int height) {
+//        try {
+//            // Load the image using the ClassLoader
+//            ClassLoader classLoader = getClass().getClassLoader();
+//            java.net.URL imageUrl = classLoader.getResource(imagePath);
+//
+//            // Load the original image
+//            Image originalImage = new ImageIcon(imageUrl).getImage();
+//
+//            // Resize the image
+//            Image resizedImage = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+//
+//            // Create a buffered image with transparency
+//            BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+//
+//            // Draw the resized image on the buffered image
+//            Graphics2D g2d = bufferedImage.createGraphics();
+//            g2d.drawImage(resizedImage, 0, 0, null);
+//            g2d.dispose();
+//
+//            // Return the resized ImageIcon
+//            return new ImageIcon(bufferedImage);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
+
 }
