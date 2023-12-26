@@ -15,9 +15,11 @@ import com.itextpdf.text.pdf.PdfWriter;
 public class PdfGenerator {
     public static void generatePdf(List<PlayerInfo> playerInfoList, String filePath) {
         Document document = new Document();
-
+        FileOutputStream stream = null;
         try {
-            PdfWriter.getInstance(document, new FileOutputStream(filePath));
+        	
+        	  stream =	new FileOutputStream(filePath);
+            PdfWriter.getInstance(document, stream);
             document.open();
 
             // Ajoutez les informations des joueurs au document PDF
@@ -29,6 +31,12 @@ public class PdfGenerator {
             e.printStackTrace();
         } finally {
             document.close();
+            try {
+				stream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
     }
 
