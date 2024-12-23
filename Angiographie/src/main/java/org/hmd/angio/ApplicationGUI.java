@@ -294,7 +294,8 @@ public class ApplicationGUI extends JFrame {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			new PhotoOrganizerApp();
+//			new PhotoOrganizerApp();
+			new PhotoOrganizerTreeApp();
 		});
 
 		setVisible(false);

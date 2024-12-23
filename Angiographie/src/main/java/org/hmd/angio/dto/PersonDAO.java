@@ -14,7 +14,7 @@ import org.hmd.angio.install.sgbd.DatabaseManager;
 public class PersonDAO {
 
 	
-	private static String tb_personne ="tb_patients";
+	private static String tb_patients ="tb_patients";
 	
 	
 //    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/angiographie";
@@ -31,12 +31,17 @@ public class PersonDAO {
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		
         		) {
-            String createTableSQL = "CREATE TABLE IF NOT EXISTS "+tb_personne+" ("
+            String createTableSQL = "CREATE TABLE IF NOT EXISTS "+tb_patients+" ("
                     + "id INT AUTO_INCREMENT PRIMARY KEY,"
+                    
                     + "nom VARCHAR(255),"
                     + "prenom VARCHAR(255),"
                     + "naissance DATE"
+//                    + ","
+//                    + "idx INT( 11 ) NOT NULL"
                     + ")";
+//            ALTER TABLE `tb_patients` ADD `idx` INT( 11 ) NOT NULL ,
+//            ADD INDEX ( `idx` )
             try (PreparedStatement preparedStatement = connection.prepareStatement(createTableSQL)) {
                 preparedStatement.executeUpdate();
             }
@@ -47,13 +52,22 @@ public class PersonDAO {
 			e1.printStackTrace();
 		}
     }
-
+ 
+public boolean isConnected() {
+	try {
+		return DatabaseManager.getConnection()!=null;
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		return false;
+	}
+}
     public static int insertPerson(Person person) {
         try (Connection connection = 
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-            String insertSQL = "INSERT INTO "+tb_personne+" (nom, prenom, naissance) VALUES (?, ?, ? )";
+            String insertSQL = "INSERT INTO "+tb_patients+" (nom, prenom, naissance) VALUES (?, ?, ? )";
             try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, person.getNom());
                 preparedStatement.setString(2, person.getPrenom());
@@ -90,7 +104,7 @@ public class PersonDAO {
             
             java.sql.Date sqlDate = new java.sql.Date(person.getDateNaissance().getTime());
 
-            String sql = "INSERT INTO "+tb_personne+" (id, nom, prenom, naissance ) VALUES (?,?, ?,   ?)";
+            String sql = "INSERT INTO "+tb_patients+" (id, nom, prenom, naissance ) VALUES (?,?, ?,   ?)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             	  preparedStatement.setInt(1, person.getId());
             	  preparedStatement.setString(2, person.getNom());
@@ -117,13 +131,13 @@ public class PersonDAO {
 
     
     
-    public static Person readPerson(int personId) {
+    public static Person findById(int personId) {
         Person person = null;
         try (Connection connection = 
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-            String selectSQL = "SELECT * FROM "+tb_personne+" WHERE id = ?";
+            String selectSQL = "SELECT * FROM "+tb_patients+" WHERE id = ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectSQL)) {
                 preparedStatement.setInt(1, personId);
 
@@ -154,7 +168,7 @@ public class PersonDAO {
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-            String selectAllSQL = "SELECT * FROM "+tb_personne+"";
+            String selectAllSQL = "SELECT * FROM "+tb_patients+"";
             try (PreparedStatement preparedStatement = connection.prepareStatement(selectAllSQL)) {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
@@ -183,7 +197,7 @@ public class PersonDAO {
          		DatabaseManager.getConnection()
          		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
          		) {
-            String query = "UPDATE "+tb_personne+" SET nom=?, prenom=?, naissance=?  WHERE id=?";
+            String query = "UPDATE "+tb_patients+" SET nom=?, prenom=?, naissance=?  WHERE id=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setString(1, person.getNom());
                 preparedStatement.setString(2, person.getPrenom());
@@ -209,7 +223,7 @@ public class PersonDAO {
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
-            String sql = "DELETE FROM "+tb_personne+" WHERE id=?";
+            String sql = "DELETE FROM "+tb_patients+" WHERE id=?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, personId);
                 preparedStatement.executeUpdate();
@@ -230,7 +244,7 @@ public class PersonDAO {
           		DatabaseManager.getConnection()
           		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
           		) {
-              String sql = "DELETE FROM "+tb_personne+" WHERE id=?";
+              String sql = "DELETE FROM "+tb_patients+" WHERE id=?";
               try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                   preparedStatement.setInt(1, person.getId());
                   preparedStatement.executeUpdate();
@@ -271,7 +285,7 @@ public class PersonDAO {
             		DatabaseManager.getConnection()
             		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
             		;/* obtenir une connexion à votre base de données */;
-            String query = "SELECT * FROM "+tb_personne+"";
+            String query = "SELECT * FROM "+tb_patients+"";
             statement = connection.prepareStatement(query);
             resultSet = statement.executeQuery();
 
@@ -302,7 +316,7 @@ public class PersonDAO {
 
         try ( Connection connection =
         		DatabaseManager.getConnection()) {
-            StringBuilder query = new StringBuilder("SELECT * FROM  "+tb_personne+ " WHERE 1=1");
+            StringBuilder query = new StringBuilder("SELECT * FROM  "+tb_patients+ " WHERE 1=1");
 
             if (nom != null && !nom.isEmpty()) {
                 query.append(" AND nom LIKE ?");

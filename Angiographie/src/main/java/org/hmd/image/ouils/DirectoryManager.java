@@ -11,7 +11,9 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 import org.hmd.angio.conf.Config;
-import org.hmd.angio.dto.Person; 
+import org.hmd.angio.dto.Person;
+import org.hmd.angio.ihm.tree.ExamTreeNode;
+import org.hmd.angio.ihm.tree.PhotoDirectoryUtils; 
  
 public class DirectoryManager {
 
@@ -64,8 +66,16 @@ public class DirectoryManager {
 	public static String getByPersonPhotosDirectory(Person person) {
 		
 		
-		return person.getId()+"_"+person.getNom()+"_"+person.getPrenom()+"\\";
+		//return person.getId()+"_"+person.getNom()+"_"+person.getPrenom()+"\\";
+		
+		return PhotoDirectoryUtils.normalizeDirectoryName(  person);
 	}
+	
+	 
+
+	
+	
+	
 	
 	public static String getPersonWorkspaceDirectory(Person person ) {
 		return getWorkspaceDirectory( )+getByPersonPhotosDirectory(  person);
@@ -107,6 +117,32 @@ public static String createphotosDirectory(Person newPerson) {
 				return null;
 			}  
 	}
+
+
+
+/**
+ * methode utiliser pour migrer les données et changer 
+ * les noms de repertoires en fonction de la mormalisation 
+ * des noms des repertoires
+ */
+//public static void migrateExistingDirectories() {
+//    File baseDir = new File("C:/dev/test/photos/");
+//    for (File dir : baseDir.listFiles()) {
+//        String[] parts = dir.getName().split("_");
+//        if (parts.length >= 3) {
+//            int id = Integer.parseInt(parts[0]);
+//            Person person = personDAO.findById(id);
+//            if (person != null) {
+//                String newDirName = normalizeDirectoryName(person);
+//                dir.renameTo(new File(baseDir, newDirName));
+//            }
+//        }
+//    }
+//}
+
+
+
+
 /**
  * 
  * @param newPerson
@@ -137,18 +173,63 @@ public static String createphotosDirectoryByDate(Person newPerson,Date date) {
 
 /**
  * 
- * @param selectedPerson
+ * @param examTreeNod
  * @return
  */
-public static String getPDFPersonInWorkspaceDirectory(Person selectedPerson) {
-	String personWorkspace = DirectoryManager.getPersonWorkspaceDirectory(selectedPerson);	
-	String pdfFilePath = personWorkspace+""+selectedPerson.getId()+"_"+selectedPerson.getNom()+".pdf"; 
+public static String getPDFPersonInWorkspaceDirectory(ExamTreeNode examTreeNod) {
+	Person person = examTreeNod.getPerson();
+	String personWorkspace = DirectoryManager.getPersonWorkspaceDirectory(person);	
+	String dateExam = examTreeNod.getFormattedExamDate();
+	String pdfFilePath = personWorkspace+"\\"+dateExam+"\\"+person.getId()+"_"+person.getNom()+".pdf"; 
 	
 	return pdfFilePath;
 }
+	/**
+	 * 	 pour imprimer toutes les photo de la persone de tous ses examen
+	 * @param person
+	 * @return
+	 */
+public static String getPDFPersonInWorkspaceDirectory(Person person ) {
+	 
+	String personWorkspace = DirectoryManager.getPersonWorkspaceDirectory(person);	 
+	String pdfFilePath = personWorkspace+"\\" +person.getId()+"_"+person.getNom()+".pdf"; 
 	
+	return pdfFilePath;
+}
+ 
 
+public static String getPDFPersonListInWorkspaceDirectory(Person person ) {
+ 
+	String personWorkspace = DirectoryManager.getPersonWorkspaceDirectory(person);	 
+	String pdfFilePath = personWorkspace+"\\" +person.getId()+"_"+person.getNom()+".pdf"; 
+	
+	return pdfFilePath;
+}
+public static String getPDFPersonExamListInDirectory(Person person,ExamTreeNode exam ) {
+	 
+	String personWorkspace = DirectoryManager.getPersonWorkspaceDirectory(person);	 
+	String pdfFilePath = personWorkspace+"\\"+exam.getFormattedExamDate()+"\\" +person.getId()+"_"+exam.getFormattedExamDate()+".pdf"; 
+	
+	return pdfFilePath;
+}
 
+/**
+ * repertoire d'examen file:\\..\\person\\ddMMyyy
+ * @param person
+ * @param exam
+ * @return
+ */
+public static String getPersonExamDirectory(Person person, ExamTreeNode exam) {
+	String personWorkspace = DirectoryManager.getPersonWorkspaceDirectory(person);	 
+	String pdfFilePath = personWorkspace+"\\"+exam.getFormattedExamDate(); 
+	
+	return pdfFilePath;
+}
+/**
+ * 
+ * @param originalFile
+ * @param modifiedImage
+ */
 public static void saveModifiedCopy(File originalFile, BufferedImage modifiedImage) {
 	try {
 		
@@ -176,6 +257,9 @@ public static void saveModifiedCopy(File originalFile, BufferedImage modifiedIma
 				JOptionPane.ERROR_MESSAGE);
 	}
 }
+
+
+
 
 
 }

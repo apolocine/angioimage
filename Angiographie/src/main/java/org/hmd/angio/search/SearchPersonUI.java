@@ -127,7 +127,7 @@ public class SearchPersonUI extends JFrame {
 			Date cDate = null;
 			if (!txtDateNaissance.getText().isBlank() || !txtDateNaissance.getText().isEmpty())
 				cDate = df.parse(txtDateNaissance.getText());
-System.out.println(cDate);
+				System.out.println(cDate);
 
 			rowData = personDAO.searchPersons(txtNom.getText(), txtPrenom.getText(), cDate);
 			System.out.println("searh class " + rowData);

@@ -83,6 +83,8 @@ import net.coobird.thumbnailator.Thumbnails;
 
 public class PhotoOrganizerApp implements PhotoOrganizer {
 
+	private static final String INFO = "PhotoOrganizerApp : ";
+
 	private PersonDAO personDAO; // Ajouter l'instance de PersonDAO
 
 	// Modifiez le type de peopleList
@@ -121,6 +123,11 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 	private PDFGenerationGUI pdfGenerationGUI = new PDFGenerationGUI();
 
+	
+	 String[] extensions = {"jpg", "jpeg", "png", "bmp", "gif"};
+	 
+	 
+	 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
 			try {
@@ -163,7 +170,7 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 		frame.setVisible(true);
 
-		// Ajoutez le JScrollPane de l'arborescence à votre interface utilisateur
+//		// Ajoutez le JScrollPane de l'arborescence à votre interface utilisateur
 //		frame.add(initializeJTree(), BorderLayout.WEST);
 //		frame.add(initializePeopleTree(), BorderLayout.WEST);
 
@@ -282,25 +289,62 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 	}
 
+//	private void displayPhotosForPerson() {
+//
+//		Person selectedPerson = peopleJList.getSelectedValue();
+//
+//		if (selectedPerson != null) {
+//
+//			// Ajoutez votre logique pour afficher les photos de la personne sélectionnée
+//			 JOptionPane.showMessageDialog(frame, "Afficher les photos de peretoire : " +
+//			 selectedPerson.getNom());
+//
+//			String directory = DirectoryManager.getPersonWorkspaceDirectory(selectedPerson);
+//			System.out.println(INFO+" "+directory);
+//			
+//			File workingDirectory = new File(directory);
+//			chooseDirectory(workingDirectory);
+//
+//		} else {
+//			JOptionPane.showMessageDialog(frame, "Personne non trouvée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+//		}
+//
+//	}
 	private void displayPhotosForPerson() {
+	    Person selectedPerson = peopleJList.getSelectedValue();
 
-		Person selectedPerson = peopleJList.getSelectedValue();
+	    if (selectedPerson != null) {
+	        String directory = DirectoryManager.getPersonWorkspaceDirectory(selectedPerson);
+	        File workingDirectory = new File(directory);
 
-		if (selectedPerson != null) {
-
-			// Ajoutez votre logique pour afficher les photos de la personne sélectionnée
-			// JOptionPane.showMessageDialog(frame, "Afficher les photos de peretoire : " +
-			// selectedPerson.getNom());
-
-			String directory = DirectoryManager.getPersonWorkspaceDirectory(selectedPerson);
-			File workingDirectory = new File(directory);
-			chooseDirectory(workingDirectory);
-
-		} else {
-			JOptionPane.showMessageDialog(frame, "Personne non trouvée.", "Erreur", JOptionPane.ERROR_MESSAGE);
-		}
-
+	        if (workingDirectory.exists() && workingDirectory.isDirectory()) {
+	            try {
+	                chooseDirectory(workingDirectory); // Charge les photos
+	            } catch (IOException e) {
+	                showErrorDialog("Impossible de charger les photos pour " + selectedPerson.getNom(), e);
+	            }
+	        } else {
+	            showWarningDialog("Le répertoire pour " + selectedPerson.getNom() + " n'existe pas.");
+	        }
+	    } else {
+	        showWarningDialog("Aucune personne sélectionnée.");
+	    }
 	}
+	
+	
+
+
+	
+	private void showErrorDialog(String message, Exception e) {
+	    JOptionPane.showMessageDialog(frame, message + "\n" + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+	    e.printStackTrace();
+	}
+
+	private void showWarningDialog(String message) {
+	    JOptionPane.showMessageDialog(frame, message, "Attention", JOptionPane.WARNING_MESSAGE);
+	}
+
+	
 
 	private JPopupMenu createPeoplePopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
@@ -454,31 +498,51 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 			selectedDirectory = new File(directory);
 		}
 
-//		// Ajoutez la liste de photos
-//		JPanel photosPanel = new JPanel(new BorderLayout());
-//		photosPanel.add(new JLabel("Liste de Photos"), BorderLayout.NORTH);
-//		// Ajoutez votre liste de photos (par exemple, photoList) ici
-//		// ...
-
-//		// Ajoutez un bouton pour afficher les photos de la personne sélectionnée
-//		JButton showPhotosButton = new JButton("Afficher les Photos");
-//		showPhotosButton.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				displayPhotosForPerson();
+////		// Ajoutez la liste de photos
+////		JPanel photosPanel = new JPanel(new BorderLayout());
+////		photosPanel.add(new JLabel("Liste de Photos"), BorderLayout.NORTH);
+////		// Ajoutez votre liste de photos (par exemple, photoList) ici
+////		// ...
 //
-//			}
-//		});
-//		peoplePanel.add(showPhotosButton, BorderLayout.SOUTH);
+////		// Ajoutez un bouton pour afficher les photos de la personne sélectionnée
+////		JButton showPhotosButton = new JButton("Afficher les Photos");
+////		showPhotosButton.addActionListener(new ActionListener() {
+////			@Override
+////			public void actionPerformed(ActionEvent e) {
+////				displayPhotosForPerson();
+////
+////			}
+////		});
+////		peoplePanel.add(showPhotosButton, BorderLayout.SOUTH);
 
 		listModel = new DefaultListModel<>();
 		photoList = new JList<>(listModel);
 
+		
+		
 		// "ListSelectionModel.MULTIPLE_INTERVAL_SELECTION"
 		photoList.setSelectionMode(2);
 
+		
+		//affichage des elements sous forme de Thumb
 		photoList.setCellRenderer(new ThumbnailRenderer());
 
+//		Affichage des emlement sous forme de text nom des fichiers
+		
+//		photoList.setCellRenderer(new DefaultListCellRenderer() {
+//		    @Override
+//		    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+//		        Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+//		        if (value instanceof File) {
+//		            setText(((File) value).getName()); // Affiche seulement le nom du fichier
+//		        }
+//		        return renderer;
+//		    }
+//		});
+		
+		
+		
+		
 		photoList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -1014,27 +1078,39 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 	 * 
 	 * @param workingDirectory
 	 */
-	private void chooseDirectory(File workingDirectory) {
-
-		try {
-			loadPhotos(workingDirectory);
-		}
-
-		catch (/** PhotoLoadException | */
-		IOException e) {
-//				le chargement par la section directe du repertoire 
-			try {
-				String message = "Erreur lors du chargement des photos : le répertoire est vide ou inaccessible.";
-				// Ajoutez votre logique pour afficher les photos de la personne sélectionnée
-				JOptionPane.showMessageDialog(frame, message);
-				chooseDirectory();
-			} catch (PhotoLoadException | IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
+//	private void chooseDirectory(File workingDirectory) {
+//
+//		try {
+//			loadPhotos(workingDirectory);
+//		}
+//
+//		catch (/** PhotoLoadException | */
+//		IOException e) {
+////				le chargement par la section directe du repertoire 
+//			try {
+//				String message = "Erreur lors du chargement des photos : le répertoire est vide ou inaccessible.";
+//				// Ajoutez votre logique pour afficher les photos de la personne sélectionnée
+//				JOptionPane.showMessageDialog(frame, message);
+//				chooseDirectory();
+//			} catch (PhotoLoadException | IOException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//		}
+//	}
+//	
+	
+	
+	
+	private void chooseDirectory(File directory) throws IOException {
+	    if (directory != null && directory.exists() && directory.isDirectory()) {
+	        loadPhotos(directory);
+	        JOptionPane.showMessageDialog(frame, "Photos du répertoire chargé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+	    } else {
+	        throw new IOException("Répertoire invalide ou inaccessible : " + directory);
+	    }
 	}
-
+ 
 	@Override
 	public void showPerson(Person person) {
 
@@ -1135,6 +1211,49 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 		return previewScrollPane;
 	}
 
+	
+	private void handlePDFAction(Person person, Runnable action) {
+	    if (person != null) {
+	        action.run();
+	    } else {
+	        JOptionPane.showMessageDialog(frame, "Aucune personne sélectionnée.", "Erreur", JOptionPane.WARNING_MESSAGE);
+	    }
+	}
+	
+	
+		private void generatePDFForSelectedPersonne(Person selectedPerson) {
+				boolean pdfGenerated = generatePDF(selectedPerson);
+				try {
+					if (pdfGenerated) {
+						isPDFGenerated = true;
+						showPDFButton.setEnabled(true);
+						printePDFButton.setEnabled(true);
+					}
+
+				} finally {
+					if (pdfGenerated) {
+						String generatedPDFFile = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+
+						// premier viewer
+						displayPDF(generatedPDFFile, pdfPanel);
+						// Add zoom functionality
+						pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
+						pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
+
+						// premier viewer
+						displayPDF(generatedPDFFile, previewPDFPanel);
+						// Add zoom functionality
+						// previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile,
+						// previewPDFPanel));
+						previewPDFPanel
+								.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
+					}
+
+				}
+				
+			}
+		
+		
 	/**
 	 * les button et leur action
 	 * 
@@ -1147,47 +1266,36 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 		panelOptionsView.add(showPDFButton);
 		panelOptionsView.add(printePDFButton);
 
+		generatePDFButton.addActionListener(e -> handlePDFAction(peopleJList.getSelectedValue(), () -> {
+			Person selectedPerson = peopleJList.getSelectedValue();
+			if (selectedPerson != null) {
+				generatePDFForSelectedPersonne(selectedPerson);
+			} else {
+
+			}
+		}));
+
+		
 		generatePDFButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
 				Person selectedPerson = peopleJList.getSelectedValue();
 				if (selectedPerson != null) {
-					boolean pdfGenerated = generatePDF(selectedPerson);
-					try {
-						if (pdfGenerated) {
-							isPDFGenerated = true;
-							showPDFButton.setEnabled(true);
-							printePDFButton.setEnabled(true);
-						}
-
-					} finally {
-						if (pdfGenerated) {
-							String generatedPDFFile = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
-
-							// premier viewer
-							displayPDF(generatedPDFFile, pdfPanel);
-							// Add zoom functionality
-							pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
-							pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
-
-							// premier viewer
-							displayPDF(generatedPDFFile, previewPDFPanel);
-							// Add zoom functionality
-							// previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile,
-							// previewPDFPanel));
-							previewPDFPanel
-									.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
-						}
-
-					}
+					generatePDFForSelectedPersonne(selectedPerson);
 				} else {
 
 				}
 
 			}
+
+		
 		});
 
+		
+		
+		
+		
 		showPDFButton.setEnabled(false);
 		printePDFButton.setEnabled(false);
 
@@ -1547,13 +1655,13 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 		Person perso = new Person("John", "Doe", new Date());
 		// Exemple pour ajouter une personne et une photo
 		addPersonForTree(perso);
-		// addPhoto(perso, DirectoryManager.getPersonWorkspaceDirectory(perso));
+		addPhoto(perso, DirectoryManager.getPersonWorkspaceDirectory(perso),"not used value");
 
 		List<Person> people = personDAO.findAll();
 
 		for (Person person : people) {
 
-			PhotoDirectoryUtils.createPhotoTree(root, person);
+			PhotoDirectoryUtils.createPhotoTreeAsFileNodes(root, person);
 		}
 
 		// Rafraîchissez le modèle du JTree
@@ -1616,7 +1724,7 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 		for (Person person : people) {
 
-			PhotoDirectoryUtils.createPhotoTree(toDay, person);
+			PhotoDirectoryUtils.createPhotoTreeAsFileNodes(toDay, person);
 		}
 		// Ajoutez la liste de photos (arborescence) à votre interface utilisateur
 
@@ -1643,22 +1751,59 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 		// ... Autres parties de votre code ...
 	}
 
+//	private void loadPhotosJTree(File directory) {
+//		listModel.clear();
+//
+//		File[] files = directory.listFiles();
+//		if (files != null) {
+//			for (File file : files) {
+//				if (isImageFile(file)) {
+//					listModel.addElement(file);
+//				}
+//			}
+//		}
+//
+// 	        try {
+//				loadPhotos( directory);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//
+//	}
+
+	
 	private void loadPhotosJTree(File directory) {
-		listModel.clear();
+	    listModel.clear();
+	    if (directory.isDirectory() && directory.getName().matches("\\d{6}")) {
+	        loadPhotosRecursively(directory); 
+	    }
 
-		File[] files = directory.listFiles();
-		if (files != null) {
-			for (File file : files) {
-				if (isImageFile(file)) {
-					listModel.addElement(file);
-				}
-			}
-		}
-
-//	        loadPhotos( directory);
-
+	    photoList.updateUI();
 	}
 
+	private void loadPhotosRecursively(File directory) {
+	    if (directory == null || !directory.isDirectory()) {
+	        return;
+	    }
+
+	    File[] files = directory.listFiles();
+	    if (files != null) {
+	        for (File file : files) {
+	            if (file.isDirectory()) {
+	                // Appel récursif pour les sous-dossiers
+	                loadPhotosRecursively(file);
+	            } else if (isImageFile(file)) {
+	                // Ajout des fichiers image uniquement
+	                listModel.addElement(file);
+	                System.out.println("Photo trouvée : " + file.getAbsolutePath());
+	            }
+	        }
+	    }
+	}
+
+	
+	
 	private void updateTree(File directory) {
 		DefaultMutableTreeNode rootNode = createTreeNode(directory);
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
@@ -1684,35 +1829,85 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 	 * @throws PhotoLoadException
 	 * @throws IOException
 	 */
-	private void loadPhotos(File directory) throws IOException {
+	private void loadPhotos_old(File directory) throws IOException {
 
-		if (directory != null) {
-			listModel.clear();
-			File[] files = directory.listFiles();
-			if (files != null) {
-				for (File file : files) {
-					if (isImageFile(file)) {
-						listModel.addElement(file);
-						// Mettez à jour peopleList pour refléter les changements
-						photoList.updateUI();
-					}
-				}
-			}
-
-//		else {
-//			String message = "Erreur lors du chargement des photos : le répertoire est vide ou inaccessible.";
-//
-//			throw new PhotoLoadException(message);
+//		if (directory != null) {
+//			listModel.clear();
+//			File[] files = directory.listFiles();
+//			if (files != null) {
+//				for (File file : files) {
+//					if (isImageFile(file)) {
+//						listModel.addElement(file);
+//						// Mettez à jour peopleList pour refléter les changements
+//						photoList.updateUI();
+//						System.out.println(INFO+" "+file.getAbsolutePath());
+//						
+//					}
+//				}
+//			}
+//			
+////		else {
+////			String message = "Erreur lors du chargement des photos : le répertoire est vide ou inaccessible.";
+////
+////			throw new PhotoLoadException(message);
+////		}
 //		}
-		}
+		
+/*
+ * 		Utilisez SwingUtilities.invokeLater pour vous assurer que l’interface graphique est mise à jour correctement.
+ */
+//		
+//		if (directory != null) {
+//		    listModel.clear();
+//		    File[] files = directory.listFiles();
+//		    if (files != null) {
+//		        for (File file : files) {
+//		            if (isImageFile(file)) {
+//		                listModel.addElement(file);
+//		            }
+//		        }
+//		        /*
+//		         *  Mise à jour de l'interface utilisateur
+//		         */
+//		        SwingUtilities.invokeLater(() -> photoList.updateUI());
+//		    }
+//		}
+ 
 
 	}
 
-	private boolean isImageFile(File file) {
-		String extension = file.getName().toLowerCase();
-		return extension.endsWith(".jpg") || extension.endsWith(".jpeg") || extension.endsWith(".png");
+
+	
+	
+	
+	private void loadPhotos(File directory) throws IOException {
+	    listModel.clear(); // Réinitialise la liste des photos
+	    File[] files = directory.listFiles(file -> isImageFile(file));
+
+	    if (files != null && files.length > 0) {
+	        for (File file : files) {
+	            listModel.addElement(file);
+	        }
+	    } else {
+	        throw new IOException("Aucune photo valide trouvée dans le répertoire : " + directory.getPath());
+	    }
 	}
 
+ 
+private boolean isImageFile(File file) {
+	   
+	    String name = file.getName().toLowerCase();
+	    for (String ext : extensions) {
+	        if (name.endsWith("." + ext)) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+//	private boolean isImageFile(File file) {
+//		String extension = file.getName().toLowerCase();
+//		return extension.endsWith(".jpg") || extension.endsWith(".jpeg") || extension.endsWith(".png");
+//	}
 	/**
 	 * 
 	 * @param photoFiles

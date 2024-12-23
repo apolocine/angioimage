@@ -49,12 +49,12 @@ public class PhotoTreeExample {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Workspace");
 
         // Ajouter quelques personnes pour l'exemple
-        PersonTreeNode person1 = new PersonTreeNode("John Doe");
+        PersonTreeNode person1 = new PersonTreeNode(new Person("John"," Doe","2022-01-01") );
         person1.addPhotoDirectory("2022-01-01");
         person1.addPhoto("photo1.jpg");
         person1.addPhoto("photo2.jpg");
 
-        PersonTreeNode person2 = new PersonTreeNode("Jane Smith");
+        PersonTreeNode person2 = new PersonTreeNode(new Person("Jane ", " Smith","2022-02-01") );
         person2.addPhotoDirectory("2022-02-01");
         person2.addPhoto("photo3.jpg");
         person2.addPhoto("photo4.jpg");
@@ -62,7 +62,7 @@ public class PhotoTreeExample {
         String parentDirectory = "C:\\\\Users\\\\DELL\\\\Documents\\\\0APng\\\\1_aaa_aaa\\";
         
        List<String> directories=  PhotoDirectoryUtils.getPhotoDirectories(parentDirectory);
-       PersonTreeNode person3 = new PersonTreeNode("XXXS Smith");
+       PersonTreeNode person3 = new PersonTreeNode(new Person("XXS ", " Smith","2022-02-01") );
        
        for (String dir : directories) {
     	   File localdir = new File(dir);

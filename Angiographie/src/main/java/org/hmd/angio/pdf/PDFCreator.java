@@ -485,7 +485,7 @@ public class PDFCreator {
 			PDDocument document = PDDocument.load(pdfFile);
 			PrinterJob job = PrinterJob.getPrinterJob();
 			job.setPageable(new PDFPageable(document));
-
+ 
 			if (job.printDialog()) {
 				job.print();
 			}

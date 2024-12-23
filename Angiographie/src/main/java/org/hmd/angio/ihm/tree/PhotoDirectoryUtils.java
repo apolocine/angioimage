@@ -89,11 +89,74 @@ public class PhotoDirectoryUtils {
         }
     }
 
-	public static PersonTreeNode createPhotoTree(DefaultMutableTreeNode root, Person person) {
+    
+    public static PersonTreeNode createPhotoTreeAsFileNodes(DefaultMutableTreeNode root, Person person) {
+     
+    PersonTreeNode personNode = new PersonTreeNode(person);
+    root.add(personNode);
+	return personNode;
+   	 
+   	
+    }
+    
+    public static PersonTreeNode createPhotoTreeAsFileNodes_old(DefaultMutableTreeNode root, Person person) {
+        // Récupérer le répertoire parent de la personne
+        String parentDirectory = DirectoryManager.getPersonWorkspaceDirectory(person);
+        File personDirectory = new File(parentDirectory);
+
+        // Vérifier si le répertoire existe
+        if (!personDirectory.exists() || !personDirectory.isDirectory()) {
+            System.out.println("Le répertoire de la personne n'existe pas ou n'est pas un répertoire.");
+            return null;
+        }
+
+        // Créer un nœud pour la personne, associé à son répertoire
+      //  DefaultMutableTreeNode personNode = new DefaultMutableTreeNode(personDirectory);
+        
+        PersonTreeNode personNode = new PersonTreeNode(person); 
+        
+        
+        // Récupérer les sous-répertoires (par exemple, les dates des examens)
+        List<String> directories = PhotoDirectoryUtils.getPhotoDirectories(parentDirectory);
+
+        for (String dir : directories) {
+            File localDir = new File(dir);
+
+            // Créer un nœud pour chaque sous-répertoire
+            DefaultMutableTreeNode directoryNode = new DefaultMutableTreeNode(localDir);// (localDir.getName() );
+
+            // Ajouter les fichiers photo au nœud du répertoire
+            List<String> files = PhotoDirectoryUtils.getListPhotoDirectories(dir);
+            for (String file : files) {
+                File localFile = new File(file);
+                //ne pas charger les photos seulement les repertoires 'examens
+                if(!localFile.isFile()) {
+                	DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode(localFile);//(localFile.getName());
+
+                // Ajouter le fichier comme nœud enfant
+                directoryNode.add(fileNode);
+                }
+                
+            }
+
+            // Ajouter le nœud du répertoire comme enfant du nœud de la personne
+            personNode.add(directoryNode);
+        }
+
+        // Ajouter le nœud de la personne à la racine
+        root.add(personNode);
+
+        return personNode;
+    }
+
+    
+    
+    
+	public static PersonTreeNode createPhotoTreeAsStringNodes(DefaultMutableTreeNode root, Person person) {
     	
    	 String parentDirectory = DirectoryManager.getPersonWorkspaceDirectory(person);  
    	 // Ajouter quelques personnes pour l'exemple
-        PersonTreeNode person1 = new PersonTreeNode(person.getNom()+" "+person.getPrenom()); 
+        PersonTreeNode person1 = new PersonTreeNode(person); 
        List<String> directories=  PhotoDirectoryUtils.getPhotoDirectories(parentDirectory); 
        for (String dir : directories) {
     	   File localdir = new File(dir);
@@ -111,8 +174,30 @@ public class PhotoDirectoryUtils {
         return person1;
     }
    
+	
+	
+	// Normalization du non du repertoire
+		public static String normalizeDirectoryName(Person person) {
+		    String prenom = person.getPrenom().replaceAll("[^a-zA-Z0-9]", "_");
+		    String nom = person.getNom().replaceAll("[^a-zA-Z0-9]", "_");
+		    int id = person.getId();  // Nouvel identifiant unique
+		    return id+ "_" + nom + "_" + prenom ;
+		}
     
-    
+		/**
+		 *  Normalization du non du fichier pdf en fonction du nom dela personne et de la date d'examen 
+		 *  PDF Name not the path
+		 * @param selectedPerson
+		 * @return
+		 */
+		
+				public static String normalizePDFName(Person selectedPerson) {
+					 
+					String pdfFilePath = ""+selectedPerson.getId()+"_"+selectedPerson.getNom()+".pdf"; 
+					
+					return pdfFilePath;
+				}
+		
     public static void main(String[] args) {
         String parentDirectory = "C:\\\\Users\\\\DELL\\\\Documents\\\\0APng\\\\1_aaa_aaa";
         List<String> photoDirectories = getPhotoDirectories(parentDirectory);

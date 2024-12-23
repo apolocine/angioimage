@@ -20,6 +20,8 @@ public class ThumbnailRenderer extends DefaultListCellRenderer {
 	private static final long serialVersionUID = 1L;
 		private int thumbnailSize = 50;
 
+ 
+		
 	    @Override
 	    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
 	            boolean cellHasFocus) {
@@ -45,7 +47,7 @@ public class ThumbnailRenderer extends DefaultListCellRenderer {
 	            label.setIcon(new ImageIcon(thumbnail));
 	            
 	            //sans nom de l'image
-	            label.setText(file.getName());
+	             label.setText(file.getName());
 
 	        } catch (IOException e) {
 	            e.printStackTrace();
