@@ -161,8 +161,11 @@ public static String createphotosDirectoryByDate(Person newPerson,Date date) {
 	String directoryPath =  createphotosDirectory(  newPerson);
 	
 	if (directoryPath!=null) {
-		directoryPath+=strDate+"\\"; 
-		if (mkdir(directoryPath)) { 		 
+		directoryPath+="\\"+strDate+"\\"; 
+		if (mkdir(directoryPath)) { 
+//			open directory 
+			DirectoryManager.browseDirectory(directoryPath);
+			
 			return directoryPath;
 		}  
 	}
@@ -239,7 +242,7 @@ public static void saveModifiedCopy(File originalFile, BufferedImage modifiedIma
 		String originalFileDir = originalFilePath.substring(0, originalFilePath.lastIndexOf(File.separator));
 
 		// Générez un nom de fichier pour la copie modifiée
-		String modifiedFileName = "modified_" + originalFile.getName();
+		String modifiedFileName = "mdf_" + originalFile.getName();
 
 		// Créez un nouveau fichier pour la copie modifiée dans le même répertoire
 		File modifiedFile = new File(originalFileDir, modifiedFileName);

@@ -1060,12 +1060,7 @@ TreePath path = peopleJTree.getSelectionPath();
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-
-//						catch (PhotoLoadException e1) {
-//							// TODO Auto-generated catch block
-//							e1.printStackTrace();
-//						}						
-
+ 
 						controleurDeModifications = false;
 
 					} else {
