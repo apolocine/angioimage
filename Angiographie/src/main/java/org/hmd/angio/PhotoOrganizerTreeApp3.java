@@ -2,14 +2,12 @@ package org.hmd.angio;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -17,12 +15,9 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -37,7 +32,6 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -61,7 +55,6 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -90,7 +83,7 @@ import org.hmd.image.ouils.ThumbnailRenderer;
 
 import net.coobird.thumbnailator.Thumbnails;
 
-public class PhotoOrganizerTreeApp implements PhotoOrganizer {
+public class PhotoOrganizerTreeApp3 implements PhotoOrganizer {
 	String[] extensions = { "jpg", "jpeg", "png", "bmp", "gif" };
 	// Ajouter l'instance de PersonDAO
 	// Initialisez l'instance de PersonDAO
@@ -117,11 +110,8 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 	/**
 	 * PDF generator IHM
 	 */
-	JComboBox<String> printPageModelComboBox = new JComboBox<>( );
-	private Properties printModels = new Properties(); 
+	JComboBox<String> printPageModelComboBox = new JComboBox<>(new String[] { "Portrait", "Paysage" });
 	
-	
-
 	JComboBox<String> orientationComboBox = new JComboBox<>(new String[] { "Portrait", "Paysage" });
 	JComboBox<Integer> photosPerLineComboBox = new JComboBox<>(new Integer[] { 1, 2, 3, 4, 5, 6, 8, 9, 10 });
 	JComboBox<Integer> widthByPhotosSizeComboBox = new JComboBox<>(new Integer[] { 150, 200, 300, 400, 500 });
@@ -145,11 +135,11 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			new PhotoOrganizerTreeApp();
+			new PhotoOrganizerTreeApp3();
 		});
 	}
 
-	public PhotoOrganizerTreeApp() {
+	public PhotoOrganizerTreeApp3() {
 
 		frame = new JFrame("Photo Organizer");
 		frame.setSize(800, 600);
@@ -376,14 +366,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
  	private void showWarningDialog(String message) {
 		JOptionPane.showMessageDialog(frame, message, "Attention", JOptionPane.WARNING_MESSAGE);
 	}
-	private void showInfoDialog(String message) {
-	    JOptionPane.showMessageDialog(null, message, "Information", JOptionPane.INFORMATION_MESSAGE);
-	}
-	private void showErrorDialog(String message) {
-	    JOptionPane.showMessageDialog(null, message, "Erreur", JOptionPane.ERROR_MESSAGE);
-	}
-	
-	
+
 	private JPopupMenu createPeoplePopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 
@@ -442,10 +425,8 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 				ExamTreeNode examNode = (ExamTreeNode) selectedNode;
 				File directoryExam = examNode.getDirectory();
 
-					//reloadSelectedTreeNode();
 				try {
 					loadPhotos(directoryExam);
-					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -453,11 +434,8 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 			if (selectedNode instanceof PersonTreeNode) {
 				PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
 				File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
-				//reloadSelectedTreeNode();
-					try {
+				try {
 					loadPhotos(directory);
-					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
-	                
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -465,64 +443,6 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		}
 	}
  
-	
-
-	// Rafraîchir un nœud spécifique de l'arbre
-	private void refreshTreeNode(DefaultMutableTreeNode node) {
-	    DefaultTreeModel model = (DefaultTreeModel) peopleJTree.getModel();
-	    model.nodeStructureChanged(node);  // Met à jour la structure du nœud
-	    
-	}
-	
-	private void reloadSelectedTreeNode() {
-	    TreePath path = peopleJTree.getSelectionPath();
-
-	    if (path != null) {
-	        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-
-	        // Lancer un SwingWorker pour le chargement
-	        new PhotoLoaderWorker(selectedNode).execute();
-	    }
-	}
-
-	// SwingWorker pour charger les photos en arrière-plan
-	private class PhotoLoaderWorker extends SwingWorker<Void, Void> {
-	    private final DefaultMutableTreeNode selectedNode;
-
-	    public PhotoLoaderWorker(DefaultMutableTreeNode selectedNode) {
-	        this.selectedNode = selectedNode;
-	    }
-
-	    @Override
-	    protected Void doInBackground() throws Exception {
-	        if (selectedNode instanceof ExamTreeNode) {
-	            ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-	            File directoryExam = examNode.getDirectory();
-	            loadPhotos(directoryExam);  // Chargement en arrière-plan
-	        }
-
-	        if (selectedNode instanceof PersonTreeNode) {
-	            PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-	            File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
-	            loadPhotos(directory);  // Chargement en arrière-plan
-	        }
-	        return null;
-	    }
-
-	    @Override
-	    protected void done() {
-	        try {
-	            get();  // Récupère le résultat (gère les exceptions si elles ont eu lieu)
-	            refreshTreeNode(selectedNode);  // Met à jour l'arborescence après le chargement
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            showErrorDialog("Erreur lors du chargement des photos.");
-	        }
-	    }
-	}
-
-	
-	
 	private void removePersonAction() {
 		TreePath path = peopleJTree.getSelectionPath();
 
@@ -1321,14 +1241,9 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		JScrollPane previewScrollPane = panelPDFView();
 		JScrollPane pdfScrollPane = panelPDFView2();
 
-	//	
-		
-//		JSplitPane optioNbuttonArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, optionsPanel, panelOptionsView);
-		
-		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optionsPanel, previewScrollPane);
-		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelOptionsView, pdfScrollPane);
-		
-		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions,splitTextArea );
+		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelOptionsView, previewScrollPane);
+		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optionsPanel, splitTextArea);
+		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions, pdfScrollPane);
 
 		return splitViewPdf;
 	}
@@ -1388,16 +1303,24 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 						selectedPerson = examNode.getPerson();
 
 						String pdfFilePath = DirectoryManager.getPDFPersonExamListInDirectory(selectedPerson, examNode);
-						makeshowPDF(selectedPerson, pdfFilePath); 
+						makeshowPDF(selectedPerson, pdfFilePath);
+
+						String pdf_config = DirectoryManager.getPersonExamDirectory(selectedPerson, examNode)
+								+ "\\pdf_config.properties";
+						savePDFSettings(pdf_config);
+
 					}
 
-					if (selectedNode instanceof PersonTreeNode) { 
+					if (selectedNode instanceof PersonTreeNode) {
+
 						PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
 						selectedPerson = personTreeNode.getPerson();
 
 						String pdfFilePath = DirectoryManager.getPDFPersonListInWorkspaceDirectory(selectedPerson);
 						makeshowPDF(selectedPerson, pdfFilePath);
- 
+
+						String pdf_config = pdfFilePath + "\\pdf_config.properties";
+						savePDFSettings(pdf_config);
 					}
 				} else {
 					showWarningDialog("aucune personne selectionnée");
@@ -1521,295 +1444,99 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 
 	}
 
-	 
-
-	
 	/**
 	 * 
-	 * @return
+	 * @param pdf_config
 	 */
+	private void savePDFSettings(String pdf_config) {
+		Properties properties = new Properties();
+
+		// Enregistrement des valeurs sélectionnées
+		properties.setProperty("orientation", (String) orientationComboBox.getSelectedItem());
+		properties.setProperty("photosPerLine", photosPerLineComboBox.getSelectedItem().toString());
+		properties.setProperty("photoWidth", widthByPhotosSizeComboBox.getSelectedItem().toString());
+		properties.setProperty("pageFormat", rectangleComboBox.getSelectedItem().toString());
+		properties.setProperty("xMargin", String.valueOf(xMarginSlider.getValue()));
+		properties.setProperty("yMargin", String.valueOf(yMarginSlider.getValue()));
+		properties.setProperty("sideMargin", String.valueOf(sideMarginSlider.getValue()));
+		properties.setProperty("pageCount", pageCountSpinner.getValue().toString());
+
+		try (FileOutputStream out = new FileOutputStream(/* "pdf_config.properties" */ pdf_config)) {
+			properties.store(out, "PDF Generation Settings");
+			System.out.println("Paramètres PDF enregistrés.");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void loadPDFSettings(String pdf_config) {
+		Properties properties = new Properties();
+
+		try (FileInputStream in = new FileInputStream(/* "pdf_config.properties" */ pdf_config)) {
+			properties.load(in);
+
+			// Appliquer les valeurs aux composants
+			orientationComboBox.setSelectedItem(properties.getProperty("orientation", "Portrait"));
+			photosPerLineComboBox.setSelectedItem(Integer.parseInt(properties.getProperty("photosPerLine", "2")));
+			widthByPhotosSizeComboBox.setSelectedItem(Integer.parseInt(properties.getProperty("photoWidth", "150")));
+			rectangleComboBox.setSelectedItem(PDRectangleEnum.valueOf(properties.getProperty("pageFormat", "A5")));
+			xMarginSlider.setValue(Integer.parseInt(properties.getProperty("xMargin", "10")));
+			yMarginSlider.setValue(Integer.parseInt(properties.getProperty("yMargin", "10")));
+			sideMarginSlider.setValue(Integer.parseInt(properties.getProperty("sideMargin", "5")));
+			pageCountSpinner.setValue(Integer.parseInt(properties.getProperty("pageCount", "1")));
+
+			System.out.println("Paramètres PDF chargés.");
+		} catch (IOException e) {
+			System.out.println("Fichier de configuration non trouvé, chargement par défaut.");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			System.out.println("Erreur lors du chargement des paramètres.");
+		}
+	}
+
 	private JPanel initOptionPDF() {
-	    loadPrintModels();  // Charger les modèles d'impression au démarrage
-	    
-	   ///  printPageModelComboBox.addActionListener(e -> applySelectedModel());
-	    printPageModelComboBox.addItemListener(e -> {
-	        if (e.getStateChange() == ItemEvent.SELECTED) {
-	            applySelectedModel();
-	        }
-	    });
+		String pdfConfig = "pdf_config.properties";
+		loadPDFSettings(pdfConfig); // Charge les paramètres dès l'ouverture de l'interface
 
-	    JPanel panel = new JPanel(new GridLayout(9, 2));
-	    
-	    // Bouton pour ouvrir le menu contextuel
-	     JButton menuModelButton = new JButton("...");  
-	    // Initialisation du menu contextuel
-	    modelsPopupMenu = gestionModelsPopupMenu(); 
-	    menuModelButton.addActionListener(e -> showModelPopup(menuModelButton));
-         panel.add(new JLabel("___________________"));
-	     panel.add(menuModelButton);  
-	     
-	      
-	    panel.add(new JLabel("Modèle d'impression :"));
-	    panel.add(printPageModelComboBox);
-	    panel.add(new JLabel("Orientation de la page:"));
-	    panel.add(orientationComboBox);
-	    panel.add(new JLabel("Taille des photos:"));
-	    panel.add(widthByPhotosSizeComboBox);
-	    panel.add(new JLabel("Nombre de photos par ligne:"));
-	    panel.add(photosPerLineComboBox);
-	    panel.add(new JLabel("Format de page :"));
-	    panel.add(rectangleComboBox);
-	    panel.add(new JLabel("Marge supérieure:"));
-	    panel.add(yMarginSlider);
-	    panel.add(new JLabel("Marge latérale:"));
-	    panel.add(xMarginSlider);
+		xMarginSlider.setMajorTickSpacing(10);
+		xMarginSlider.setMinorTickSpacing(1);
+		xMarginSlider.setPaintTicks(true);
+		xMarginSlider.setPaintLabels(true);
 
-	    
-	 
-	   
-	 
-	    
-	    return panel;
-	}
-	private JPopupMenu modelsPopupMenu;
-	
-	// Création du menu contextuel
-	private JPopupMenu gestionModelsPopupMenu() {
-	    JPopupMenu popupMenu = new JPopupMenu();
+		yMarginSlider.setMajorTickSpacing(10);
+		yMarginSlider.setMinorTickSpacing(1);
+		yMarginSlider.setPaintTicks(true);
+		yMarginSlider.setPaintLabels(true);
 
-	    JMenuItem saveModel = new JMenuItem("Enregistrer Nouveau Modèle");
-	    JMenuItem updateModel = new JMenuItem("Modifier Modèle Actuel");
+///**		pdfPanel = new JPanel();
 
-	    // Actions du menu
-	    saveModel.addActionListener(e -> saveNewPrintModel());
-	    updateModel.addActionListener(e -> updateSelectedPrintModel());
+		JPanel optionsPanel = new JPanel(new GridLayout(8, 2)); // Ajout d'une rangée pour le nombre de pages
+		optionsPanel.add(new JLabel("Orientation de la page:"));
+		optionsPanel.add(orientationComboBox);
+		optionsPanel.add(new JLabel("Taille des photos:"));
+		optionsPanel.add(widthByPhotosSizeComboBox);
+		optionsPanel.add(new JLabel("Nombre de photos par ligne:"));
+		optionsPanel.add(photosPerLineComboBox);
+		optionsPanel.add(new JLabel("Format de page :"));
+		optionsPanel.add(rectangleComboBox); // Nouveau ajout
+		optionsPanel.add(new JLabel("Marge supérieure:"));
+		optionsPanel.add(yMarginSlider);
+		optionsPanel.add(new JLabel("Marge latérale:"));
+		optionsPanel.add(xMarginSlider);
 
-	    popupMenu.add(saveModel);
-	    popupMenu.add(updateModel);
+		rectangleComboBox.setSelectedItem(PDRectangleEnum.A5);
+		pageCountSpinner.setValue(5);
+		orientationComboBox.setSelectedIndex(1);
 
-	    return popupMenu;
+		photosPerLineComboBox.setSelectedIndex(2);
+		widthByPhotosSizeComboBox.setSelectedIndex(0);
+
+		xMarginSlider.setValue(10);
+		yMarginSlider.setValue(10);
+		sideMarginSlider.setValue(5);
+		return optionsPanel;
 	}
 
-	
-	
-	// Affichage du menu contextuel à côté du bouton
-	private void showModelPopup(Component invoker) {
-	    modelsPopupMenu.show(invoker, invoker.getWidth(), invoker.getHeight());
-	}
-	
-	private void applySelectedModel() {
-	    String selectedModel = (String) printPageModelComboBox.getSelectedItem();
-	    
-	    if (selectedModel != null) {
-	        System.out.println("Modèle sélectionné : " + selectedModel);
-	        
-	        // Lire chaque propriété
-	        String orientation = printModels.getProperty(selectedModel + ".orientation");
-	        String photosPerLine = printModels.getProperty(selectedModel + ".photosPerLine");
-	        String photoWidth = printModels.getProperty(selectedModel + ".photoWidth");
-	        String pageFormat = printModels.getProperty(selectedModel + ".pageFormat");
-	        String xMargin = printModels.getProperty(selectedModel + ".xMargin");
-	        String yMargin = printModels.getProperty(selectedModel + ".yMargin");
-	        String sideMargin = printModels.getProperty(selectedModel + ".sideMargin");
-	        String pageCount = printModels.getProperty(selectedModel + ".pageCount");
-
-	        // Afficher les valeurs pour vérifier
-	        System.out.println("Orientation : " + orientation);
-	        System.out.println("Photos par ligne : " + photosPerLine);
-	        System.out.println("Largeur des photos : " + photoWidth);
-	        System.out.println("Format : " + pageFormat);
-	        System.out.println("Marges : " + xMargin + ", " + yMargin + ", " + sideMargin);
-	        System.out.println("Nombre de pages : " + pageCount);
-	        
-	        // Appliquer les valeurs (ajout de vérification pour éviter les erreurs null)
-	        if (orientation != null) {
-	            orientationComboBox.setSelectedItem(orientation);
-	        }
-	        if (photosPerLine != null) {
-	            photosPerLineComboBox.setSelectedItem(Integer.parseInt(photosPerLine));
-	        }
-	        if (photoWidth != null) {
-	            widthByPhotosSizeComboBox.setSelectedItem(Integer.parseInt(photoWidth));
-	        }
-	        if (pageFormat != null) {
-	            rectangleComboBox.setSelectedItem(PDRectangleEnum.valueOf(pageFormat));
-	        }
-	        if (xMargin != null) {
-	            xMarginSlider.setValue(Integer.parseInt(xMargin));
-	        }
-	        if (yMargin != null) {
-	            yMarginSlider.setValue(Integer.parseInt(yMargin));
-	        }
-	        if (sideMargin != null) {
-	            sideMarginSlider.setValue(Integer.parseInt(sideMargin));
-	        }
-	        if (pageCount != null) {
-	            pageCountSpinner.setValue(Integer.parseInt(pageCount));
-	        }
-	    } else {
-	        System.out.println("Aucun modèle sélectionné.");
-	    }
-	}
-
-
-	
-	
-//	private void loadPrintModels_old() {
-//	    try (BufferedReader reader = new BufferedReader(new FileReader("print_models.ini"))) {
-//	        String line;
-//	        String currentModel = null;
-//	        
-//	        while ((line = reader.readLine()) != null) {
-//	            line = line.trim();
-//	            
-//	            if (line.startsWith("[") && line.endsWith("]")) {
-//	                currentModel = line.substring(1, line.length() - 1);
-//	                printPageModelComboBox.addItem(currentModel);
-//	            } else if (currentModel != null && line.contains("=")) {
-//	                printModels.setProperty(currentModel + "." + line.split("=")[0], line.split("=")[1]);
-//	            }
-//	        }
-//	    } catch (IOException e) {
-//	        e.printStackTrace();
-//	        System.out.println("Erreur lors du chargement des modèles d'impression.");
-//	    }
-//	     
-//	    if (printPageModelComboBox.getItemCount() > 0) {
-//	        printPageModelComboBox.setSelectedIndex(0);  // Sélection du premier modèle
-//	        applySelectedModel();  // Applique le modèle par défaut
-//	    }
-//
-//	    for (String key : printModels.stringPropertyNames()) {
-//	        System.out.println(key + " = " + printModels.getProperty(key));
-//	    }
-//
-//	    
-//	    
-//	}
-	
-	private void loadPrintModels() {
-	    try (FileReader reader = new FileReader("printModels.ini")) {
-	        printModels.load(reader);
-
-	        for (String key : printModels.stringPropertyNames()) {
-	            if (key.endsWith(".orientation")) {
-	                String modelName = key.substring(0, key.indexOf("."));
-	                if (!(((DefaultComboBoxModel<String>) printPageModelComboBox.getModel()).getIndexOf(modelName) >= 0)) {
-	                    printPageModelComboBox.addItem(modelName);
-	                }
-	            }
-	        }
-	    } catch (IOException e) {
-	        System.out.println("Fichier de modèles introuvable. Un nouveau fichier sera créé.");
-	    }
-	}
-
-//	private void saveNewPrintModel(String modelName) {
-//	    try (FileWriter writer = new FileWriter("print_models.ini", true)) {
-//	        writer.write("\n[" + modelName + "]\n");
-//	        writer.write("orientation=" + orientationComboBox.getSelectedItem() + "\n");
-//	        writer.write("photosPerLine=" + photosPerLineComboBox.getSelectedItem() + "\n");
-//	        writer.write("photoWidth=" + widthByPhotosSizeComboBox.getSelectedItem() + "\n");
-//	        writer.write("pageFormat=" + rectangleComboBox.getSelectedItem() + "\n");
-//	        writer.write("xMargin=" + xMarginSlider.getValue() + "\n");
-//	        writer.write("yMargin=" + yMarginSlider.getValue() + "\n");
-//	        writer.write("sideMargin=" + sideMarginSlider.getValue() + "\n");
-//	        writer.write("pageCount=" + pageCountSpinner.getValue() + "\n");
-//
-//	        // Rechargez les modèles après l'enregistrement
-//	        printPageModelComboBox.addItem(modelName);
-//	        JOptionPane.showMessageDialog(null, "Modèle enregistré avec succès !");
-//	    } catch (IOException e) {
-//	        e.printStackTrace();
-//	        JOptionPane.showMessageDialog(null, "Erreur lors de l'enregistrement du modèle.");
-//	    }
-//	}
-	
-	
-	private void saveNewPrintModel() {
-	    String modelName = JOptionPane.showInputDialog("Nom du nouveau modèle :");
-
-	    if (modelName == null || modelName.trim().isEmpty()) {
-	        showWarningDialog("Le nom du modèle est requis.");
-	        return;
-	    }
-
-	    // Vérifie si le modèle existe déjà
-	    if (printModels.containsKey(modelName + ".orientation")) {
-	        int option = JOptionPane.showConfirmDialog(null, 
-	            "Un modèle avec ce nom existe déjà. Voulez-vous le remplacer ?", 
-	            "Confirmer", JOptionPane.YES_NO_OPTION);
-	        if (option != JOptionPane.YES_OPTION) {
-	            return;
-	        }
-	    }
-
-	    // Sauvegarde des paramètres
-	    saveModelToProperties(modelName);
-	    printPageModelComboBox.addItem(modelName);  // Ajout au ComboBox
-	    printPageModelComboBox.setSelectedItem(modelName);  // Sélection automatique
-
-	    showInfoDialog("Modèle '" + modelName + "' enregistré avec succès.");
-	}
-
-	
-	
-	private void updateSelectedPrintModel() {
-	    String selectedModel = (String) printPageModelComboBox.getSelectedItem();
-
-	    if (selectedModel == null) {
-	        showWarningDialog("Aucun modèle sélectionné pour modification.");
-	        return;
-	    }
-
-	    int option = JOptionPane.showConfirmDialog(null,
-	        "Voulez-vous vraiment modifier le modèle '" + selectedModel + "' ?", 
-	        "Modifier Modèle", JOptionPane.YES_NO_OPTION);
-
-	    if (option == JOptionPane.YES_OPTION) {
-	        saveModelToProperties(selectedModel);
-	        showInfoDialog("Modèle '" + selectedModel + "' mis à jour.");
-	    }
-	}
-	private void saveModelToProperties(String modelName) {
-	    printModels.setProperty(modelName + ".orientation", 
-	                            (String) orientationComboBox.getSelectedItem());
-	    printModels.setProperty(modelName + ".photosPerLine", 
-	                            String.valueOf(photosPerLineComboBox.getSelectedItem()));
-	    printModels.setProperty(modelName + ".photoWidth", 
-	                            String.valueOf(widthByPhotosSizeComboBox.getSelectedItem()));
-	    printModels.setProperty(modelName + ".pageFormat", 
-	                            ((PDRectangleEnum) rectangleComboBox.getSelectedItem()).name());
-	    printModels.setProperty(modelName + ".xMargin", 
-	                            String.valueOf(xMarginSlider.getValue()));
-	    printModels.setProperty(modelName + ".yMargin", 
-	                            String.valueOf(yMarginSlider.getValue()));
-	    printModels.setProperty(modelName + ".sideMargin", 
-	                            String.valueOf(sideMarginSlider.getValue()));
-	    printModels.setProperty(modelName + ".pageCount", 
-	                            String.valueOf(pageCountSpinner.getValue()));
-
-	    // Enregistrer dans le fichier .ini
-	    savePrintModelsToFile();
-	}
-	private void savePrintModelsToFile() {
-	    try (FileWriter writer = new FileWriter("printModels.ini")) {
-	        printModels.store(writer, "Modèles d'impression");
-	    } catch (IOException e) {
-	        showWarningDialog("Erreur lors de l'enregistrement du fichier : " + e.getMessage());
-	    }
-	}
-
-	 
-
-
-	
-	
-	
-	
- 
-	
-	
 	/***
 	 * 
 	 * @param selectedPerson
@@ -2097,7 +1824,9 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 							// File directoryExam = examNode.getDirectory();
 							File directoryExam = new File(
 									DirectoryManager.getPersonExamDirectory(  examNode.getPerson() , examNode));
-							 
+							// charger la configuration du PDF
+							String pdf_config = directoryExam .getAbsolutePath()+ "\\pdf_config.properties";
+							loadPDFSettings(pdf_config);
 
 							try {
 								loadPhotos(directoryExam);
@@ -2109,7 +1838,9 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 							PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
 							File directory = new File(
 									DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
-						 
+							// charger la configuration du PDF
+							String pdf_config = directory + "\\pdf_config.properties";
+							loadPDFSettings(pdf_config);
 
 							try {
 								loadPhotos(directory);
