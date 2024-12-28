@@ -160,9 +160,7 @@ public class PersonInfoEntryTreeUI extends JFrame {
         enregistrerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	saveOrUpdatePerson();
-            	
-            	
+            	saveOrUpdatePerson(); 
             	
             }
         });
@@ -216,7 +214,7 @@ public class PersonInfoEntryTreeUI extends JFrame {
     }
     
     
-    private void saveOrUpdatePerson() {
+    private Person saveOrUpdatePerson() {
         // Créez une instance de Person avec les données saisies
         Person newPerson = getNewPerson() ;
         photoOrganizerApp.addPerson(newPerson);
@@ -229,6 +227,7 @@ public class PersonInfoEntryTreeUI extends JFrame {
         // Fermez la fenêtre PersonInfoEntryUI ou effectuez toute autre action nécessaire
         dispose();
         
+        return newPerson;
     }
 
      

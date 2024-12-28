@@ -161,9 +161,7 @@ public class PersonInfoEntryUI  extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
             	saveOrUpdatePerson();
-            	
-            	
-            	
+            	           	
             }
         });
         mainPanel.add(enregistrerButton);

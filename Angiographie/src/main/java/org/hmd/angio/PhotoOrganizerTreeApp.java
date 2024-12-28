@@ -114,13 +114,17 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 	private float zoomFactor = 1.0f;
 	private int currentPage = 0;
 
+ // Appel de la classe PersonInfoEntryUI
+		PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
+	
 	/**
 	 * PDF generator IHM
 	 */
 	JComboBox<String> printPageModelComboBox = new JComboBox<>( );
 	private Properties printModels = new Properties(); 
 	
-	
+	boolean controleurDeModifications = false;
+	BufferedImage modifiedImage = null;
 
 	JComboBox<String> orientationComboBox = new JComboBox<>(new String[] { "Portrait", "Paysage" });
 	JComboBox<Integer> photosPerLineComboBox = new JComboBox<>(new Integer[] { 1, 2, 3, 4, 5, 6, 8, 9, 10 });
@@ -666,7 +670,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 			selectedDirectory = new File(directory);
 		}
 
-		// "ListSelectionModel.MULTIPLE_INTERVAL_SELECTION"
+		// "ListSelectionModel.MULTIPLE_INTERVAL_SELECTION" voir JList.MULTIPLE_INTERVAL_SELECTION
 		photoList.setSelectionMode(2);
 
 		photoList.setCellRenderer(new ThumbnailRenderer());
@@ -879,8 +883,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		});
 	}
 
-	boolean controleurDeModifications = false;
-	BufferedImage modifiedImage = null;
+
 
 	/**
 	 * Afficher la photo pour la moifier
@@ -1075,9 +1078,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 
 		// Ajoutez l'élément de menu "Ajouter Personne"
 		JMenuItem ajouterPersonneItem = new JMenuItem("Ajouter Personne");
-
-		PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
-
+ 
 		ajouterPersonneItem.addActionListener(new ActionListener() {
 
 			@Override
@@ -1227,21 +1228,21 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 //		}
 //	}
 
-//	@Override
-//	public void addPerson(Person person) {
+ 
+//	public void addPerson(Person person,DefaultMutableTreeNode node) {
 //		// Ajoutez la personne à la base de données
 //		personDAO.saveOrUpdatePerson(person);
 //
 //		// Ajoutez la personne à la liste
 ////		peopleListModel.addElement(person);
-//
+//		node.add(new PersonTreeNode(person));
+//		// Affichez le répertoire de photos de la personne dans photoList
+//		loadPhotosForPerson(person);
+//		today.add(node);
 //		PhotoDirectoryUtils.createPhotoTreeAsFileNodes(today, person);
 //		// Mettez à jour peopleList pour refléter les changements
 //		peopleJTree.updateUI();
-//
-//		// Affichez le répertoire de photos de la personne dans photoList
-//		loadPhotosForPerson(person);
-//		 
+//  
 //	}
 
 	
@@ -1261,29 +1262,49 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		loadPhotosForPerson(person);
 	}
 	
+//	@Override
+//	public void addPerson(Person person) {
+//		
+//		// Ajoutez la personne à la liste
+////		peopleListModel.addElement(person);
+//		PersonTreeNode photoTre = PhotoDirectoryUtils.createPhotoTreeAsFileNodes(today, person);
+//		JTree peopleToday = new JTree(new DefaultTreeModel(photoTre));
+//		
+//		peopleJTree.add(peopleToday);
+//
+//		// Rafraîchissez le modèle du JTree
+//		treeModel.reload();
+//		// Mettez à jour peopleList pour refléter les changements
+//		peopleJTree.updateUI();
+//		 
+//		// Affichez le répertoire de photos de la personne dans photoList
+//		loadPhotosForPerson(person);
+//		
+//	}
 	@Override
 	public void addPerson(Person person) {
-		// Ajoutez la personne à la base de données
-		personDAO.saveOrUpdatePerson(person);
 		
+//		// Ajoutez la personne à la base de données
+//		personDAO.saveOrUpdatePerson(person);
+//		
+//		 showPerson(  person);
 		
-		// Ajoutez la personne à la liste
-//		peopleListModel.addElement(person);
+		// Effacer tous les enfants de la racine
+		today.removeAllChildren();
 		PersonTreeNode photoTre = PhotoDirectoryUtils.createPhotoTreeAsFileNodes(today, person);
 		JTree peopleToday = new JTree(new DefaultTreeModel(photoTre));
-		
 		peopleJTree.add(peopleToday);
 
 		// Rafraîchissez le modèle du JTree
 		treeModel.reload();
-		// Mettez à jour peopleList pour refléter les changements
 		peopleJTree.updateUI();
-		 
 		// Affichez le répertoire de photos de la personne dans photoList
 		loadPhotosForPerson(person);
-		 
+		
+		
+		
+		
 	}
-	
 	
 	
 	private void loadPhotosForPerson(Person person) {
@@ -1314,19 +1335,16 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 
 		// initializeComponents();
 
-		JPanel optionsPanel = initOptionPDF();
+		JPanel initOptionPDF = initOptionPDF();
+		JPanel buttonPDFAction = buttonPDFAction();
 
-		JPanel panelOptionsView = buttonPDFAction();
+		JScrollPane panelPDFView = panelPDFView();
+		JScrollPane panelPDFView2 = panelPDFView2();
 
-		JScrollPane previewScrollPane = panelPDFView();
-		JScrollPane pdfScrollPane = panelPDFView2();
-
-	//	
-		
 //		JSplitPane optioNbuttonArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, optionsPanel, panelOptionsView);
 		
-		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optionsPanel, previewScrollPane);
-		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelOptionsView, pdfScrollPane);
+		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initOptionPDF, panelPDFView);
+		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, buttonPDFAction, panelPDFView2);
 		
 		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions,splitTextArea );
 
@@ -2458,8 +2476,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 
 		SearchPersonUI search = new SearchPersonUI(this);
 
-		// Appel de la classe PersonInfoEntryUI
-		PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
+		
 
 		// Configuration des actions pour les boutons de la barre d'outils
 		openToolBarButton.addActionListener(new ActionListener() {
