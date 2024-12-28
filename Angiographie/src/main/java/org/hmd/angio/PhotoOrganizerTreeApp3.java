@@ -1185,7 +1185,7 @@ public class PhotoOrganizerTreeApp3 implements PhotoOrganizer {
 	public void addPerson(Person person) {
 		// Ajoutez la personne à la base de données
 		personDAO.saveOrUpdatePerson(person);
-		
+		 
 		
 		// Ajoutez la personne à la liste
 //		peopleListModel.addElement(person);
