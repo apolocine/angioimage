@@ -1182,12 +1182,12 @@ public class PhotoOrganizerTreeApp3 implements PhotoOrganizer {
 	}
 	
 	@Override
-	public void addPerson(Person person) {
+	public Person addPerson(Person person_) {
 		// Ajoutez la personne à la base de données
-		personDAO.saveOrUpdatePerson(person);
+		Person person = 	personDAO.saveOrUpdatePerson(person_);
 		 
-		
-		// Ajoutez la personne à la liste
+		if(  person != null) {
+				// Ajoutez la personne à la liste
 //		peopleListModel.addElement(person);
 		PersonTreeNode photoTre = PhotoDirectoryUtils.createPhotoTreeAsFileNodes(today, person);
 		JTree peopleToday = new JTree(new DefaultTreeModel(photoTre));
@@ -1201,7 +1201,10 @@ public class PhotoOrganizerTreeApp3 implements PhotoOrganizer {
 		 
 		// Affichez le répertoire de photos de la personne dans photoList
 		loadPhotosForPerson(person);
-		 
+		
+		}
+	
+		 return person;
 	}
 	
 	

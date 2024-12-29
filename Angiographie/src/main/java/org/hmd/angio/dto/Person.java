@@ -56,7 +56,7 @@ public class Person {
 	public Person(String nom2, String prenom2, String dateNaissance2) {
 		this.nom = nom2;
 		this.prenom = prenom2;
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-dd-MM");
+		SimpleDateFormat df = new SimpleDateFormat("ddMMyyyy");//yyyy-dd-MM
 		Date cDate = null;
 		try {
 			cDate = df.parse(dateNaissance2);
@@ -79,7 +79,7 @@ public class Person {
 	@Override
 	public String toString() {
 
-		return "Nom: " + getNom() + "\n" + "Prenom: " + getPrenom() + "\n" + "Né(e): " + getDateNaissance();
+		return "Id: " + getId() + "\n" +"Nom: " + getNom() + "\n" + "Prenom: " + getPrenom() + "\n" + "Né(e): " + getDateNaissance();
 	}
 	// Ajoutez des getters et des setters selon vos besoins
 }

@@ -17,10 +17,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,6 +25,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +40,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -97,15 +94,14 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 	private PersonDAO personDAO = new PersonDAO();
 	// Modifiez le type de peopleList
 //	private DefaultListModel<Person> peopleListModel;
-
-	JPanel peoplePanel = new JPanel(new BorderLayout());
+ 
 
 	private DefaultListModel<File> listModel = new DefaultListModel<>();
 	private Map<File, ImageIconBorder> photoMap = new HashMap<>();
 
 	private JList<File> photoList = new JList<>(listModel);
 
-	private File selectedDirectory;
+
 	private JFrame frame;
 	private JPanel pdfPanel;
 	JPanel previewPDFPanel;
@@ -196,8 +192,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		frame.add(dashBoardSplitPane, BorderLayout.CENTER);
 		frame.setVisible(true);
 
-		// Ajoutez le JScrollPane de l'arborescence à votre interface utilisateur
-		frame.add(peoplePanel, BorderLayout.WEST);
+ 
 	}
 
 	/**
@@ -205,9 +200,17 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 	 * @return
 	 */
 	private void initPeopleTreeListe() {
-
-		peopleJTree.addMouseListener(new MouseAdapter() {
+peopleJTree.addMouseListener(new MouseAdapter() {
 			@Override
+			public void mousePressed(MouseEvent e) {
+				showPopup(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				showPopup(e);
+			}
+	 
 			public void mouseClicked(MouseEvent e) {
 
 				if (personDAO.isConnected()) {
@@ -297,17 +300,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 
 		});
 
-		peopleJTree.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				showPopup(e);
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				showPopup(e);
-			}
-		});
+		
 
 	}
 
@@ -393,10 +386,14 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 
 		// Ajoutez les éléments du menu
 		JMenuItem reloadPersonPhotosItem = new JMenuItem("Reload Photos");
+		JMenuItem nounelExamen = new JMenuItem("Nouvel Examen");
 		JMenuItem removePersonItem = new JMenuItem("Remove Person");
 		JMenuItem browseDirecty = new JMenuItem("Browse Directy");
 		// Ajoutez des actions aux éléments du menu
 		reloadPersonPhotosItem.addActionListener(e -> reloadPhotosAction());
+		//nouvel examen par defaut date actuelle
+		nounelExamen.addActionListener(e -> nounelExamenAction());
+		
 		removePersonItem.addActionListener(e -> removePersonAction());
 		browseDirecty.addActionListener(e -> browseDirectyAction());
 
@@ -405,6 +402,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		if (path != null) {
 			// Ajoutez les éléments au menu contextuel
 			popupMenu.add(reloadPersonPhotosItem);
+			popupMenu.add(nounelExamen);
 			popupMenu.add(removePersonItem);
 			popupMenu.add(browseDirecty);
 		}
@@ -412,29 +410,69 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		return popupMenu;
 	}
  
-	private void browseDirectyAction() {
+
+ 
+ 
+	
+private void browseDirectyAction() {
+
+	TreePath path = peopleJTree.getSelectionPath();
+
+	if (path != null) {
+		DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+
+		if (selectedNode instanceof ExamTreeNode) {
+			ExamTreeNode examNode = (ExamTreeNode) selectedNode;
+			String directoryExam = examNode.getDirectory().getAbsolutePath();
+			DirectoryManager.browseDirectory(directoryExam);
+		}
+		if (selectedNode instanceof PersonTreeNode) {
+
+			PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
+			String directory = DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson());
+			DirectoryManager.browseDirectory(directory);
+
+		}
+	}
+
+}
+
+	private void nounelExamenAction() {
 
 		TreePath path = peopleJTree.getSelectionPath();
 
+		 
+		
 		if (path != null) {
 			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 
 			if (selectedNode instanceof ExamTreeNode) {
 				ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-				String directoryExam = examNode.getDirectory().getAbsolutePath();
-				DirectoryManager.browseDirectory(directoryExam);
+				File directoryExam = examNode.getDirectory();
+
+		 
 			}
 			if (selectedNode instanceof PersonTreeNode) {
-
 				PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-				String directory = DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson());
-				DirectoryManager.browseDirectory(directory);
-
+				System.out.println(personTreeNode.getPerson().getId());
+				
+				Person person = PersonDAO.findById(personTreeNode.getPerson().getId());
+				
+				//File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
+				 personInfoEntryUI.setEditingPerson(person);
+				// Appel de la classe PersonInfoEntryUI
+				SwingUtilities.invokeLater(() -> personInfoEntryUI.setVisible(true)); 
+			}
+			if (selectedNode instanceof PhotoTreeNode) {
+				
+				
 			}
 		}
-
+		
+	 
 	}
- 
+	
+	
 	private void reloadPhotosAction() {
 
 		TreePath path = peopleJTree.getSelectionPath();
@@ -445,7 +483,10 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 			if (selectedNode instanceof ExamTreeNode) {
 				ExamTreeNode examNode = (ExamTreeNode) selectedNode;
 				File directoryExam = examNode.getDirectory();
-
+ 
+					PhotoDirectoryUtils.createPhotoTreeAsFileNodes(inAction, examNode.getPerson());
+			 
+				
 					//reloadSelectedTreeNode();
 				try {
 					loadPhotos(directoryExam);
@@ -458,6 +499,8 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 				PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
 				File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
 				//reloadSelectedTreeNode();
+				PhotoDirectoryUtils.createPhotoTreeAsFileNodes(inAction, personTreeNode.getPerson());
+				 
 					try {
 					loadPhotos(directory);
 					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
@@ -467,6 +510,8 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 				}
 			}
 		}
+		
+		//reloadSelectedTreeNode();
 	}
  
 	
@@ -483,7 +528,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 
 	    if (path != null) {
 	        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-
+	        ((DefaultTreeModel) peopleJTree.getModel()).reload(selectedNode);
 	        // Lancer un SwingWorker pour le chargement
 	        new PhotoLoaderWorker(selectedNode).execute();
 	    }
@@ -663,12 +708,6 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		// lecture directed des informationsà partir du ficher nous avons pas besoins de
 		// l'interface utilisateur
 
-		// Utilisez la configuration chargée, par exemple :
-		String directory = DirectoryManager.getWorkspaceDirectory();
-
-		if (directory != null && new File(directory).isDirectory()) {
-			selectedDirectory = new File(directory);
-		}
 
 		// "ListSelectionModel.MULTIPLE_INTERVAL_SELECTION" voir JList.MULTIPLE_INTERVAL_SELECTION
 		photoList.setSelectionMode(2);
@@ -1146,8 +1185,7 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 		menuBar.add(Box.createHorizontalGlue()); // Pour aligner les menus à droite
 		menuBar.add(helpMenu);
 		menuBar.add(aboutMenu);
-		frame.setJMenuBar(menuBar);
-
+		frame.setJMenuBar(menuBar); 
 	}
 
 	private static void showAboutUsDialog(JFrame parentFrame) {
@@ -1282,33 +1320,54 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 //		
 //	}
 	@Override
-	public void addPerson(Person person) {
+	public Person addPerson(Person person_) {
 		
 //		// Ajoutez la personne à la base de données
-//		personDAO.saveOrUpdatePerson(person);
-//		
+		Person person = personDAO.saveOrUpdatePerson(person_); 
 //		 showPerson(  person);
 		
+System.out.println(person);
+        
+        // Affichez un message de succès
+       JOptionPane.showMessageDialog(null, "Personne enregistrée avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+       
+       
+      // créer le repertoire des photo 
+       DirectoryManager. createphotosDirectoryByDate(  person,new Date ());
+       
+//      // Effacez les champs après l'enregistrement/modification si nécessaire
+//       clearFields();
+       // Fermez la fenêtre PersonInfoEntryUI ou effectuez toute autre action nécessaire
+       
+       
+       
+		if(person != null) {
 		// Effacer tous les enfants de la racine
 		today.removeAllChildren();
 		PersonTreeNode photoTre = PhotoDirectoryUtils.createPhotoTreeAsFileNodes(today, person);
 		JTree peopleToday = new JTree(new DefaultTreeModel(photoTre));
 		peopleJTree.add(peopleToday);
-
 		// Rafraîchissez le modèle du JTree
 		treeModel.reload();
 		peopleJTree.updateUI();
 		// Affichez le répertoire de photos de la personne dans photoList
-		loadPhotosForPerson(person);
-		
-		
-		
-		
+		loadPhotosForPerson(person);	
+		}
+			return person;
 	}
 	
 	
+	/**
+	 * Person per = personDAO.findById(person.getId());
+			 if( per!=null) {
+				 
+			 }
+			 on supose que le patient est déjà enregistré dans la base.
+	 * @param person
+	 */
 	private void loadPhotosForPerson(Person person) {
-
+		
+		
 		// Obtenez le répertoire de la personne
 		File personDirectory = new File(DirectoryManager.getPersonWorkspaceDirectory(person));
 
@@ -1325,9 +1384,14 @@ public class PhotoOrganizerTreeApp implements PhotoOrganizer {
 					}
 				}
 			}
-		} else {
-			JOptionPane.showMessageDialog(frame, "Le répertoire de photos de la personne n'existe pas.",
-					"Avertissement", JOptionPane.WARNING_MESSAGE);
+		} else {  
+			int confirmation = JOptionPane.showConfirmDialog(frame,
+					"\"Le répertoire de photos de la personne n'existe pas. Voulez-vous le créer" + "?",
+					"Avertissement Working directory das not existe ", JOptionPane.YES_NO_OPTION); 
+			if (confirmation == JOptionPane.YES_OPTION) { 
+				   // créer le repertoire des photo 
+		        DirectoryManager. createphotosDirectory(person);
+			} 
 		}
 	}
 

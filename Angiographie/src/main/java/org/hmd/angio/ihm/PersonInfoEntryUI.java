@@ -4,7 +4,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,11 +16,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import org.hmd.angio.PhotoOrganizer;
 import org.hmd.angio.dto.Person;
-import org.hmd.angio.dto.PersonDAO;
 import org.hmd.image.ouils.DatePicker;
 import org.hmd.image.ouils.DirectoryManager;
 
@@ -29,11 +26,11 @@ public class PersonInfoEntryUI  extends JFrame {
 
 	
 	
-	private PersonDAO personDAO; // Ajouter l'instance de PersonDAO
-   
+
    private PhotoOrganizer photoOrganizerApp;
  
 	private static final long serialVersionUID = 1L;
+	private JTextField idField;
 	private JTextField nomField;
     private JTextField prenomField;
     private JTextField dateNaissanceField;
@@ -57,11 +54,6 @@ public class PersonInfoEntryUI  extends JFrame {
 
 	private void initialize() {
     	
-    	   // Initialisez l'instance de PersonDAO
-        personDAO = new PersonDAO(); 
-        
-        
-        
         setTitle("Saisie des informations d'une personne");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -69,7 +61,15 @@ public class PersonInfoEntryUI  extends JFrame {
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(6, 2, 10, 10));
-
+        
+        
+        // Ajouter des composants Swing pour la saisie des informations
+        mainPanel.add(new JLabel("id :"));
+        idField = new JTextField("0");
+        idField.setEditable(false);
+        
+        mainPanel.add(idField);
+        
         // Ajouter des composants Swing pour la saisie des informations
         mainPanel.add(new JLabel("Nom :"));
         nomField = new JTextField();
@@ -79,18 +79,13 @@ public class PersonInfoEntryUI  extends JFrame {
         prenomField = new JTextField();
         mainPanel.add(prenomField);
 
-        
-       
         mainPanel.add(new JLabel("Date de Naissance :"));
-        
-         JPanel birthPanel = new JPanel();
+        JPanel birthPanel = new JPanel();
         birthPanel.setLayout(new GridLayout(1, 2, 10, 10));
         
         dateNaissanceField = new JTextField();
         dateNaissanceField.setEditable(false);
         birthPanel.add(dateNaissanceField );
-        
-        
         
         final DatePicker dpBirthDay = new DatePicker();
         ImageIcon ii = dpBirthDay.getImage();
@@ -161,7 +156,8 @@ public class PersonInfoEntryUI  extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
             	saveOrUpdatePerson();
-            	           	
+            	   // Effacez les champs après l'enregistrement/modification si nécessaire
+                clearFields();
             }
         });
         mainPanel.add(enregistrerButton);
@@ -172,11 +168,22 @@ public class PersonInfoEntryUI  extends JFrame {
     
  // Méthode appelée pour définir la personne en cours de modification
     public void setEditingPerson(Person person) {
-      
+    	
+    	int idPerson = 0;
+		try {	idPerson = Integer.parseInt(person.getId()+""); 
+			
+		} catch (NumberFormatException e) {
+			idPerson = 0;
+		 e.printStackTrace();		 
+		}
+		
+    	idField.setText(""+idPerson);
+    	
         // Initialisez les champs de l'interface utilisateur avec les informations de la personne en cours de modification
         nomField.setText(person.getNom());
-        prenomField.setText(person.getPrenom());
-        dateNaissanceField.setText(      person.getDateNaissance().toString() );
+        prenomField.setText(person.getPrenom());  
+SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+     dateNaissanceField.setText( simpleDateFormat.format(person.getDateNaissance())     );
         
     }
 
@@ -192,7 +199,18 @@ public class PersonInfoEntryUI  extends JFrame {
      */
     public Person getNewPerson() {
     	
-    	   // Récupérez les informations saisies dans l'interface utilisateur
+    	int idPerson = 0;
+		try {
+			if(idField.getText()!= null && idField.getText() != " "  && idField.getText() != "") {
+				idPerson = Integer.parseInt(idField.getText());
+			} 
+			
+		} catch (NumberFormatException e) {
+			idPerson = 0;
+		 e.printStackTrace();		 
+		}
+    	
+    	// Récupérez les informations saisies dans l'interface utilisateur
         String nom = nomField.getText();
         String prenom = prenomField.getText();
     	
@@ -213,7 +231,7 @@ public class PersonInfoEntryUI  extends JFrame {
         }
 
         // Créez une instance de Person avec les données saisies
-        Person newPerson = new Person(nom, prenom, dateNaissance); 
+        Person newPerson = new Person(idPerson,nom, prenom, dateNaissance); 
         
         return newPerson;
     }
@@ -223,13 +241,7 @@ public class PersonInfoEntryUI  extends JFrame {
         // Créez une instance de Person avec les données saisies
         Person newPerson = getNewPerson() ;
         photoOrganizerApp.addPerson(newPerson);
-         // Affichez un message de succès
-        JOptionPane.showMessageDialog(this, "Personne enregistrée avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
-       // créer le repertoire des photo 
-        DirectoryManager. createphotosDirectoryByDate(  newPerson,new Date ());
-       // Effacez les champs après l'enregistrement/modification si nécessaire
-        clearFields();
-        // Fermez la fenêtre PersonInfoEntryUI ou effectuez toute autre action nécessaire
+        
         dispose();
         
     }
@@ -238,6 +250,7 @@ public class PersonInfoEntryUI  extends JFrame {
     
 
 	private void clearFields() {
+		idField.setText("0");
         nomField.setText("");
         prenomField.setText("");
         dateNaissanceField.setText("");

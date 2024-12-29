@@ -1287,9 +1287,14 @@ private void showPopup(MouseEvent e) {
 	
 	
 	@Override
-	public void addPerson(Person person) {
-		// Ajoutez la personne à la base de données
-		personDAO.saveOrUpdatePerson(person);
+	public Person addPerson(Person person_) {
+		
+		
+//		// Ajoutez la personne à la base de données
+		Person person = personDAO.saveOrUpdatePerson(person_); 
+//		 showPerson(  person);
+		
+		if(person != null) { 
 
 		// Ajoutez la personne à la liste
 		peopleListModel.addElement(person);
@@ -1299,6 +1304,8 @@ private void showPopup(MouseEvent e) {
 
 		// Affichez le répertoire de photos de la personne dans photoList
 		loadPhotosForPerson(person);
+		}
+		return person;
 	}
 
 	private void loadPhotosForPerson(Person person) {

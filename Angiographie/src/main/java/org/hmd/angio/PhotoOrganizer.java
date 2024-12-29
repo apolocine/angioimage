@@ -6,6 +6,6 @@ public interface PhotoOrganizer {
 
 	void showPerson(Person person);
 
-	void addPerson(Person person);
+	Person addPerson(Person person);
 
 }

@@ -62,7 +62,10 @@ public boolean isConnected() {
 		return false;
 	}
 }
-    public static int insertPerson(Person person) {
+   
+
+private int insertNewPerson(Person person) {
+	
         try (Connection connection = 
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
@@ -94,32 +97,38 @@ public boolean isConnected() {
         return -1; // Retourne -1 en cas d'échec
     }
 
-   public void createPerson(Person person) {
+private Person createPerson(Person person) {
         try (Connection connection = 
         		DatabaseManager.getConnection()
         		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
         		) {
             PersonDAO.createTableIfNotExists();
-            
+             
             
             java.sql.Date sqlDate = new java.sql.Date(person.getDateNaissance().getTime());
 
-            String sql = "INSERT INTO "+tb_patients+" (id, nom, prenom, naissance ) VALUES (?,?, ?,   ?)";
+            String sql = "INSERT INTO "+tb_patients+" ( nom, prenom, naissance ) VALUES (?, ?,   ?)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            	  preparedStatement.setInt(1, person.getId());
-            	  preparedStatement.setString(2, person.getNom());
-                    preparedStatement.setString(3, person.getPrenom());
-                preparedStatement.setDate(4, sqlDate/*new java.sql.Date(person.getDateNaissance().getTime())*/);
+            	  preparedStatement.setString(1, person.getNom());
+                    preparedStatement.setString(2, person.getPrenom());
+                preparedStatement.setDate(3, sqlDate/*new java.sql.Date(person.getDateNaissance().getTime())*/);
                 
+                int affectedRows = preparedStatement.executeUpdate();
 
-                preparedStatement.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Insertion échouée, aucune ligne ajoutée.");
+                }
 
-                // Récupérer l'ID généré pour la nouvelle personne
                 try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         person.setId(generatedKeys.getInt(1));
-                    }
-                }
+                    } else {
+                        throw new SQLException("Échec de la récupération de l'ID généré.");
+                    } 
+            }
+            
+            
+              return person;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -127,6 +136,10 @@ public boolean isConnected() {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+            
+            
+    
+        return null;
     }
 
     
@@ -192,7 +205,8 @@ public boolean isConnected() {
 
  
     
-    public void updatePerson(Person person) {
+    private Person updatePerson(Person person) {
+    	
     	 try (Connection connection = 
          		DatabaseManager.getConnection()
          		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
@@ -207,6 +221,8 @@ public boolean isConnected() {
 
                 preparedStatement.executeUpdate();
             }
+            
+            return person;
         } catch (SQLException e) {
             e.printStackTrace();
             // Gérer les exceptions SQL
@@ -214,10 +230,11 @@ public boolean isConnected() {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+    	 return null;
     }
 
-    public void deletePerson(int personId) {
-    	
+    
+    public void deletePerson(int personId) { 
   
         try (Connection connection = 
         		DatabaseManager.getConnection()
@@ -238,36 +255,37 @@ public boolean isConnected() {
 
     
     // Méthode pour supprimer une personne de la base de données
-    public void deletePerson(Person person) {
+    public void deletePerson(Person person) {  
+    	deletePerson(person.getId()); 
     	
-    	  try (Connection connection = 
-          		DatabaseManager.getConnection()
-          		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
-          		) {
-              String sql = "DELETE FROM "+tb_patients+" WHERE id=?";
-              try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                  preparedStatement.setInt(1, person.getId());
-                  preparedStatement.executeUpdate();
-              }
-          } catch (SQLException e) {
-              e.printStackTrace();
-          } catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+//    	  try (Connection connection = 
+//          		DatabaseManager.getConnection()
+//          		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
+//          		) {
+//              String sql = "DELETE FROM "+tb_patients+" WHERE id=?";
+//              try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+//                  preparedStatement.setInt(1, person.getId());
+//                  preparedStatement.executeUpdate();
+//              }
+//          } catch (SQLException e) {
+//              e.printStackTrace();
+//          } catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
     	  
      
     }
     
     
     
-    public void saveOrUpdatePerson(Person person) {
+    public Person saveOrUpdatePerson(Person person) {
         if (person.getId() == 0) {
             // La personne n'a pas encore d'ID, effectuez une insertion
-            createPerson(person);
+          return   createPerson(person);
         } else {
             // La personne a déjà un ID, effectuez une mise à jour
-            updatePerson(person);
+         return   updatePerson(person);
         }
     }
 
@@ -374,6 +392,7 @@ public boolean isConnected() {
     }
 
     
+ 
 //   public static void main(String[] args) {
 //            PersonDAO.createTableIfNotExists();
 //

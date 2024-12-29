@@ -1127,18 +1127,21 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 	}
 
 	@Override
-	public void addPerson(Person person) {
+	public Person addPerson(Person person_) {
 		// Ajoutez la personne à la base de données
-		personDAO.saveOrUpdatePerson(person);
-
-		// Ajoutez la personne à la liste
-		peopleListModel.addElement(person);
-
-		// Mettez à jour peopleList pour refléter les changements
-		peopleJList.updateUI();
-
-		// Affichez le répertoire de photos de la personne dans photoList
-		loadPhotosForPerson(person);
+		Person person =	personDAO.saveOrUpdatePerson(person_);
+				if(person!=null) {
+					// Ajoutez la personne à la liste
+						peopleListModel.addElement(person);
+				
+						// Mettez à jour peopleList pour refléter les changements
+						peopleJList.updateUI();
+				
+						// Affichez le répertoire de photos de la personne dans photoList
+						loadPhotosForPerson(person);
+				}
+		
+		return person;
 	}
 
 	private void loadPhotosForPerson(Person person) {

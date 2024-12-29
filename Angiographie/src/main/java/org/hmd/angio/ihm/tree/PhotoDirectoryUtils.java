@@ -199,7 +199,7 @@ public class PhotoDirectoryUtils {
 				}
 		
     public static void main(String[] args) {
-        String parentDirectory = "C:\\\\Users\\\\DELL\\\\Documents\\\\0APng\\\\1_aaa_aaa";
+        String parentDirectory = "C:\\dev\\test\\photos";
         List<String> photoDirectories = getPhotoDirectories(parentDirectory);
 
         System.out.println("Liste des sous-répertoires de photos :");
