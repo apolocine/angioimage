@@ -123,11 +123,8 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 	private PDFGenerationGUI pdfGenerationGUI = new PDFGenerationGUI();
 
-	
-	 String[] extensions = {"jpg", "jpeg", "png", "bmp", "gif"};
-	 
-	 
-	 
+	String[] extensions = { "jpg", "jpeg", "png", "bmp", "gif" };
+
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
 			try {
@@ -311,40 +308,34 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 //
 //	}
 	private void displayPhotosForPerson() {
-	    Person selectedPerson = peopleJList.getSelectedValue();
+		Person selectedPerson = peopleJList.getSelectedValue();
 
-	    if (selectedPerson != null) {
-	        String directory = DirectoryManager.getPersonWorkspaceDirectory(selectedPerson);
-	        File workingDirectory = new File(directory);
+		if (selectedPerson != null) {
+			String directory = DirectoryManager.getPersonWorkspaceDirectory(selectedPerson);
+			File workingDirectory = new File(directory);
 
-	        if (workingDirectory.exists() && workingDirectory.isDirectory()) {
-	            try {
-	                chooseDirectory(workingDirectory); // Charge les photos
-	            } catch (IOException e) {
-	                showErrorDialog("Impossible de charger les photos pour " + selectedPerson.getNom(), e);
-	            }
-	        } else {
-	            showWarningDialog("Le répertoire pour " + selectedPerson.getNom() + " n'existe pas.");
-	        }
-	    } else {
-	        showWarningDialog("Aucune personne sélectionnée.");
-	    }
+			if (workingDirectory.exists() && workingDirectory.isDirectory()) {
+				try {
+					chooseDirectory(workingDirectory); // Charge les photos
+				} catch (IOException e) {
+					showErrorDialog("Impossible de charger les photos pour " + selectedPerson.getNom(), e);
+				}
+			} else {
+				showWarningDialog("Le répertoire pour " + selectedPerson.getNom() + " n'existe pas.");
+			}
+		} else {
+			showWarningDialog("Aucune personne sélectionnée.");
+		}
 	}
-	
-	
 
-
-	
 	private void showErrorDialog(String message, Exception e) {
-	    JOptionPane.showMessageDialog(frame, message + "\n" + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-	    e.printStackTrace();
+		JOptionPane.showMessageDialog(frame, message + "\n" + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+		e.printStackTrace();
 	}
 
 	private void showWarningDialog(String message) {
-	    JOptionPane.showMessageDialog(frame, message, "Attention", JOptionPane.WARNING_MESSAGE);
+		JOptionPane.showMessageDialog(frame, message, "Attention", JOptionPane.WARNING_MESSAGE);
 	}
-
-	
 
 	private JPopupMenu createPeoplePopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
@@ -518,17 +509,14 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 		listModel = new DefaultListModel<>();
 		photoList = new JList<>(listModel);
 
-		
-		
 		// "ListSelectionModel.MULTIPLE_INTERVAL_SELECTION"
 		photoList.setSelectionMode(2);
 
-		
-		//affichage des elements sous forme de Thumb
+		// affichage des elements sous forme de Thumb
 		photoList.setCellRenderer(new ThumbnailRenderer());
 
 //		Affichage des emlement sous forme de text nom des fichiers
-		
+
 //		photoList.setCellRenderer(new DefaultListCellRenderer() {
 //		    @Override
 //		    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -539,10 +527,7 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 //		        return renderer;
 //		    }
 //		});
-		
-		
-		
-		
+
 		photoList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -1099,20 +1084,19 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 //		}
 //	}
 //	
-	
-	
-	
+
 	private void chooseDirectory(File directory) throws IOException {
-	    if (directory != null && directory.exists() && directory.isDirectory()) {
-	        loadPhotos(directory);
-	        JOptionPane.showMessageDialog(frame, "Photos du répertoire chargé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
-	    } else {
-	        throw new IOException("Répertoire invalide ou inaccessible : " + directory);
-	    }
+		if (directory != null && directory.exists() && directory.isDirectory()) {
+			loadPhotos(directory);
+			JOptionPane.showMessageDialog(frame, "Photos du répertoire chargé avec succès.", "Succès",
+					JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			throw new IOException("Répertoire invalide ou inaccessible : " + directory);
+		}
 	}
- 
+
 	@Override
-	public void showPerson(Person person) {
+	public void showSearchResultPerson(Person person) {
 
 		peopleListModel.removeAllElements();
 
@@ -1127,20 +1111,20 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 	}
 
 	@Override
-	public Person addPerson(Person person_) {
+	public Person addTodayWorkPerson(Person person_) {
 		// Ajoutez la personne à la base de données
-		Person person =	personDAO.saveOrUpdatePerson(person_);
-				if(person!=null) {
-					// Ajoutez la personne à la liste
-						peopleListModel.addElement(person);
-				
-						// Mettez à jour peopleList pour refléter les changements
-						peopleJList.updateUI();
-				
-						// Affichez le répertoire de photos de la personne dans photoList
-						loadPhotosForPerson(person);
-				}
-		
+		Person person = personDAO.saveOrUpdatePerson(person_);
+		if (person != null) {
+			// Ajoutez la personne à la liste
+			peopleListModel.addElement(person);
+
+			// Mettez à jour peopleList pour refléter les changements
+			peopleJList.updateUI();
+
+			// Affichez le répertoire de photos de la personne dans photoList
+			loadPhotosForPerson(person);
+		}
+
 		return person;
 	}
 
@@ -1214,49 +1198,46 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 		return previewScrollPane;
 	}
 
-	
 	private void handlePDFAction(Person person, Runnable action) {
-	    if (person != null) {
-	        action.run();
-	    } else {
-	        JOptionPane.showMessageDialog(frame, "Aucune personne sélectionnée.", "Erreur", JOptionPane.WARNING_MESSAGE);
-	    }
+		if (person != null) {
+			action.run();
+		} else {
+			JOptionPane.showMessageDialog(frame, "Aucune personne sélectionnée.", "Erreur",
+					JOptionPane.WARNING_MESSAGE);
+		}
 	}
-	
-	
-		private void generatePDFForSelectedPersonne(Person selectedPerson) {
-				boolean pdfGenerated = generatePDF(selectedPerson);
-				try {
-					if (pdfGenerated) {
-						isPDFGenerated = true;
-						showPDFButton.setEnabled(true);
-						printePDFButton.setEnabled(true);
-					}
 
-				} finally {
-					if (pdfGenerated) {
-						String generatedPDFFile = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
-
-						// premier viewer
-						displayPDF(generatedPDFFile, pdfPanel);
-						// Add zoom functionality
-						pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
-						pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
-
-						// premier viewer
-						displayPDF(generatedPDFFile, previewPDFPanel);
-						// Add zoom functionality
-						// previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile,
-						// previewPDFPanel));
-						previewPDFPanel
-								.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
-					}
-
-				}
-				
+	private void generatePDFForSelectedPersonne(Person selectedPerson) {
+		boolean pdfGenerated = generatePDF(selectedPerson);
+		try {
+			if (pdfGenerated) {
+				isPDFGenerated = true;
+				showPDFButton.setEnabled(true);
+				printePDFButton.setEnabled(true);
 			}
-		
-		
+
+		} finally {
+			if (pdfGenerated) {
+				String generatedPDFFile = DirectoryManager.getPDFPersonInWorkspaceDirectory(selectedPerson);
+
+				// premier viewer
+				displayPDF(generatedPDFFile, pdfPanel);
+				// Add zoom functionality
+				pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
+				pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
+
+				// premier viewer
+				displayPDF(generatedPDFFile, previewPDFPanel);
+				// Add zoom functionality
+				// previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile,
+				// previewPDFPanel));
+				previewPDFPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
+			}
+
+		}
+
+	}
+
 	/**
 	 * les button et leur action
 	 * 
@@ -1278,7 +1259,6 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 			}
 		}));
 
-		
 		generatePDFButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -1292,13 +1272,8 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 
 			}
 
-		
 		});
 
-		
-		
-		
-		
 		showPDFButton.setEnabled(false);
 		printePDFButton.setEnabled(false);
 
@@ -1658,7 +1633,7 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 		Person perso = new Person("John", "Doe", new Date());
 		// Exemple pour ajouter une personne et une photo
 		addPersonForTree(perso);
-		addPhoto(perso, DirectoryManager.getPersonWorkspaceDirectory(perso),"not used value");
+		addPhoto(perso, DirectoryManager.getPersonWorkspaceDirectory(perso), "not used value");
 
 		List<Person> people = personDAO.findAll();
 
@@ -1775,38 +1750,35 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 //
 //	}
 
-	
 	private void loadPhotosJTree(File directory) {
-	    listModel.clear();
-	    if (directory.isDirectory() && directory.getName().matches("\\d{6}")) {
-	        loadPhotosRecursively(directory); 
-	    }
+		listModel.clear();
+		if (directory.isDirectory() && directory.getName().matches("\\d{6}")) {
+			loadPhotosRecursively(directory);
+		}
 
-	    photoList.updateUI();
+		photoList.updateUI();
 	}
 
 	private void loadPhotosRecursively(File directory) {
-	    if (directory == null || !directory.isDirectory()) {
-	        return;
-	    }
+		if (directory == null || !directory.isDirectory()) {
+			return;
+		}
 
-	    File[] files = directory.listFiles();
-	    if (files != null) {
-	        for (File file : files) {
-	            if (file.isDirectory()) {
-	                // Appel récursif pour les sous-dossiers
-	                loadPhotosRecursively(file);
-	            } else if (isImageFile(file)) {
-	                // Ajout des fichiers image uniquement
-	                listModel.addElement(file);
-	                System.out.println("Photo trouvée : " + file.getAbsolutePath());
-	            }
-	        }
-	    }
+		File[] files = directory.listFiles();
+		if (files != null) {
+			for (File file : files) {
+				if (file.isDirectory()) {
+					// Appel récursif pour les sous-dossiers
+					loadPhotosRecursively(file);
+				} else if (isImageFile(file)) {
+					// Ajout des fichiers image uniquement
+					listModel.addElement(file);
+					System.out.println("Photo trouvée : " + file.getAbsolutePath());
+				}
+			}
+		}
 	}
 
-	
-	
 	private void updateTree(File directory) {
 		DefaultMutableTreeNode rootNode = createTreeNode(directory);
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
@@ -1855,10 +1827,11 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 ////			throw new PhotoLoadException(message);
 ////		}
 //		}
-		
-/*
- * 		Utilisez SwingUtilities.invokeLater pour vous assurer que l’interface graphique est mise à jour correctement.
- */
+
+		/*
+		 * Utilisez SwingUtilities.invokeLater pour vous assurer que l’interface
+		 * graphique est mise à jour correctement.
+		 */
 //		
 //		if (directory != null) {
 //		    listModel.clear();
@@ -1875,38 +1848,33 @@ public class PhotoOrganizerApp implements PhotoOrganizer {
 //		        SwingUtilities.invokeLater(() -> photoList.updateUI());
 //		    }
 //		}
- 
 
 	}
 
-
-	
-	
-	
 	private void loadPhotos(File directory) throws IOException {
-	    listModel.clear(); // Réinitialise la liste des photos
-	    File[] files = directory.listFiles(file -> isImageFile(file));
+		listModel.clear(); // Réinitialise la liste des photos
+		File[] files = directory.listFiles(file -> isImageFile(file));
 
-	    if (files != null && files.length > 0) {
-	        for (File file : files) {
-	            listModel.addElement(file);
-	        }
-	    } else {
-	        throw new IOException("Aucune photo valide trouvée dans le répertoire : " + directory.getPath());
-	    }
+		if (files != null && files.length > 0) {
+			for (File file : files) {
+				listModel.addElement(file);
+			}
+		} else {
+			throw new IOException("Aucune photo valide trouvée dans le répertoire : " + directory.getPath());
+		}
 	}
 
- 
-private boolean isImageFile(File file) {
-	   
-	    String name = file.getName().toLowerCase();
-	    for (String ext : extensions) {
-	        if (name.endsWith("." + ext)) {
-	            return true;
-	        }
-	    }
-	    return false;
+	private boolean isImageFile(File file) {
+
+		String name = file.getName().toLowerCase();
+		for (String ext : extensions) {
+			if (name.endsWith("." + ext)) {
+				return true;
+			}
+		}
+		return false;
 	}
+
 //	private boolean isImageFile(File file) {
 //		String extension = file.getName().toLowerCase();
 //		return extension.endsWith(".jpg") || extension.endsWith(".jpeg") || extension.endsWith(".png");

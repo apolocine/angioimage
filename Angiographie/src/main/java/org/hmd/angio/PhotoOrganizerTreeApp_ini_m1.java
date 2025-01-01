@@ -17,14 +17,17 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +37,6 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -50,7 +52,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
@@ -70,8 +71,6 @@ import javax.swing.tree.TreePath;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.hmd.angio.conf.ConfigEditorUI;
-import org.hmd.angio.conf.PrintModelManager;
-import org.hmd.angio.conf.PrintPageModelEntryUI;
 import org.hmd.angio.dto.Person;
 import org.hmd.angio.dto.PersonDAO;
 import org.hmd.angio.enuma.PDRectangleEnum;
@@ -87,12 +86,11 @@ import org.hmd.angio.pdf.PDFGenerationGUI;
 import org.hmd.angio.search.SearchPersonUI;
 import org.hmd.image.ouils.DirectoryManager;
 import org.hmd.image.ouils.ImageIconBorder;
-import org.hmd.image.ouils.ThumbnailPDFRenderer;
 import org.hmd.image.ouils.ThumbnailRenderer;
 
 import net.coobird.thumbnailator.Thumbnails;
 
-public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
+public class PhotoOrganizerTreeApp_ini_m1 implements PhotoOrganizer {
 	String[] extensions = { "jpg", "jpeg", "png", "bmp", "gif" };
 	// Ajouter l'instance de PersonDAO
 	// Initialisez l'instance de PersonDAO
@@ -100,17 +98,14 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	// Modifiez le type de peopleList
 //	private DefaultListModel<Person> peopleListModel;
 
-	private Map<File, ImageIconBorder> photoMap = new HashMap<>();
+	JPanel peoplePanel = new JPanel(new BorderLayout());
 
 	private DefaultListModel<File> listModel = new DefaultListModel<>();
+	private Map<File, ImageIconBorder> photoMap = new HashMap<>();
+
 	private JList<File> photoList = new JList<>(listModel);
 
-	/**
-	 * liste de spdf produit par examen
-	 */
-	private DefaultListModel<File> pdfListModel = new DefaultListModel<>();
-	private JList<File> pdfJList = new JList<>(pdfListModel);
-
+	private File selectedDirectory;
 	private JFrame frame;
 	private JPanel pdfPanel;
 	JPanel previewPDFPanel;
@@ -119,25 +114,22 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	private float zoomFactor = 1.0f;
 	private int currentPage = 0;
 
-	// Appel de la classe PersonInfoEntryUI
-	PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
-
-	PrintModelManager modelManager = new PrintModelManager("printModels.ini");
+ // Appel de la classe PersonInfoEntryUI
+		PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
 	
 	/**
 	 * PDF generator IHM
 	 */
-	JComboBox<String> printPageModelComboBox = new JComboBox<>();
-//	private Properties printModels = new Properties();
-
+	JComboBox<String> printPageModelComboBox = new JComboBox<>( );
+	private Properties printModels = new Properties(); 
+	
 	boolean controleurDeModifications = false;
 	BufferedImage modifiedImage = null;
 
 	JComboBox<String> orientationComboBox = new JComboBox<>(new String[] { "Portrait", "Paysage" });
-	JComboBox<Integer> photosPerLineSpinner = new JComboBox<>(new Integer[] { 1, 2, 3, 4, 5, 6, 8, 9, 10 });
-	JComboBox<Integer> photosParColomnSpinner = new JComboBox<>(new Integer[] { 1, 2, 3, 4, 5, 6, 8, 9, 10 });
-	JComboBox<Integer> photoWidthSpinner = new JComboBox<>(new Integer[] { 150, 200, 300, 400, 500 });
-	JComboBox<PDRectangleEnum> pageFormatComboBox = new JComboBox<>(PDRectangleEnum.values());
+	JComboBox<Integer> photosPerLineComboBox = new JComboBox<>(new Integer[] { 1, 2, 3, 4, 5, 6, 8, 9, 10 });
+	JComboBox<Integer> widthByPhotosSizeComboBox = new JComboBox<>(new Integer[] { 150, 200, 300, 400, 500 });
+	JComboBox<PDRectangleEnum> rectangleComboBox = new JComboBox<>(PDRectangleEnum.values());
 
 	JSlider xMarginSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
 	JSlider yMarginSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
@@ -150,10 +142,6 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 	private PDFGenerationGUI pdfGenerationGUI = new PDFGenerationGUI();
 
-	private JProgressBar progressBarPDFGen;
-	
-	
-	
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
 			try {
@@ -161,11 +149,11 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			new PhotoOrganizerTreeApp();
+			new PhotoOrganizerTreeApp_ini_m1();
 		});
 	}
 
-	public PhotoOrganizerTreeApp() {
+	public PhotoOrganizerTreeApp_ini_m1() {
 
 		frame = new JFrame("Photo Organizer");
 		frame.setSize(800, 600);
@@ -175,6 +163,18 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		frame.add(toolBar, BorderLayout.PAGE_START);
 
 		initializeMenu();
+
+		// Ajoutez votre liste de photos (par exemple, photoList) ici
+		// ...
+		// Ajoutez un bouton pour afficher les photos de la personne sélectionnée
+		JButton showPhotosButton = new JButton("Afficher les Photos");
+		showPhotosButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				/// displayPhotosForPerson();
+				displayPhotosBasedOnSelection();
+			}
+		});
 
 		// Ajoutez la liste des personnes au-dessus de la liste de photos
 		JPanel treePeoplePhotsPanel = new JPanel(new BorderLayout());
@@ -196,45 +196,18 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		frame.add(dashBoardSplitPane, BorderLayout.CENTER);
 		frame.setVisible(true);
 
+		// Ajoutez le JScrollPane de l'arborescence à votre interface utilisateur
+		frame.add(peoplePanel, BorderLayout.WEST);
 	}
 
-	
-	
-	private void initUI() {
-	    JPanel panel = new JPanel();
-	    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-	    progressBarPDFGen = new JProgressBar();
-	    progressBarPDFGen.setStringPainted(true);
-	    progressBarPDFGen.setVisible(false);
-
-	    panel.add(new JLabel("Marges latérales :"));
-	    panel.add(sideMarginSlider);
-	    panel.add(new JLabel("Nombre de pages :"));
-	    panel.add(pageCountSpinner);
-	    panel.add(progressBarPDFGen);
-
-	    add(panel);
-	}
-	
-	
-	
 	/**
 	 * 
 	 * @return
 	 */
 	private void initPeopleTreeListe() {
+
 		peopleJTree.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mousePressed(MouseEvent e) {
-				showPopup(e);
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				showPopup(e);
-			}
-
 			public void mouseClicked(MouseEvent e) {
 
 				if (personDAO.isConnected()) {
@@ -249,50 +222,24 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 								DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path
 										.getLastPathComponent();
 
-								
-									if (selectedNode instanceof PersonTreeNode) {
-
-									PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode; 
-									// Ajouter un séparateur visuel pour les photos d'examen
-									String examTitle = "Photos examen - " + personTreeNode.getPerson().getNom();
-									boolean fromPerson = false;
-									Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person,
-																								// Rouge si direct
-									loadPDFListFromJTree(new File(personTreeNode.getPersonDirectoryName()), examTitle,
-											borderColor); // Noir pour différencier
-									
-									
-									try {
-										loadPhotos( new File(personTreeNode.getPersonDirectoryName())) ;
-									} catch (IOException e1) {
-										// TODO Auto-generated catch block
-										e1.printStackTrace();
-									}
-								}
-								
 								if (selectedNode instanceof ExamTreeNode) {
 									ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-								 
-									// Ajouter un séparateur visuel pour les photos d'examen
-									String examTitle = "Photos examen - " + examNode.getPerson().getNom();
-									boolean fromPerson = false;
-									Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person,
-																								// Rouge si direct
-									loadPDFListFromJTree(examNode.getDirectory(), examTitle, borderColor); // Noir pour
-																									// différencier
-									
-									try {
-										loadPhotos(  examNode.getDirectory()) ;
-									} catch (IOException e1) {
-										// TODO Auto-generated catch block
-										e1.printStackTrace();
-									}
-									
-									
+									System.out.println(" selectedPerson.getNom()  :" + examNode.getPerson().getNom());
+									String pdfFilePath = DirectoryManager
+											.getPDFPersonExamListInDirectory(examNode.getPerson(), examNode);
+									pdfExam4Person(pdfFilePath);
+								}
+								if (selectedNode instanceof PersonTreeNode) {
+
+									PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
+
+									System.out.println(
+											" selectedPerson.getNom()  :" + personTreeNode.getPerson().getNom());
+									String pdfFilePath = DirectoryManager
+											.getPDFPersonListInWorkspaceDirectory(personTreeNode.getPerson());
+									pdfExam4Person(pdfFilePath);
 
 								}
-							
-								
 
 							}
 
@@ -317,8 +264,49 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 				}
 
 			}
- 
 
+			private void pdfExam4Person(/* Person selectedPerson , */String pdfFilePath) {
+//				if (selectedPerson!=null){
+//					System.out.println(" selectedPerson.getNom()  :"+selectedPerson.getNom());
+//					String pdfFilePath = DirectoryManager.getPDFPersonListInWorkspaceDirectory(selectedPerson);
+
+				File pdfFilePerson = new File(pdfFilePath);
+
+				if (pdfFilePerson.exists()) {
+					isPDFGenerated = true;
+					showPDFButton.setEnabled(true);
+					printePDFButton.setEnabled(true);
+					// premier viewer
+					displayPDF(pdfFilePath, pdfPanel);
+					// Add zoom functionality
+					pdfPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, pdfPanel));
+					pdfPanel.addMouseListener(new ContextMenuMouseListener(pdfFilePath, pdfPanel));
+
+					// premier viewer
+					displayPDF(pdfFilePath, previewPDFPanel);
+					// Add zoom functionality
+					// previewPDFPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath,
+					// previewPDFPanel));
+					previewPDFPanel.addMouseListener(new ContextMenuMouseListener(pdfFilePath, previewPDFPanel));
+				}
+//					}else {
+//						
+//						   showErrorDialog("Erreur de selection de patient "  , new  Exception());
+//					}
+			}
+
+		});
+
+		peopleJTree.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				showPopup(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				showPopup(e);
+			}
 		});
 
 	}
@@ -329,33 +317,86 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			createPeoplePopupMenu().show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
- 
 
-	private void showWarningDialog(String message) {
+	private void displayPhotosBasedOnSelection() {
+		// Récupérer le nœud sélectionné dans peopleJTree
+		TreePath selectedPath = peopleJTree.getSelectionPath();
+
+		if (selectedPath != null) {
+			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
+
+			System.out.println("Selected userObject: " + selectedNode.getUserObject() + " | Type: "
+					+ selectedNode.getUserObject().getClass().getSimpleName());
+
+			if (selectedNode instanceof PersonTreeNode) {
+				displayPhotosForPerson((PersonTreeNode) selectedNode);
+			} else if (selectedNode instanceof ExamTreeNode) {
+				displayPhotosForExam((ExamTreeNode) selectedNode, false);
+			} else {
+				showWarningDialog("Veuillez sélectionner une personne ou un examen.");
+			}
+
+		} else {
+			showWarningDialog("Aucun élément sélectionné.");
+		}
+	}
+
+	private void displayPhotosForPerson(PersonTreeNode personNode) {
+		listModel.clear(); // Vider la liste des photos actuelles
+
+		String path = DirectoryManager.getPersonWorkspaceDirectory(personNode.getPerson());
+		File personDir = new File(path);
+
+		if (personDir.isDirectory()) {
+			// Charger les photos générales du répertoire de la personne
+			loadPhotosJTree(personDir, "Photos générales", Color.BLACK); // Noir pour différencier
+
+			// Charger récursivement les photos des sous-répertoires (examens)
+			for (int i = 0; i < personNode.getChildCount(); i++) {
+				DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) personNode.getChildAt(i);
+				if (childNode instanceof ExamTreeNode) {
+					displayPhotosForExam((ExamTreeNode) childNode, true);
+				}
+			}
+		} else {
+			showWarningDialog("Le répertoire de la personne est introuvable.");
+		}
+	}
+
+	private void displayPhotosForExam(ExamTreeNode examNode, boolean fromPerson) {
+		File examDir = (File) examNode.getUserObject();
+
+		if (examDir.isDirectory()) {
+			// Ajouter un séparateur visuel pour les photos d'examen
+			String examTitle = "Photos examen - " + examDir.getName();
+			Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person, Rouge si direct
+
+			loadPhotosJTree(examDir, examTitle, borderColor);
+		} else {
+			showWarningDialog("Le répertoire de l'examen est introuvable.");
+		}
+	}
+
+ 	private void showWarningDialog(String message) {
 		JOptionPane.showMessageDialog(frame, message, "Attention", JOptionPane.WARNING_MESSAGE);
 	}
-
 	private void showInfoDialog(String message) {
-		JOptionPane.showMessageDialog(null, message, "Information", JOptionPane.INFORMATION_MESSAGE);
+	    JOptionPane.showMessageDialog(null, message, "Information", JOptionPane.INFORMATION_MESSAGE);
 	}
-
 	private void showErrorDialog(String message) {
-		JOptionPane.showMessageDialog(null, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+	    JOptionPane.showMessageDialog(null, message, "Erreur", JOptionPane.ERROR_MESSAGE);
 	}
-
+	
+	
 	private JPopupMenu createPeoplePopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 
 		// Ajoutez les éléments du menu
 		JMenuItem reloadPersonPhotosItem = new JMenuItem("Reload Photos");
-		JMenuItem nounelExamen = new JMenuItem("Nouvel Examen");
 		JMenuItem removePersonItem = new JMenuItem("Remove Person");
 		JMenuItem browseDirecty = new JMenuItem("Browse Directy");
 		// Ajoutez des actions aux éléments du menu
 		reloadPersonPhotosItem.addActionListener(e -> reloadPhotosAction());
-		// nouvel examen par defaut date actuelle
-		nounelExamen.addActionListener(e -> nounelExamenAction());
-
 		removePersonItem.addActionListener(e -> removePersonAction());
 		browseDirecty.addActionListener(e -> browseDirectyAction());
 
@@ -364,14 +405,13 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		if (path != null) {
 			// Ajoutez les éléments au menu contextuel
 			popupMenu.add(reloadPersonPhotosItem);
-			popupMenu.add(nounelExamen);
 			popupMenu.add(removePersonItem);
 			popupMenu.add(browseDirecty);
 		}
 
 		return popupMenu;
 	}
-
+ 
 	private void browseDirectyAction() {
 
 		TreePath path = peopleJTree.getSelectionPath();
@@ -394,40 +434,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		}
 
 	}
-
-	private void nounelExamenAction() {
-
-		TreePath path = peopleJTree.getSelectionPath();
-
-		if (path != null) {
-			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-
-			if (selectedNode instanceof ExamTreeNode) {
-				ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-				File directoryExam = examNode.getDirectory();
-
-			}
-			if (selectedNode instanceof PersonTreeNode) {
-				PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-				System.out.println(personTreeNode.getPerson().getId());
-
-				Person person = PersonDAO.findById(personTreeNode.getPerson().getId());
-
-				// File directory = new
-				// File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
-				personInfoEntryUI.setEditingPerson(person);
-				// Appel de la classe PersonInfoEntryUI
-				SwingUtilities.invokeLater(() -> personInfoEntryUI.setVisible(true));
-				
-				
-			}
-			if (selectedNode instanceof PhotoTreeNode) {
-
-			}
-		}
-
-	}
-
+ 
 	private void reloadPhotosAction() {
 
 		TreePath path = peopleJTree.getSelectionPath();
@@ -436,91 +443,90 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 
 			if (selectedNode instanceof ExamTreeNode) {
-				ExamTreeNode examNode = (ExamTreeNode) selectedNode; 
+				ExamTreeNode examNode = (ExamTreeNode) selectedNode;
+				File directoryExam = examNode.getDirectory();
 
-				PhotoDirectoryUtils.createPhotoTreeAsFileNodes(examNode, examNode.getPerson());
-
-				// reloadSelectedTreeNode();
-//				try {
-//					loadPhotos(directoryExam);
-//					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
+					//reloadSelectedTreeNode();
+				try {
+					loadPhotos(directoryExam);
+					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			if (selectedNode instanceof PersonTreeNode) {
 				PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-//				File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
-				// reloadSelectedTreeNode();
-				PhotoDirectoryUtils.createPhotoTreeAsFileNodes(personTreeNode, personTreeNode.getPerson());
-		
-//				try {
-//					loadPhotos(directory);
-//					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
-//
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
+				File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
+				//reloadSelectedTreeNode();
+					try {
+					loadPhotos(directory);
+					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
+	                
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-
-		// reloadSelectedTreeNode();
 	}
+ 
+	
 
 	// Rafraîchir un nœud spécifique de l'arbre
 	private void refreshTreeNode(DefaultMutableTreeNode node) {
-		DefaultTreeModel model = (DefaultTreeModel) peopleJTree.getModel();
-		model.nodeStructureChanged(node); // Met à jour la structure du nœud
-
+	    DefaultTreeModel model = (DefaultTreeModel) peopleJTree.getModel();
+	    model.nodeStructureChanged(node);  // Met à jour la structure du nœud
+	    
 	}
-
+	
 	private void reloadSelectedTreeNode() {
-		TreePath path = peopleJTree.getSelectionPath();
+	    TreePath path = peopleJTree.getSelectionPath();
 
-		if (path != null) {
-			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-			((DefaultTreeModel) peopleJTree.getModel()).reload(selectedNode);
-			// Lancer un SwingWorker pour le chargement
-			new PhotoLoaderWorker(selectedNode).execute();
-		}
+	    if (path != null) {
+	        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+
+	        // Lancer un SwingWorker pour le chargement
+	        new PhotoLoaderWorker(selectedNode).execute();
+	    }
 	}
 
 	// SwingWorker pour charger les photos en arrière-plan
 	private class PhotoLoaderWorker extends SwingWorker<Void, Void> {
-		private final DefaultMutableTreeNode selectedNode;
+	    private final DefaultMutableTreeNode selectedNode;
 
-		public PhotoLoaderWorker(DefaultMutableTreeNode selectedNode) {
-			this.selectedNode = selectedNode;
-		}
+	    public PhotoLoaderWorker(DefaultMutableTreeNode selectedNode) {
+	        this.selectedNode = selectedNode;
+	    }
 
-		@Override
-		protected Void doInBackground() throws Exception {
-			if (selectedNode instanceof ExamTreeNode) {
-				ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-				File directoryExam = examNode.getDirectory();
-				loadPhotos(directoryExam); // Chargement en arrière-plan
-			}
+	    @Override
+	    protected Void doInBackground() throws Exception {
+	        if (selectedNode instanceof ExamTreeNode) {
+	            ExamTreeNode examNode = (ExamTreeNode) selectedNode;
+	            File directoryExam = examNode.getDirectory();
+	            loadPhotos(directoryExam);  // Chargement en arrière-plan
+	        }
 
-			if (selectedNode instanceof PersonTreeNode) {
-				PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-				File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
-				loadPhotos(directory); // Chargement en arrière-plan
-			}
-			return null;
-		}
+	        if (selectedNode instanceof PersonTreeNode) {
+	            PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
+	            File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
+	            loadPhotos(directory);  // Chargement en arrière-plan
+	        }
+	        return null;
+	    }
 
-		@Override
-		protected void done() {
-			try {
-				get(); // Récupère le résultat (gère les exceptions si elles ont eu lieu)
-				refreshTreeNode(selectedNode); // Met à jour l'arborescence après le chargement
-			} catch (Exception e) {
-				e.printStackTrace();
-				showErrorDialog("Erreur lors du chargement des photos.");
-			}
-		}
+	    @Override
+	    protected void done() {
+	        try {
+	            get();  // Récupère le résultat (gère les exceptions si elles ont eu lieu)
+	            refreshTreeNode(selectedNode);  // Met à jour l'arborescence après le chargement
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            showErrorDialog("Erreur lors du chargement des photos.");
+	        }
+	    }
 	}
 
+	
+	
 	private void removePersonAction() {
 		TreePath path = peopleJTree.getSelectionPath();
 
@@ -586,7 +592,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			deletePhotosAndDirectory(person);
 		}
 	}
-
+ 
 	private void deleteExamenDirectory(ExamTreeNode examen) {
 		// Obtenez le répertoire de la personne
 		File examenDirectory = examen.getDirectory();
@@ -651,14 +657,20 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 	}
 
-	private JList<File> initializePhotoList() {
+	private JList initializePhotoList() {
 
 		// Au démarrage, chargez la configuration depuis le fichier
 		// lecture directed des informationsà partir du ficher nous avons pas besoins de
 		// l'interface utilisateur
 
-		// "ListSelectionModel.MULTIPLE_INTERVAL_SELECTION" voir
-		// JList.MULTIPLE_INTERVAL_SELECTION
+		// Utilisez la configuration chargée, par exemple :
+		String directory = DirectoryManager.getWorkspaceDirectory();
+
+		if (directory != null && new File(directory).isDirectory()) {
+			selectedDirectory = new File(directory);
+		}
+
+		// "ListSelectionModel.MULTIPLE_INTERVAL_SELECTION" voir JList.MULTIPLE_INTERVAL_SELECTION
 		photoList.setSelectionMode(2);
 
 		photoList.setCellRenderer(new ThumbnailRenderer());
@@ -719,7 +731,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 		return photoList;
 	}
-
+ 
 	private JPopupMenu createPhotoListPopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 
@@ -870,6 +882,8 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			new ConfigEditorUI().setVisible(true);
 		});
 	}
+
+
 
 	/**
 	 * Afficher la photo pour la moifier
@@ -1064,7 +1078,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 		// Ajoutez l'élément de menu "Ajouter Personne"
 		JMenuItem ajouterPersonneItem = new JMenuItem("Ajouter Personne");
-
+ 
 		ajouterPersonneItem.addActionListener(new ActionListener() {
 
 			@Override
@@ -1133,6 +1147,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		menuBar.add(helpMenu);
 		menuBar.add(aboutMenu);
 		frame.setJMenuBar(menuBar);
+
 	}
 
 	private static void showAboutUsDialog(JFrame parentFrame) {
@@ -1213,6 +1228,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 //		}
 //	}
 
+ 
 //	public void addPerson(Person person,DefaultMutableTreeNode node) {
 //		// Ajoutez la personne à la base de données
 //		personDAO.saveOrUpdatePerson(person);
@@ -1229,19 +1245,14 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 //  
 //	}
 
+	
 	@Override
 	public void showSearchResultPerson(Person person) {
 
-		
-		addTodayWorkPerson(person);
-		
 		// Effacer tous les enfants de la racine
 		inAction.removeAllChildren();
-//		PersonTreeNode photoTre =   PhotoDirectoryUtils.createPhotoTreeAsFileNodes(inAction, person);
-		PersonTreeNode personNode = new PersonTreeNode(person);
-		inAction.add(personNode);
-		
-		JTree people = new JTree(new DefaultTreeModel(inAction));
+		PersonTreeNode photoTre = PhotoDirectoryUtils.createPhotoTreeAsFileNodes(inAction, person);
+		JTree people = new JTree(new DefaultTreeModel(photoTre));
 		peopleJTree.add(people);
 
 		// Rafraîchissez le modèle du JTree
@@ -1250,7 +1261,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		// Affichez le répertoire de photos de la personne dans photoList
 		loadPhotosForPerson(person);
 	}
-
+	
 //	@Override
 //	public void addPerson(Person person) {
 //		
@@ -1271,49 +1282,30 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 //		
 //	}
 	@Override
-	public Person addTodayWorkPerson(Person person_) {
-
+	public Person addTodayWorkPerson(Person person) {
+		
 //		// Ajoutez la personne à la base de données
-		Person person = personDAO.saveOrUpdatePerson(person_);
+//		personDAO.saveOrUpdatePerson(person);
+//		
 //		 showPerson(  person);
+		
+		// Effacer tous les enfants de la racine
+		today.removeAllChildren();
+		PersonTreeNode photoTre = PhotoDirectoryUtils.createPhotoTreeAsFileNodes(today, person);
+		JTree peopleToday = new JTree(new DefaultTreeModel(photoTre));
+		peopleJTree.add(peopleToday);
 
-		System.out.println(person);
-
-		// Affichez un message de succès
-		JOptionPane.showMessageDialog(null, "Personne enregistrée avec succès.", "Succès",
-				JOptionPane.INFORMATION_MESSAGE);
-
-		// créer le repertoire des photo
-		DirectoryManager.createphotosDirectoryByDate(person, new Date());
-
-//      // Effacez les champs après l'enregistrement/modification si nécessaire
-//       clearFields();
-		// Fermez la fenêtre PersonInfoEntryUI ou effectuez toute autre action
-		// nécessaire
-
-		if (person != null) {
-			// Effacer tous les enfants de la racine
-			//today.removeAllChildren();
-			
-			PersonTreeNode photoTre =   PhotoDirectoryUtils.createPhotoTreeAsFileNodes(today, person);
-			JTree peopleToday = new JTree(new DefaultTreeModel(photoTre));
-			peopleJTree.add(peopleToday);
-			// Rafraîchissez le modèle du JTree
-			treeModel.reload();
-			peopleJTree.updateUI();
-			// Affichez le répertoire de photos de la personne dans photoList
-			loadPhotosForPerson(person);
-		}
+		// Rafraîchissez le modèle du JTree
+		treeModel.reload();
+		peopleJTree.updateUI();
+		// Affichez le répertoire de photos de la personne dans photoList
+		loadPhotosForPerson(person);
+		
 		return person;
+		 
 	}
-
-	/**
-	 * Person per = personDAO.findById(person.getId()); if( per!=null) {
-	 * 
-	 * } on supose que le patient est déjà enregistré dans la base.
-	 * 
-	 * @param person
-	 */
+	
+	
 	private void loadPhotosForPerson(Person person) {
 
 		// Obtenez le répertoire de la personne
@@ -1333,115 +1325,29 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 				}
 			}
 		} else {
-			int confirmation = JOptionPane.showConfirmDialog(frame,
-					"\"Le répertoire de photos de la personne n'existe pas. Voulez-vous le créer" + "?",
-					"Avertissement Working directory das not existe ", JOptionPane.YES_NO_OPTION);
-			if (confirmation == JOptionPane.YES_OPTION) {
-				// créer le repertoire des photo
-				DirectoryManager.createphotosDirectory(person);
-			}
+			JOptionPane.showMessageDialog(frame, "Le répertoire de photos de la personne n'existe pas.",
+					"Avertissement", JOptionPane.WARNING_MESSAGE);
 		}
 	}
 
 	public JSplitPane getsplitPanel() {
 
 		// initializeComponents();
-		
-		JList<File> initPDFListModel = initPDFListModel(); 
-		JPanel pdfListButtonPanel = new JPanel(new BorderLayout());
-		
-		pdfListButtonPanel.add(new JScrollPane(initPDFListModel), BorderLayout.CENTER);
-		pdfListButtonPanel.add( showPDFButton, BorderLayout.SOUTH);
-				 
-				
-				
-		
+
 		JPanel initOptionPDF = initOptionPDF();
-		JSplitPane optioNbuttonArea = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initOptionPDF, pdfListButtonPanel);
+		JPanel buttonPDFAction = buttonPDFAction();
 
-		
-		
-		
-		
-		JScrollPane panelPDFView = panelPDFView();	
-		
-		JPanel buttonPDFAction = buttonPDFAction(); 
-		
-		
-		JPanel splitTextArea = new JPanel(new BorderLayout());
-		
-		splitTextArea.add(new JScrollPane(panelPDFView), BorderLayout.CENTER);
-		splitTextArea.add( buttonPDFAction, BorderLayout.SOUTH);
-		
-		
-		
-		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optioNbuttonArea,splitTextArea );
-
-	
-
+		JScrollPane panelPDFView = panelPDFView();
 		JScrollPane panelPDFView2 = panelPDFView2();
 
+//		JSplitPane optioNbuttonArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, optionsPanel, panelOptionsView);
 		
+		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initOptionPDF, panelPDFView);
+		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, buttonPDFAction, panelPDFView2);
 		
-		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions, panelPDFView2 );
+		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions,splitTextArea );
 
 		return splitViewPdf;
-	}
-
-	private JList<File> initPDFListModel() {
-
-		// Au démarrage, chargez la configuration depuis le fichier
-		// lecture directed des informationsà partir du ficher nous avons pas besoins de
-		// l'interface utilisateur
-
-		// "ListSelectionModel.MULTIPLE_INTERVAL_SELECTION" voir
-		// JList.MULTIPLE_INTERVAL_SELECTION
-		pdfJList.setSelectionMode(1);
-
-		pdfJList.setCellRenderer(new ThumbnailPDFRenderer());
-
-		pdfJList.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				showPopup(e);
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				showPopup(e);
-			}
-
-			private void showPopup(MouseEvent e) {
-				if (e.isPopupTrigger()) {
-					// Affichez le menu contextuel ici
-					createPhotoListPopupMenu().show(e.getComponent(), e.getX(), e.getY());
-				}
-			}
-		});
-
-		pdfJList.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-
-				if (e.getClickCount() == 2) {
-					// Double-clic détecté
-					File selectedFile = pdfJList.getSelectedValue();
-					if (selectedFile != null) {					 
-						// premier viewer
-						displayPDF(selectedFile.getAbsolutePath(), previewPDFPanel);
-						// Add zoom functionality
-						// previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile,
-						// previewPDFPanel)); 
-						previewPDFPanel.addMouseListener(new ContextMenuMouseListener(selectedFile.getAbsolutePath(), previewPDFPanel));
-						previewPDFPanel.addMouseWheelListener(new ZoomHandler(selectedFile.getAbsolutePath(), previewPDFPanel));
-					}
-				}
-
-			}
-
-		});
-
-		return pdfJList;
 	}
 
 	private JScrollPane panelPDFView2() {
@@ -1472,9 +1378,6 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		return previewScrollPane;
 	}
 
-	
-	
-	
 	/**
 	 * les button et leur action
 	 * 
@@ -1483,11 +1386,43 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	private JPanel buttonPDFAction() {
 		JPanel panelOptionsView = new JPanel();
 
-//		panelOptionsView.add(generatePDFButton);
-//		panelOptionsView.add(showPDFButton);
+		panelOptionsView.add(generatePDFButton);
+		panelOptionsView.add(showPDFButton);
 		panelOptionsView.add(printePDFButton);
+
+		generatePDFButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				TreePath path = peopleJTree.getSelectionPath();
+
+				Person selectedPerson = null;
+				if (path != null) {
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+
+					if (selectedNode instanceof ExamTreeNode) {
+						ExamTreeNode examNode = (ExamTreeNode) selectedNode;
+						selectedPerson = examNode.getPerson();
+
+						String pdfFilePath = DirectoryManager.getPDFPersonExamListInDirectory(selectedPerson, examNode);
+						makeshowPDF(selectedPerson, pdfFilePath); 
+					}
+
+					if (selectedNode instanceof PersonTreeNode) { 
+						PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
+						selectedPerson = personTreeNode.getPerson();
+
+						String pdfFilePath = DirectoryManager.getPDFPersonListInWorkspaceDirectory(selectedPerson);
+						makeshowPDF(selectedPerson, pdfFilePath);
  
-		
+					}
+				} else {
+					showWarningDialog("aucune personne selectionnée");
+				}
+
+			}
+		});
+
 		showPDFButton.setEnabled(false);
 		printePDFButton.setEnabled(false);
 
@@ -1578,27 +1513,22 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 				}
 
 			} finally {
-				
-				
-				// différencier
-				
 				if (pdfGenerated) {
 					// String generatedPDFFile =
 					// DirectoryManager.getPDFPersonListInWorkspaceDirectory(selectedPerson);
-					
+
+					// premier viewer
+					displayPDF(generatedPDFFile, pdfPanel);
+					// Add zoom functionality
+					pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
+					pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
+
 					// premier viewer
 					displayPDF(generatedPDFFile, previewPDFPanel);
 					// Add zoom functionality
 					// previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile,
-					// previewPDFPanel)); 
+					// previewPDFPanel));
 					previewPDFPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, previewPDFPanel));
-					previewPDFPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, previewPDFPanel));
-//					// premier viewer
-//					displayPDF(generatedPDFFile, pdfPanel);
-//					// Add zoom functionality
-//					pdfPanel.addMouseWheelListener(new ZoomHandler(generatedPDFFile, pdfPanel));
-//					pdfPanel.addMouseListener(new ContextMenuMouseListener(generatedPDFFile, pdfPanel));
-
 				}
 
 			}
@@ -1608,225 +1538,139 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 	}
 
+	 
+
+	
 	/**
 	 * 
 	 * @return
 	 */
 	private JPanel initOptionPDF() {
-		loadPrintModels(); // Charger les modèles d'impression au démarrage
+	    loadPrintModels();  // Charger les modèles d'impression au démarrage
+	    
+	   ///  printPageModelComboBox.addActionListener(e -> applySelectedModel());
+	    printPageModelComboBox.addItemListener(e -> {
+	        if (e.getStateChange() == ItemEvent.SELECTED) {
+	            applySelectedModel();
+	        }
+	    });
 
-		/// printPageModelComboBox.addActionListener(e -> applySelectedModel());
-		printPageModelComboBox.addItemListener(e -> {
-			if (e.getStateChange() == ItemEvent.SELECTED) {
-				applySelectedModel();
-			}
-		});
+	    JPanel panel = new JPanel(new GridLayout(9, 2));
+	    
+	    // Bouton pour ouvrir le menu contextuel
+	     JButton menuModelButton = new JButton("...");  
+	    // Initialisation du menu contextuel
+	    modelsPopupMenu = gestionModelsPopupMenu(); 
+	    menuModelButton.addActionListener(e -> showModelPopup(menuModelButton));
+         panel.add(new JLabel("___________________"));
+	     panel.add(menuModelButton);  
+	     
+	      
+	    panel.add(new JLabel("Modèle d'impression :"));
+	    panel.add(printPageModelComboBox);
+	    panel.add(new JLabel("Orientation de la page:"));
+	    panel.add(orientationComboBox);
+	    panel.add(new JLabel("Taille des photos:"));
+	    panel.add(widthByPhotosSizeComboBox);
+	    panel.add(new JLabel("Nombre de photos par ligne:"));
+	    panel.add(photosPerLineComboBox);
+	    panel.add(new JLabel("Format de page :"));
+	    panel.add(rectangleComboBox);
+	    panel.add(new JLabel("Marge supérieure:"));
+	    panel.add(yMarginSlider);
+	    panel.add(new JLabel("Marge latérale:"));
+	    panel.add(xMarginSlider);
 
-		JPanel panel = new JPanel(new GridLayout(12, 2));
-
-		// Bouton pour ouvrir le menu contextuel
-		JButton menuModelButton = new JButton("...");
-		// Initialisation du menu contextuel
-		modelsPopupMenu = gestionModelsPopupMenu();
-		menuModelButton.addActionListener(e -> showModelPopup(menuModelButton));
-		panel.add(new JLabel("Manager les Modèles :"));
-		panel.add(menuModelButton);
-		panel.add(new JLabel("Nom du modèle :"));
-		panel.add(printPageModelComboBox);
-		panel.add(new JLabel("Orientation :"));
-		panel.add(orientationComboBox);
-		panel.add(new JLabel("Taille des photos:"));
-		panel.add(photoWidthSpinner);
-		panel.add(new JLabel("Photos par ligne:"));
-		panel.add(photosPerLineSpinner);
-		panel.add(new JLabel("Photos par Colomn:"));
-		panel.add(photosParColomnSpinner);
-		
-		panel.add(new JLabel("Format de page :"));
-		panel.add(pageFormatComboBox);
-		panel.add(new JLabel("Marges X :"));
-		panel.add(xMarginSlider);
-		panel.add(new JLabel("Marges Y :"));
-		panel.add(yMarginSlider);
-		 
+	    
 	 
-		panel. add(new JLabel("Marges latérales :"));
-		panel. add(sideMarginSlider);
-		panel. add(new JLabel("Nombre de pages :"));
-		panel. add(pageCountSpinner);
- 
-		panel. add(new JLabel("Générer le PDF :"));
-		panel. add(generatePDFButton); 
-	        
-		generatePDFButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				TreePath path = peopleJTree.getSelectionPath();
-
-				Person selectedPerson = null;
-				if (path != null) {
-					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-
-					if (selectedNode instanceof ExamTreeNode) {
-						ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-						selectedPerson = examNode.getPerson();
-
-						String pdfFilePath = DirectoryManager.getPDFPersonExamListInDirectory(selectedPerson, examNode);
-						makeshowPDF(selectedPerson, pdfFilePath);
-						
-						// Ajouter un séparateur visuel pour les photos d'examen
-						String examTitle = "Photos examen - " + examNode.getPerson().getNom();
-						boolean fromPerson = false;
-						Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person,
-																					// Rouge si direct
-						loadPDFListFromJTree(examNode.getDirectory(), examTitle, borderColor); // Noir pour
-																						// différencier
-					}
-
-					if (selectedNode instanceof PersonTreeNode) {
-						PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-						selectedPerson = personTreeNode.getPerson();
-
-						String pdfFilePath = DirectoryManager.getPDFPersonListInWorkspaceDirectory(selectedPerson);
-						makeshowPDF(selectedPerson, pdfFilePath);
-						
-						 
-						// Ajouter un séparateur visuel pour les photos d'examen
-						String examTitle = "Photos examen - " + personTreeNode.getPerson().getNom();
-						boolean fromPerson = false;
-						Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person,
-																					// Rouge si direct
-						loadPDFListFromJTree(new File(personTreeNode.getPersonDirectoryName()), examTitle,
-								borderColor); // Noir pour différencier
-
-					}
-				} else {
-					showWarningDialog("aucune personne selectionnée");
-				}
-
-			}
-		});
-
-		
-	        
-		return panel;
+	   
+	 
+	    
+	    return panel;
 	}
-
 	private JPopupMenu modelsPopupMenu;
-
-	
 	
 	// Création du menu contextuel
 	private JPopupMenu gestionModelsPopupMenu() {
-		JPopupMenu popupMenu = new JPopupMenu();
+	    JPopupMenu popupMenu = new JPopupMenu();
 
-		JMenuItem saveModel = new JMenuItem("Enregistrer Nouveau Modèle");
-		JMenuItem updateModel = new JMenuItem("Modifier Modèle Actuel");
-		JMenuItem deleteModel = new JMenuItem("SUpprimer Modèle Actuel");
-		JMenuItem importButton = new JMenuItem("Importer Modèles");
-		JMenuItem exportButton = new JMenuItem("Exporter Modèles");
-		JMenuItem editModelButton = new JMenuItem("Edit Modèles");
-		// Actions du menu
-		saveModel.addActionListener(e -> saveNewPrintModel());
-		updateModel.addActionListener(e -> updateSelectedPrintModel());
-		deleteModel.addActionListener(e -> deleteSelectedPrintModel());
-		importButton.addActionListener(e -> importPrintModels());
-		exportButton.addActionListener(e -> exportPrintModels());
-		editModelButton.addActionListener(e -> editSelectedPrintModel());
-		    
-		    
-		popupMenu.add(saveModel);
-		popupMenu.add(updateModel);
-		popupMenu.add(deleteModel);
-		popupMenu.add(importButton);
-		popupMenu.add(exportButton);
-		popupMenu.add(editModelButton);
-		return popupMenu;
+	    JMenuItem saveModel = new JMenuItem("Enregistrer Nouveau Modèle");
+	    JMenuItem updateModel = new JMenuItem("Modifier Modèle Actuel");
+
+	    // Actions du menu
+	    saveModel.addActionListener(e -> saveNewPrintModel());
+	    updateModel.addActionListener(e -> updateSelectedPrintModel());
+
+	    popupMenu.add(saveModel);
+	    popupMenu.add(updateModel);
+
+	    return popupMenu;
 	}
 
 	
-	private void editSelectedPrintModel() {
+	
+	// Affichage du menu contextuel à côté du bouton
+	private void showModelPopup(Component invoker) {
+	    modelsPopupMenu.show(invoker, invoker.getWidth(), invoker.getHeight());
+	}
+	
+	private void applySelectedModel() {
 	    String selectedModel = (String) printPageModelComboBox.getSelectedItem();
+	    
 	    if (selectedModel != null) {
-	        PrintPageModelEntryUI editDialog = new PrintPageModelEntryUI(this, selectedModel, modelManager.getProperties());
-	        editDialog.setVisible(true);
+	        System.out.println("Modèle sélectionné : " + selectedModel);
 	        
-	        refreshPrintModelComboBox();  // Rafraîchit la liste après modification
+	        // Lire chaque propriété
+	        String orientation = printModels.getProperty(selectedModel + ".orientation");
+	        String photosPerLine = printModels.getProperty(selectedModel + ".photosPerLine");
+	        String photoWidth = printModels.getProperty(selectedModel + ".photoWidth");
+	        String pageFormat = printModels.getProperty(selectedModel + ".pageFormat");
+	        String xMargin = printModels.getProperty(selectedModel + ".xMargin");
+	        String yMargin = printModels.getProperty(selectedModel + ".yMargin");
+	        String sideMargin = printModels.getProperty(selectedModel + ".sideMargin");
+	        String pageCount = printModels.getProperty(selectedModel + ".pageCount");
+
+	        // Afficher les valeurs pour vérifier
+	        System.out.println("Orientation : " + orientation);
+	        System.out.println("Photos par ligne : " + photosPerLine);
+	        System.out.println("Largeur des photos : " + photoWidth);
+	        System.out.println("Format : " + pageFormat);
+	        System.out.println("Marges : " + xMargin + ", " + yMargin + ", " + sideMargin);
+	        System.out.println("Nombre de pages : " + pageCount);
+	        
+	        // Appliquer les valeurs (ajout de vérification pour éviter les erreurs null)
+	        if (orientation != null) {
+	            orientationComboBox.setSelectedItem(orientation);
+	        }
+	        if (photosPerLine != null) {
+	            photosPerLineComboBox.setSelectedItem(Integer.parseInt(photosPerLine));
+	        }
+	        if (photoWidth != null) {
+	            widthByPhotosSizeComboBox.setSelectedItem(Integer.parseInt(photoWidth));
+	        }
+	        if (pageFormat != null) {
+	            rectangleComboBox.setSelectedItem(PDRectangleEnum.valueOf(pageFormat));
+	        }
+	        if (xMargin != null) {
+	            xMarginSlider.setValue(Integer.parseInt(xMargin));
+	        }
+	        if (yMargin != null) {
+	            yMarginSlider.setValue(Integer.parseInt(yMargin));
+	        }
+	        if (sideMargin != null) {
+	            sideMarginSlider.setValue(Integer.parseInt(sideMargin));
+	        }
+	        if (pageCount != null) {
+	            pageCountSpinner.setValue(Integer.parseInt(pageCount));
+	        }
 	    } else {
-	        JOptionPane.showMessageDialog(null, "Aucun modèle sélectionné.");
+	        System.out.println("Aucun modèle sélectionné.");
 	    }
 	}
 
+
 	
 	
-
-	// Affichage du menu contextuel à côté du bouton
-	private void showModelPopup(Component invoker) {
-		modelsPopupMenu.show(invoker, invoker.getWidth(), invoker.getHeight());
-	}
-
-	private void applySelectedModel() {
-		String selectedModel = (String) printPageModelComboBox.getSelectedItem();
-
-		if (selectedModel != null) {
-			System.out.println("Modèle sélectionné : " + selectedModel);
-			 
-			Properties printModels = modelManager.getProperties();
-			// Lire chaque propriété
-			String orientation = printModels .getProperty(selectedModel + ".orientation");
-			String photosPerLine = printModels.getProperty(selectedModel + ".photosPerLine");
-			String photosPerColomne = printModels.getProperty(selectedModel + ".photosPerColomne");
-			String photoWidth = printModels.getProperty(selectedModel + ".photoWidth");
-			String pageFormat = printModels.getProperty(selectedModel + ".pageFormat");
-			String xMargin = printModels.getProperty(selectedModel + ".xMargin");
-			String yMargin = printModels.getProperty(selectedModel + ".yMargin");
-			String sideMargin = printModels.getProperty(selectedModel + ".sideMargin");
-			String pageCount = printModels.getProperty(selectedModel + ".pageCount");
-
-			// Afficher les valeurs pour vérifier
-			System.out.println("Orientation : " + orientation);
-			System.out.println("Photos par ligne : " + photosPerLine);
-			System.out.println("Photos par Colomne : " + photosPerColomne);
-			System.out.println("Largeur des photos : " + photoWidth);
-			System.out.println("Format : " + pageFormat);
-			System.out.println("Marges : " + xMargin + ", " + yMargin + ", " + sideMargin);
-			System.out.println("Nombre de pages : " + pageCount);
-
-			// Appliquer les valeurs (ajout de vérification pour éviter les erreurs null)
-			if (orientation != null) {
-				orientationComboBox.setSelectedItem(orientation);
-			}
-			if (photosPerLine != null) {
-				photosPerLineSpinner.setSelectedItem(Integer.parseInt(photosPerLine));
-			}
-			if (photosPerColomne != null) {
-				photosParColomnSpinner.setSelectedItem(Integer.parseInt(photosPerColomne));
-			}
-			
-			if (photoWidth != null) {
-				photoWidthSpinner.setSelectedItem(Integer.parseInt(photoWidth));
-			}
-			if (pageFormat != null) {
-				pageFormatComboBox.setSelectedItem(PDRectangleEnum.valueOf(pageFormat));
-			}
-			if (xMargin != null) {
-				xMarginSlider.setValue(Integer.parseInt(xMargin));
-			}
-			if (yMargin != null) {
-				yMarginSlider.setValue(Integer.parseInt(yMargin));
-			}
-			if (sideMargin != null) {
-				sideMarginSlider.setValue(Integer.parseInt(sideMargin));
-			}
-			if (pageCount != null) {
-				pageCountSpinner.setValue(Integer.parseInt(pageCount));
-			}
-		} else {
-			System.out.println("Aucun modèle sélectionné.");
-		}
-	}
-
 //	private void loadPrintModels_old() {
 //	    try (BufferedReader reader = new BufferedReader(new FileReader("print_models.ini"))) {
 //	        String line;
@@ -1859,25 +1703,22 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 //	    
 //	    
 //	}
-
+	
 	private void loadPrintModels() {
-		Properties printModels = modelManager.getProperties();
-		
-//		try (FileReader reader = new FileReader("printModels.ini")) {
-//			printModels.load(reader);
+	    try (FileReader reader = new FileReader("printModels.ini")) {
+	        printModels.load(reader);
 
-			for (String key : printModels.stringPropertyNames()) {
-				if (key.endsWith(".orientation")) {
-					String modelName = key.substring(0, key.indexOf("."));
-					if (!(((DefaultComboBoxModel<String>) printPageModelComboBox.getModel())
-							.getIndexOf(modelName) >= 0)) {
-						printPageModelComboBox.addItem(modelName);
-					}
-				}
-			}
-//		} catch (IOException e) {
-//			System.out.println("Fichier de modèles introuvable. Un nouveau fichier sera créé.");
-//		}
+	        for (String key : printModels.stringPropertyNames()) {
+	            if (key.endsWith(".orientation")) {
+	                String modelName = key.substring(0, key.indexOf("."));
+	                if (!(((DefaultComboBoxModel<String>) printPageModelComboBox.getModel()).getIndexOf(modelName) >= 0)) {
+	                    printPageModelComboBox.addItem(modelName);
+	                }
+	            }
+	        }
+	    } catch (IOException e) {
+	        System.out.println("Fichier de modèles introuvable. Un nouveau fichier sera créé.");
+	    }
 	}
 
 //	private void saveNewPrintModel(String modelName) {
@@ -1901,55 +1742,35 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 //	    }
 //	}
 	
-	// Collecte les données du modèle à partir des composants de l'interface
-	private Map<String, String> collectModelData() {
-	    Map<String, String> modelData = new HashMap<>();
-
-	    modelData.put("orientation", (String) orientationComboBox.getSelectedItem());
-	    modelData.put("photosPerLine", String.valueOf(photosPerLineSpinner.getSelectedItem()));
-	    modelData.put("photosPerColomne", String.valueOf(photosParColomnSpinner.getSelectedItem()));
-	    modelData.put("photoWidth", String.valueOf(photoWidthSpinner.getSelectedItem()));
-	    modelData.put("pageFormat", pageFormatComboBox.getSelectedItem().toString());
-	    modelData.put("xMargin", String.valueOf(xMarginSlider.getValue()));
-	    modelData.put("yMargin", String.valueOf(yMarginSlider.getValue()));
-	    modelData.put("sideMargin", String.valueOf(sideMarginSlider.getValue()));
-	    modelData.put("pageCount", String.valueOf(pageCountSpinner.getValue()));
-
-	    return modelData;
-	}
-
+	
 	private void saveNewPrintModel() {
 	    String modelName = JOptionPane.showInputDialog("Nom du nouveau modèle :");
 
 	    if (modelName == null || modelName.trim().isEmpty()) {
 	        showWarningDialog("Le nom du modèle est requis.");
 	        return;
-	    } 
+	    }
 
-	    // Vérifie si le modèle existe déjà via modelManager
-	    List<String> existingModels = modelManager.getModelNames();
-	    if (existingModels.contains(modelName)) {
-	        int option = JOptionPane.showConfirmDialog(null,
-	                "Un modèle avec ce nom existe déjà. Voulez-vous le remplacer ?", "Confirmer",
-	                JOptionPane.YES_NO_OPTION);
+	    // Vérifie si le modèle existe déjà
+	    if (printModels.containsKey(modelName + ".orientation")) {
+	        int option = JOptionPane.showConfirmDialog(null, 
+	            "Un modèle avec ce nom existe déjà. Voulez-vous le remplacer ?", 
+	            "Confirmer", JOptionPane.YES_NO_OPTION);
 	        if (option != JOptionPane.YES_OPTION) {
 	            return;
 	        }
 	    }
 
-	    // Récupérer les valeurs actuelles des composants
-	    Map<String, String> modelData = collectModelData();
+	    // Sauvegarde des paramètres
+	    saveModelToProperties(modelName);
+	    printPageModelComboBox.addItem(modelName);  // Ajout au ComboBox
+	    printPageModelComboBox.setSelectedItem(modelName);  // Sélection automatique
 
-	    // Sauvegarde du modèle avec modelManager
-	    if (modelManager.saveNewModel(modelName, modelData)) {
-	        printPageModelComboBox.addItem(modelName);  // Ajout au JComboBox
-	        printPageModelComboBox.setSelectedItem(modelName);  // Sélection automatique
-	        showInfoDialog("Modèle '" + modelName + "' enregistré avec succès.");
-	    } else {
-	        showWarningDialog("Erreur lors de l'enregistrement du modèle.");
-	    }
+	    showInfoDialog("Modèle '" + modelName + "' enregistré avec succès.");
 	}
 
+	
+	
 	private void updateSelectedPrintModel() {
 	    String selectedModel = (String) printPageModelComboBox.getSelectedItem();
 
@@ -1959,92 +1780,51 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	    }
 
 	    int option = JOptionPane.showConfirmDialog(null,
-	            "Voulez-vous vraiment modifier le modèle '" + selectedModel + "' ?", "Modifier Modèle",
-	            JOptionPane.YES_NO_OPTION);
+	        "Voulez-vous vraiment modifier le modèle '" + selectedModel + "' ?", 
+	        "Modifier Modèle", JOptionPane.YES_NO_OPTION);
 
 	    if (option == JOptionPane.YES_OPTION) {
-	        Map<String, String> updatedData = collectModelData();
+	        saveModelToProperties(selectedModel);
+	        showInfoDialog("Modèle '" + selectedModel + "' mis à jour.");
+	    }
+	}
+	private void saveModelToProperties(String modelName) {
+	    printModels.setProperty(modelName + ".orientation", 
+	                            (String) orientationComboBox.getSelectedItem());
+	    printModels.setProperty(modelName + ".photosPerLine", 
+	                            String.valueOf(photosPerLineComboBox.getSelectedItem()));
+	    printModels.setProperty(modelName + ".photoWidth", 
+	                            String.valueOf(widthByPhotosSizeComboBox.getSelectedItem()));
+	    printModels.setProperty(modelName + ".pageFormat", 
+	                            ((PDRectangleEnum) rectangleComboBox.getSelectedItem()).name());
+	    printModels.setProperty(modelName + ".xMargin", 
+	                            String.valueOf(xMarginSlider.getValue()));
+	    printModels.setProperty(modelName + ".yMargin", 
+	                            String.valueOf(yMarginSlider.getValue()));
+	    printModels.setProperty(modelName + ".sideMargin", 
+	                            String.valueOf(sideMarginSlider.getValue()));
+	    printModels.setProperty(modelName + ".pageCount", 
+	                            String.valueOf(pageCountSpinner.getValue()));
 
-	        if (modelManager.updateModel(selectedModel, updatedData)) {
-	            showInfoDialog("Modèle '" + selectedModel + "' mis à jour.");
-	        } else {
-	            showWarningDialog("Erreur lors de la mise à jour du modèle.");
-	        }
+	    // Enregistrer dans le fichier .ini
+	    savePrintModelsToFile();
+	}
+	private void savePrintModelsToFile() {
+	    try (FileWriter writer = new FileWriter("printModels.ini")) {
+	        printModels.store(writer, "Modèles d'impression");
+	    } catch (IOException e) {
+	        showWarningDialog("Erreur lors de l'enregistrement du fichier : " + e.getMessage());
 	    }
 	}
 
-	private void deleteSelectedPrintModel() {
-	    String selectedModel = (String) printPageModelComboBox.getSelectedItem();
-
-	    if (selectedModel != null && !selectedModel.isEmpty()) {
-	        int confirmation = JOptionPane.showConfirmDialog(null,
-	                "Voulez-vous vraiment supprimer le modèle '" + selectedModel + "' ?",
-	                "Confirmation de suppression",
-	                JOptionPane.YES_NO_OPTION);
-
-	        if (confirmation == JOptionPane.YES_OPTION) {
-	            if (modelManager.deleteModel(selectedModel)) {
-	                printPageModelComboBox.removeItem(selectedModel);
-	                showInfoDialog("Le modèle '" + selectedModel + "' a été supprimé avec succès.");
-	            } else {
-	                showWarningDialog("Échec de la suppression du modèle.");
-	            }
-	        }
-	    } else {
-	        showWarningDialog("Aucun modèle sélectionné pour la suppression.");
-	    }
-	}
-
+	 
 
 
 	
 	
-	private void importPrintModels() {
-	    JFileChooser fileChooser = new JFileChooser();
-	    int option = fileChooser.showOpenDialog(null);
-
-	    if (option == JFileChooser.APPROVE_OPTION) {
-	        File selectedFile = fileChooser.getSelectedFile();
-	        if (modelManager.importModels(selectedFile)) {
-	            refreshPrintModelComboBox();
-	            showInfoDialog("Modèles importés avec succès !");
-	        } else {
-	            showWarningDialog("Erreur lors de l'importation des modèles.");
-	        }
-	    }
-	}
-
-	private void exportPrintModels() {
-	    JFileChooser fileChooser = new JFileChooser();
-	    int option = fileChooser.showSaveDialog(null);
-
-	    if (option == JFileChooser.APPROVE_OPTION) {
-	        File exportFile = fileChooser.getSelectedFile();
-	        if (modelManager.exportModels(exportFile)) {
-	            showInfoDialog("Modèles exportés avec succès !");
-	        } else {
-	            showWarningDialog("Erreur lors de l'exportation.");
-	        }
-	    }
-	}
-	
-	private void refreshPrintModelComboBox() {
-	    printPageModelComboBox.removeAllItems();
-	    List<String> modelNames = modelManager.getModelNames();
-	    for (String model : modelNames) {
-	        printPageModelComboBox.addItem(model);
-	    }
-	}
-
 	
 	
-
-	
-	private void startPDFGeneration(Person selectedPerson, String pdfFilePath) {
-	    PDFGenerationWorker worker = new PDFGenerationWorker(selectedPerson, pdfFilePath);
-	    worker.execute();  // Lancer l'exécution en arrière-plan
-	}
-
+ 
 	
 	
 	/***
@@ -2083,14 +1863,14 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 									orientationComboBox.getSelectedItem().equals("Portrait"),
 
-									(int) photoWidthSpinner.getSelectedItem(),
-									(int) photoWidthSpinner.getSelectedItem(),
+									(int) widthByPhotosSizeComboBox.getSelectedItem(),
+									(int) widthByPhotosSizeComboBox.getSelectedItem(),
 
-									(int) photosPerLineSpinner.getSelectedItem(),
-									(int) photosParColomnSpinner.getSelectedItem(),
+									(int) photosPerLineComboBox.getSelectedItem(),
+									(int) photosPerLineComboBox.getSelectedItem(),
 
 									xMarginSlider.getValue(), yMarginSlider.getValue(),
-									(PDRectangleEnum) pageFormatComboBox.getSelectedItem(), listPhotos,
+									(PDRectangleEnum) rectangleComboBox.getSelectedItem(), listPhotos,
 									pdfFilePerson.getAbsolutePath(), selectedPerson);
 
 						}
@@ -2100,7 +1880,46 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 					}
 
 				}
- 
+
+//		if (pdfFilePerson != null
+//				&& (!pdfFilePerson.getName().toLowerCase().endsWith(".pdf") && pdfFilePerson.exists())) {
+//
+//			pdfFilePerson.delete();
+//		}else {
+//			return;
+//		}
+// 
+//		try {
+//			if (pdfFilePerson.createNewFile()) {
+//
+//				PhotoPDFCreator.createPdf(
+//
+//						orientationComboBox.getSelectedItem().equals("Portrait"),
+//
+//						(int) widthByPhotosSizeComboBox.getSelectedItem(),
+//						(int) widthByPhotosSizeComboBox.getSelectedItem(),
+//
+//						(int) photosPerLineComboBox.getSelectedItem(), 
+//						(int) photosPerLineComboBox.getSelectedItem(),
+//
+//						topMarginSlider.getValue(), 
+//						(PDRectangleEnum) rectangleComboBox.getSelectedItem(), 
+//						listPhotos,
+//						pdfFilePerson.getAbsolutePath());
+//
+//			}
+//		} catch (IOException e) {
+//
+//			e.printStackTrace();
+//		}
+
+				/**
+				 * @todo displayPDF
+				 */
+//				displayPDF(pdfFilePath, pdfPanel);//
+//				pdfPanel.addMouseWheelListener(new ZoomHandler(pdfFilePath, pdfPanel));
+//				pdfPanel.addMouseListener(new ContextMenuMouseListener(pdfFilePath, pdfPanel));
+
 				return true;
 			} else {
 				// Image non encore modifiée
@@ -2285,43 +2104,39 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) { // Double-clic
 
-			/**
-			 * @UNCOMMENT	displayPhotosBasedOnSelection();
-			 */
+					TreePath path = peopleJTree.getPathForLocation(e.getX(), e.getY());
 
-//	TreePath path = peopleJTree.getPathForLocation(e.getX(), e.getY()); 
-//					if (path != null) {
-//						DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-//						/// displayPhotosForPerson();
-//						
-//						if (selectedNode instanceof ExamTreeNode) {
-//							ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-//							// File directoryExam = examNode.getDirectory();
-//							File directoryExam = new File(
-//									DirectoryManager.getPersonExamDirectory(  examNode.getPerson() , examNode));
-//							 
-//
-//							try {
-//								loadPhotos(directoryExam);
-//							} catch (IOException ec) {
-//								ec.printStackTrace();
-//							}
-//						}
-//						if (selectedNode instanceof PersonTreeNode) {
-//							PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-//							File directory = new File(
-//									DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
-//						 
-//
-//							try {
-//								loadPhotos(directory);
-//								// displayPhotosForPerson();
-//							} catch (IOException ec) {
-//								ec.printStackTrace();
-//							}
-//						}
-//
-//					}
+					if (path != null) {
+						DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+
+						if (selectedNode instanceof ExamTreeNode) {
+							ExamTreeNode examNode = (ExamTreeNode) selectedNode;
+							// File directoryExam = examNode.getDirectory();
+							File directoryExam = new File(
+									DirectoryManager.getPersonExamDirectory(  examNode.getPerson() , examNode));
+							 
+
+							try {
+								loadPhotos(directoryExam);
+							} catch (IOException ec) {
+								ec.printStackTrace();
+							}
+						}
+						if (selectedNode instanceof PersonTreeNode) {
+							PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
+							File directory = new File(
+									DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
+						 
+
+							try {
+								loadPhotos(directory);
+								// displayPhotosForPerson();
+							} catch (IOException ec) {
+								ec.printStackTrace();
+							}
+						}
+
+					}
 				}
 			}
 		});
@@ -2353,6 +2168,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 		return treeScrollPane;
 	}
+
 
 	private void addTextToTree(DefaultMutableTreeNode node, String text) {
 		DefaultMutableTreeNode textNode = new DefaultMutableTreeNode(text);
@@ -2391,12 +2207,6 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		return copy;
 	}
 
-	/**
-	 * 
-	 * @param directory
-	 * @param sectionTitle
-	 * @param borderColor
-	 */
 	private void loadPhotosJTree(File directory, String sectionTitle, Color borderColor) {
 		if (directory.isDirectory()) {
 			File[] photoFiles = directory.listFiles((dir, name) -> {
@@ -2408,7 +2218,8 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			if (photoFiles != null && photoFiles.length > 0) {
 				/**
 				 * @TODO control of title
-				 */ // listModel.addElement("---- " + sectionTitle + " ----");
+				 */
+				// listModel.addElement("---- " + sectionTitle + " ----");
 
 				for (File photo : photoFiles) {
 					photoMap.put(photo, new ImageIconBorder(photo, borderColor));
@@ -2416,45 +2227,6 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 				}
 			}
-		}
-	}
-
-	/**
-	 * 
-	 * @param directory
-	 * @param sectionTitle
-	 * @param borderColor
-	 */
-	private void loadPDFListFromJTree(File directory, String sectionTitle, Color borderColor) {
-		System.out.println("loadPDFList ");
-		// Chargez les photos du répertoire dans photoList
-		pdfListModel.clear();
-
-		if (directory.isDirectory()) {
-			File[] pdfFiles = directory.listFiles((dir, name) -> {
-				String lowerCaseName = name.toLowerCase();
-				return lowerCaseName.endsWith(".pdf");
-			});
-
-			if (pdfFiles != null && pdfFiles.length > 0) {
-				/**
-				 * @TODO control of title
-				 */
-				// listModel.addElement("---- " + sectionTitle + " ----");
-
-				for (File pdf : pdfFiles) {
-					pdfListModel.addElement(pdf); // Continue d'ajouter des fichiers au modèle
-
-				}
-				System.out.println("pdfJList.updateUI() ");
-				pdfJList.updateUI();
-			} else {
-				System.out.println(
-						"(pdfFiles != null && pdfFiles.length > 0)" + (pdfFiles != null && pdfFiles.length > 0));
-			}
-		} else {
-			System.out.println("directory.isDirectory() =  " + directory.isDirectory());
-			System.out.println("directory.isDirectory() =  " + directory.toString());
 		}
 	}
 
@@ -2609,9 +2381,6 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			}
 		}
 	}
-	
-	
-
 
 	// Méthode générique pour générer un PDF à partir d'une personne et d'une liste
 	// de photos
@@ -2706,6 +2475,8 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 		SearchPersonUI search = new SearchPersonUI(this);
 
+		
+
 		// Configuration des actions pour les boutons de la barre d'outils
 		openToolBarButton.addActionListener(new ActionListener() {
 			@Override
@@ -2780,53 +2551,8 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		return new ImageIcon(img);
 	}
 
-	
-	
-	/**
-	 * 
-	 */
-	
-	private class PDFGenerationWorker extends SwingWorker<Boolean, Void> {
-	    private final Person selectedPerson;
-	    private final String pdfFilePath;
+ 
 
-	    public PDFGenerationWorker(Person selectedPerson, String pdfFilePath) {
-	        this.selectedPerson = selectedPerson;
-	        this.pdfFilePath = pdfFilePath;
-	    }
-
-	    @Override
-	    protected Boolean doInBackground() throws Exception {
-	    	progressBarPDFGen.setVisible(true);
-	    	progressBarPDFGen.setIndeterminate(true);  // Barre de progression infinie pendant le traitement
-
-	        return generatePDF(selectedPerson, pdfFilePath);
-	    }
-
-	    @Override
-	    protected void done() {
-	    	progressBarPDFGen.setIndeterminate(false);
-	    	progressBarPDFGen.setVisible(false);
-
-	        try {
-	            boolean success = get();
-	            if (success) {
-	                JOptionPane.showMessageDialog(null,
-	                        "Le PDF a été généré avec succès.",
-	                        "Succès", JOptionPane.INFORMATION_MESSAGE);
-	            } else {
-	                JOptionPane.showMessageDialog(null,
-	                        "La génération du PDF a échoué.",
-	                        "Erreur", JOptionPane.ERROR_MESSAGE);
-	            }
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            JOptionPane.showMessageDialog(null,
-	                    "Une erreur est survenue lors de la génération du PDF.",
-	                    "Erreur", JOptionPane.ERROR_MESSAGE);
-	        }
-	    }
-	}
+ 
 
 }
-

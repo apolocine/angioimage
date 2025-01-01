@@ -1287,7 +1287,7 @@ private void showPopup(MouseEvent e) {
 	
 	
 	@Override
-	public Person addPerson(Person person_) {
+	public Person addTodayWorkPerson(Person person_) {
 		
 		
 //		// Ajoutez la personne à la base de données
@@ -1906,7 +1906,7 @@ private void showPopup(MouseEvent e) {
 	
  
 	@Override
-	public void showPerson(Person person) {
+	public void showSearchResultPerson(Person person) {
 		  
 		copyNodeWithChildren(inAction.getNextNode(), today ); 
 		// Effacer tous les enfants de la racine 

@@ -1,6 +1,5 @@
 package org.hmd.angio.dto;
-import java.sql.Connection; 
-import java.sql.DriverManager;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -63,40 +62,7 @@ public boolean isConnected() {
 	}
 }
    
-
-private int insertNewPerson(Person person) {
-	
-        try (Connection connection = 
-        		DatabaseManager.getConnection()
-        		//DriverManager.getConnection(JDBC_URL, USER, PASSWORD)
-        		) {
-            String insertSQL = "INSERT INTO "+tb_patients+" (nom, prenom, naissance) VALUES (?, ?, ? )";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                preparedStatement.setString(1, person.getNom());
-                preparedStatement.setString(2, person.getPrenom());
-                preparedStatement.setDate(3, new java.sql.Date(person.getDateNaissance().getTime()) );
-                
-                
-                preparedStatement.executeUpdate();
-
-                // Récupérer l'identifiant généré
-                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        return generatedKeys.getInt(1);
-                    } else {
-                        throw new SQLException("Échec de la récupération de l'ID généré.");
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        return -1; // Retourne -1 en cas d'échec
-    }
-
+ 
 private Person createPerson(Person person) {
         try (Connection connection = 
         		DatabaseManager.getConnection()

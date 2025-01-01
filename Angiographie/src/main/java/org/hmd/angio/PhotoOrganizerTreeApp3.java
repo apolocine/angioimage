@@ -1166,7 +1166,7 @@ public class PhotoOrganizerTreeApp3 implements PhotoOrganizer {
 
 	
 	@Override
-	public void showPerson(Person person) {
+	public void showSearchResultPerson(Person person) {
 
 		// Effacer tous les enfants de la racine
 		inAction.removeAllChildren();
@@ -1182,7 +1182,7 @@ public class PhotoOrganizerTreeApp3 implements PhotoOrganizer {
 	}
 	
 	@Override
-	public Person addPerson(Person person_) {
+	public Person addTodayWorkPerson(Person person_) {
 		// Ajoutez la personne à la base de données
 		Person person = 	personDAO.saveOrUpdatePerson(person_);
 		 

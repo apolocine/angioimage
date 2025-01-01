@@ -4,8 +4,8 @@ import org.hmd.angio.dto.Person;
 
 public interface PhotoOrganizer {
 
-	void showPerson(Person person);
+	void showSearchResultPerson(Person person);
 
-	Person addPerson(Person person);
+	Person addTodayWorkPerson(Person person);
 
 }

@@ -92,7 +92,7 @@ import org.hmd.image.ouils.ThumbnailRenderer;
 
 import net.coobird.thumbnailator.Thumbnails;
 
-public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
+public class PhotoOrganizerTreeApp_ini_m2 extends JFrame implements PhotoOrganizer {
 	String[] extensions = { "jpg", "jpeg", "png", "bmp", "gif" };
 	// Ajouter l'instance de PersonDAO
 	// Initialisez l'instance de PersonDAO
@@ -128,7 +128,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	 * PDF generator IHM
 	 */
 	JComboBox<String> printPageModelComboBox = new JComboBox<>();
-//	private Properties printModels = new Properties();
+	private Properties printModels = new Properties();
 
 	boolean controleurDeModifications = false;
 	BufferedImage modifiedImage = null;
@@ -161,11 +161,11 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			new PhotoOrganizerTreeApp();
+			new PhotoOrganizerTreeApp_ini_m2();
 		});
 	}
 
-	public PhotoOrganizerTreeApp() {
+	public PhotoOrganizerTreeApp_ini_m2() {
 
 		frame = new JFrame("Photo Organizer");
 		frame.setSize(800, 600);
@@ -1346,44 +1346,20 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	public JSplitPane getsplitPanel() {
 
 		// initializeComponents();
-		
-		JList<File> initPDFListModel = initPDFListModel(); 
-		JPanel pdfListButtonPanel = new JPanel(new BorderLayout());
-		
-		pdfListButtonPanel.add(new JScrollPane(initPDFListModel), BorderLayout.CENTER);
-		pdfListButtonPanel.add( showPDFButton, BorderLayout.SOUTH);
-				 
-				
-				
-		
+
+		JList<File> initPDFListModel = initPDFListModel();
 		JPanel initOptionPDF = initOptionPDF();
-		JSplitPane optioNbuttonArea = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initOptionPDF, pdfListButtonPanel);
+		JSplitPane optioNbuttonArea = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initOptionPDF, initPDFListModel);
 
-		
-		
-		
-		
-		JScrollPane panelPDFView = panelPDFView();	
-		
-		JPanel buttonPDFAction = buttonPDFAction(); 
-		
-		
-		JPanel splitTextArea = new JPanel(new BorderLayout());
-		
-		splitTextArea.add(new JScrollPane(panelPDFView), BorderLayout.CENTER);
-		splitTextArea.add( buttonPDFAction, BorderLayout.SOUTH);
-		
-		
-		
-		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optioNbuttonArea,splitTextArea );
+		JScrollPane panelPDFView = panelPDFView();
+		JSplitPane splitViewOptions = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, optioNbuttonArea, panelPDFView);
 
-	
+		JPanel buttonPDFAction = buttonPDFAction();
 
 		JScrollPane panelPDFView2 = panelPDFView2();
 
-		
-		
-		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions, panelPDFView2 );
+		JSplitPane splitTextArea = new JSplitPane(JSplitPane.VERTICAL_SPLIT, buttonPDFAction, panelPDFView2);
+		JSplitPane splitViewPdf = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitViewOptions, splitTextArea);
 
 		return splitViewPdf;
 	}
@@ -1472,9 +1448,6 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		return previewScrollPane;
 	}
 
-	
-	
-	
 	/**
 	 * les button et leur action
 	 * 
@@ -1483,11 +1456,60 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	private JPanel buttonPDFAction() {
 		JPanel panelOptionsView = new JPanel();
 
-//		panelOptionsView.add(generatePDFButton);
-//		panelOptionsView.add(showPDFButton);
+		panelOptionsView.add(generatePDFButton);
+		panelOptionsView.add(showPDFButton);
 		panelOptionsView.add(printePDFButton);
- 
-		
+
+		generatePDFButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				TreePath path = peopleJTree.getSelectionPath();
+
+				Person selectedPerson = null;
+				if (path != null) {
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+
+					if (selectedNode instanceof ExamTreeNode) {
+						ExamTreeNode examNode = (ExamTreeNode) selectedNode;
+						selectedPerson = examNode.getPerson();
+
+						String pdfFilePath = DirectoryManager.getPDFPersonExamListInDirectory(selectedPerson, examNode);
+						makeshowPDF(selectedPerson, pdfFilePath);
+						
+						// Ajouter un séparateur visuel pour les photos d'examen
+						String examTitle = "Photos examen - " + examNode.getPerson().getNom();
+						boolean fromPerson = false;
+						Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person,
+																					// Rouge si direct
+						loadPDFListFromJTree(examNode.getDirectory(), examTitle, borderColor); // Noir pour
+																						// différencier
+					}
+
+					if (selectedNode instanceof PersonTreeNode) {
+						PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
+						selectedPerson = personTreeNode.getPerson();
+
+						String pdfFilePath = DirectoryManager.getPDFPersonListInWorkspaceDirectory(selectedPerson);
+						makeshowPDF(selectedPerson, pdfFilePath);
+						
+						 
+						// Ajouter un séparateur visuel pour les photos d'examen
+						String examTitle = "Photos examen - " + personTreeNode.getPerson().getNom();
+						boolean fromPerson = false;
+						Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person,
+																					// Rouge si direct
+						loadPDFListFromJTree(new File(personTreeNode.getPersonDirectoryName()), examTitle,
+								borderColor); // Noir pour différencier
+
+					}
+				} else {
+					showWarningDialog("aucune personne selectionnée");
+				}
+
+			}
+		});
+
 		showPDFButton.setEnabled(false);
 		printePDFButton.setEnabled(false);
 
@@ -1622,14 +1644,14 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			}
 		});
 
-		JPanel panel = new JPanel(new GridLayout(12, 2));
+		JPanel panel = new JPanel(new GridLayout(11, 2));
 
 		// Bouton pour ouvrir le menu contextuel
 		JButton menuModelButton = new JButton("...");
 		// Initialisation du menu contextuel
 		modelsPopupMenu = gestionModelsPopupMenu();
 		menuModelButton.addActionListener(e -> showModelPopup(menuModelButton));
-		panel.add(new JLabel("Manager les Modèles :"));
+		panel.add(new JLabel("___________________"));
 		panel.add(menuModelButton);
 		panel.add(new JLabel("Nom du modèle :"));
 		panel.add(printPageModelComboBox);
@@ -1655,60 +1677,8 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		panel. add(new JLabel("Nombre de pages :"));
 		panel. add(pageCountSpinner);
  
-		panel. add(new JLabel("Générer le PDF :"));
-		panel. add(generatePDFButton); 
 	        
-		generatePDFButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				TreePath path = peopleJTree.getSelectionPath();
-
-				Person selectedPerson = null;
-				if (path != null) {
-					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-
-					if (selectedNode instanceof ExamTreeNode) {
-						ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-						selectedPerson = examNode.getPerson();
-
-						String pdfFilePath = DirectoryManager.getPDFPersonExamListInDirectory(selectedPerson, examNode);
-						makeshowPDF(selectedPerson, pdfFilePath);
-						
-						// Ajouter un séparateur visuel pour les photos d'examen
-						String examTitle = "Photos examen - " + examNode.getPerson().getNom();
-						boolean fromPerson = false;
-						Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person,
-																					// Rouge si direct
-						loadPDFListFromJTree(examNode.getDirectory(), examTitle, borderColor); // Noir pour
-																						// différencier
-					}
-
-					if (selectedNode instanceof PersonTreeNode) {
-						PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-						selectedPerson = personTreeNode.getPerson();
-
-						String pdfFilePath = DirectoryManager.getPDFPersonListInWorkspaceDirectory(selectedPerson);
-						makeshowPDF(selectedPerson, pdfFilePath);
-						
-						 
-						// Ajouter un séparateur visuel pour les photos d'examen
-						String examTitle = "Photos examen - " + personTreeNode.getPerson().getNom();
-						boolean fromPerson = false;
-						Color borderColor = fromPerson ? Color.BLUE : Color.RED; // Bleu si via Person,
-																					// Rouge si direct
-						loadPDFListFromJTree(new File(personTreeNode.getPersonDirectoryName()), examTitle,
-								borderColor); // Noir pour différencier
-
-					}
-				} else {
-					showWarningDialog("aucune personne selectionnée");
-				}
-
-			}
-		});
-
-		
+	        
 	        
 		return panel;
 	}
@@ -1771,10 +1741,9 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 		if (selectedModel != null) {
 			System.out.println("Modèle sélectionné : " + selectedModel);
-			 
-			Properties printModels = modelManager.getProperties();
+
 			// Lire chaque propriété
-			String orientation = printModels .getProperty(selectedModel + ".orientation");
+			String orientation = printModels.getProperty(selectedModel + ".orientation");
 			String photosPerLine = printModels.getProperty(selectedModel + ".photosPerLine");
 			String photosPerColomne = printModels.getProperty(selectedModel + ".photosPerColomne");
 			String photoWidth = printModels.getProperty(selectedModel + ".photoWidth");
@@ -1803,6 +1772,8 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			if (photosPerColomne != null) {
 				photosParColomnSpinner.setSelectedItem(Integer.parseInt(photosPerColomne));
 			}
+			
+			
 			
 			if (photoWidth != null) {
 				photoWidthSpinner.setSelectedItem(Integer.parseInt(photoWidth));
@@ -1861,10 +1832,8 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 //	}
 
 	private void loadPrintModels() {
-		Properties printModels = modelManager.getProperties();
-		
-//		try (FileReader reader = new FileReader("printModels.ini")) {
-//			printModels.load(reader);
+		try (FileReader reader = new FileReader("printModels.ini")) {
+			printModels.load(reader);
 
 			for (String key : printModels.stringPropertyNames()) {
 				if (key.endsWith(".orientation")) {
@@ -1875,9 +1844,9 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 					}
 				}
 			}
-//		} catch (IOException e) {
-//			System.out.println("Fichier de modèles introuvable. Un nouveau fichier sera créé.");
-//		}
+		} catch (IOException e) {
+			System.out.println("Fichier de modèles introuvable. Un nouveau fichier sera créé.");
+		}
 	}
 
 //	private void saveNewPrintModel(String modelName) {
@@ -1924,7 +1893,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	    if (modelName == null || modelName.trim().isEmpty()) {
 	        showWarningDialog("Le nom du modèle est requis.");
 	        return;
-	    } 
+	    }
 
 	    // Vérifie si le modèle existe déjà via modelManager
 	    List<String> existingModels = modelManager.getModelNames();

@@ -68,7 +68,7 @@ public class SearchPersonUI extends JFrame {
 						// sélectionnée
 
 						// envoyer la pzesonz a lih principake
-						photoOrganizerApp.showPerson(selectedPerson);
+						photoOrganizerApp.showSearchResultPerson(selectedPerson);
 
 						dispose();
 						// Exemple : Afficher la personne dans une autre liste

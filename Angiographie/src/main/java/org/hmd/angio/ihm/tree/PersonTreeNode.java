@@ -61,7 +61,9 @@ public class PersonTreeNode extends DefaultMutableTreeNode {
             }
         }
     }
-
+    public void refrechPersonTree() {
+    	buildPersonTree();
+    }
     // Ajoute les photos comme nœuds sous le répertoire d'examen
     private void addPhotosToExamNode(ExamTreeNode examNode, File examDir) {
         File[] photoFiles = examDir.listFiles((dir, name) -> 

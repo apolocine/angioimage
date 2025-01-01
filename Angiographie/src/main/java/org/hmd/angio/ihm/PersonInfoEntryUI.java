@@ -10,6 +10,7 @@ import java.util.Date;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -20,9 +21,8 @@ import javax.swing.JTextField;
 import org.hmd.angio.PhotoOrganizer;
 import org.hmd.angio.dto.Person;
 import org.hmd.image.ouils.DatePicker;
-import org.hmd.image.ouils.DirectoryManager;
 
-public class PersonInfoEntryUI  extends JFrame {
+public class PersonInfoEntryUI extends JDialog  {
 
 	
 	
@@ -240,7 +240,7 @@ SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
     private void saveOrUpdatePerson() {
         // Créez une instance de Person avec les données saisies
         Person newPerson = getNewPerson() ;
-        photoOrganizerApp.addPerson(newPerson);
+        photoOrganizerApp.addTodayWorkPerson(newPerson);
         
         dispose();
         
