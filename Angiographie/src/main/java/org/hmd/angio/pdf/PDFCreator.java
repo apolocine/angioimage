@@ -8,6 +8,9 @@ import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -46,6 +49,50 @@ public class PDFCreator {
         }
     }
 	
+    public static void createPdf(
+    		
+    		
+    		boolean portrait,
+    		
+    		float widthByPhotosCount,
+  			float heightByPhotosCount,
+    		
+  			int nombreDePhotosParLigne,
+  			int nombreDePhotosParColomn,
+  			
+  			float xMargin,
+  			float yMargin, 
+    	    
+  			PDRectangleEnum rectangle,
+  			
+  			List<File> listPhots,
+  			String filePath,
+  			Person selectedPerson
+  			
+    		) 
+    {
+    	
+    	createPdf(
+        		
+        		
+        		 portrait,
+        		
+        		 widthByPhotosCount,
+      			 heightByPhotosCount,
+        		
+      			 nombreDePhotosParLigne,
+      			 nombreDePhotosParColomn,
+      			 xMargin,
+      			 yMargin, 
+        	    0,
+      			 rectangle,
+      			
+      			 listPhots,
+      			 filePath,
+      			 selectedPerson,
+      			new Date ()
+        		) ;
+    }
     
 	/**
 	 * 
@@ -72,19 +119,19 @@ public class PDFCreator {
   			
   			float xMargin,
   			float yMargin,
-  			
+
+    	    float sideMargin,
+    	    
   			PDRectangleEnum rectangle,
   			
   			List<File> listPhots,
   			String filePath,
-  			Person selectedPerson
-  			
+  			Person selectedPerson,
+  			java.util.Date exam
     		) 
     {
     	 	
-    	
-    
- 
+    	 
         try (PDDocument document = new PDDocument()) {
         	
         	  PDPage page ;
@@ -137,6 +184,7 @@ public class PDFCreator {
 			    		listPhots,
 			    		xMargin,
 			    		yMargin,
+			    		sideMargin,
 			    		widthByPhotosCount,
 			    		heightByPhotosCount, 
 			  			  nombreDePhotosParLigne,
@@ -155,8 +203,215 @@ public class PDFCreator {
             e.printStackTrace();
         }
     } 
-    private static final float MARGIN = 50;
-    private static final int FONT_SIZE = 40;
+
+    
+    private static void addPhotosToPage(
+    	    PDDocument document,
+    	    PDPage page,
+    	    float[] layout,
+    	    List<File> listPhots,
+    	    float xMargin,
+    	    float yMargin,
+    	    float sideMargin,
+    	    float widthByPhotosCount,
+    	    float heightByPhotosCount,
+    	    int nombreDePhotosParLigne,
+    	    int nombreDePhotosParColomn,
+    	    Person selectedPerson
+    	) throws IOException {
+    	    
+    	    float pageWidth = page.getMediaBox().getWidth();
+    	    float pageHeight = page.getMediaBox().getHeight();
+    	    
+    	    float cellWidth = (pageWidth - (xMargin * (nombreDePhotosParLigne + 1)) - (2 * sideMargin)) / nombreDePhotosParLigne;
+    	    float cellHeight = (pageHeight - (yMargin * (nombreDePhotosParColomn + 1))) / nombreDePhotosParColomn;
+    	    
+    	    int photoIndex = 0;
+    	    int totalPhotos = listPhots.size();
+    	    int page_number = 0;
+    	    
+    	    while (photoIndex < totalPhotos) {
+    	        
+    	        // Créer une nouvelle page si nécessaire
+    	        if (photoIndex > 0) {
+    	            page = new PDPage(page.getMediaBox());
+    	            document.addPage(page);
+    	        }
+
+    	        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+    	            
+    	            // Ajouter les informations à la première page
+    	            if (page.getRotation() == 0) {  
+    	                float xMargin_ = 50;
+    	                float yMargin_ = 50;
+    	                addTextInformation(document, page, selectedPerson, contentStream, xMargin_, yMargin_);
+    	            }
+    	            
+    	          
+    	            if (page.getRotation() == 0) {  
+    	                String textUser = "Dr Hamid MADANI";
+    	                addTextOnFirstPage(contentStream, page, textUser);
+    	            }     
+    	            
+    	            for (int row = 0; row < nombreDePhotosParColomn; row++) {
+    	                for (int col = 0; col < nombreDePhotosParLigne; col++) {
+    	                    
+    	                    if (photoIndex >= totalPhotos) break;
+    	                    
+    	                    // Application de sideMargin pour ajuster la position horizontale
+    	                    float cellX = sideMargin + xMargin + col * (cellWidth + xMargin);
+    	                    float cellY = pageHeight - (yMargin + (row + 1) * (cellHeight + yMargin));
+    	                    
+    	                    File filePhoto = listPhots.get(photoIndex);
+    	                    BufferedImage image = Thumbnails.of(filePhoto)
+    	                        .size((int) cellWidth, (int) cellHeight)
+    	                        .keepAspectRatio(true)
+    	                        .asBufferedImage();
+
+    	                    PDImageXObject pdImage = LosslessFactory.createFromImage(document, image);
+    	                    float imageWidth = pdImage.getWidth();
+    	                    float imageHeight = pdImage.getHeight();
+    	                    
+    	                    // Centrer l'image dans la cellule
+    	                    float xOffset = cellX + (cellWidth - imageWidth) / 2;
+    	                    float yOffset = cellY + (cellHeight - imageHeight) / 2;
+
+    	                    contentStream.drawImage(pdImage, xOffset, yOffset, imageWidth, imageHeight);
+    	                    
+    	                    // Bordure autour de chaque image
+    	                    contentStream.setLineWidth(1f);
+    	                    contentStream.setStrokingColor(Color.BLACK);
+    	                    contentStream.addRect(xOffset, yOffset, imageWidth, imageHeight);
+    	                    contentStream.stroke();
+    	                    
+    	                    // Ajouter texte sous chaque image (optionnel)
+    	                    contentStream.beginText();
+    	                    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+    	                    contentStream.newLineAtOffset(xOffset, yOffset - 15);
+    	                    contentStream.showText("Photo " + (photoIndex + 1));
+    	                    contentStream.endText();
+    	                    
+    	                    photoIndex++;
+    	                }
+    	            }
+    	            
+    	            page_number++;
+    	            // Ajouter le numéro de page
+    	            addPageNumber(contentStream, page, page_number);
+    	        }
+    	    }
+    	}
+
+    
+//    /**
+//     * {@code} OK
+//     * @param document
+//     * @param page
+//     * @param selectedPerson
+//     * @param contentStream
+//     * @param xMargin
+//     * @param yMargin
+//     * @throws IOException
+//     */
+//    private static void addPhotosToPage(
+//    	    PDDocument document,
+//    	    PDPage page,
+//    	    float[] layout,
+//    	    List<File> listPhots,
+//    	    float xMargin,
+//    	    float yMargin,
+//    	    float sideMargin,
+//    	    float widthByPhotosCount,
+//    	    float heightByPhotosCount,
+//    	    int nombreDePhotosParLigne,
+//    	    int nombreDePhotosParColomn,
+//    	    Person selectedPerson
+//    	) throws IOException {
+//    	    
+//    	    float pageWidth = page.getMediaBox().getWidth();
+//    	    float pageHeight = page.getMediaBox().getHeight();
+//    	    
+//    	    float cellWidth = (pageWidth - (xMargin * (nombreDePhotosParLigne + 1))) / nombreDePhotosParLigne;
+//    	    float cellHeight = (pageHeight - (yMargin * (nombreDePhotosParColomn + 1))) / nombreDePhotosParColomn;
+//    	    
+//    	    int photoIndex = 0;
+//    	    int totalPhotos = listPhots.size();
+//    	    int page_number=0;
+//    	    
+//    	    while (photoIndex < totalPhotos) {
+//    	        
+//    	        // Créer une nouvelle page si nécessaire
+//    	        if (photoIndex > 0) {
+//    	            page = new PDPage(page.getMediaBox());
+//    	            document.addPage(page);
+//    	        }
+//
+//    	        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+//    	        	
+//    	        	   // Ajouter les informations à la première page
+//    	            if (page.getRotation() == 0) {  // Ajout de texte uniquement à la première page
+//    	            	  float xMargin_ = 50;
+//    	          	    float yMargin_ = 50;
+//    	                addTextInformation(document, page, selectedPerson, contentStream,   xMargin_, yMargin_);
+//    	            }
+//    	              // Ajouter le texte seulement sur la première page
+//				    if (page.getRotation() == 0) {  
+//				        String textUser = "Dr Hamid MADANI";
+//				        addTextOnFirstPage(contentStream, page, textUser);
+//				    }	    
+//    	      
+//    	            
+//    	        	 
+//    	           
+//    	            for (int row = 0; row < nombreDePhotosParColomn; row++) {
+//    	                for (int col = 0; col < nombreDePhotosParLigne; col++) {
+//    	                    
+//    	                    if (photoIndex >= totalPhotos) break;
+//    	                    
+//    	                    float cellX = xMargin + col * (cellWidth + xMargin);
+//    	                    float cellY = pageHeight - (yMargin + (row + 1) * (cellHeight + yMargin));
+//    	                    
+//    	                    File filePhoto = listPhots.get(photoIndex);
+//    	                    BufferedImage image = Thumbnails.of(filePhoto)
+//    	                        .size((int) cellWidth, (int) cellHeight)
+//    	                        .keepAspectRatio(true)
+//    	                        .asBufferedImage();
+//
+//    	                    PDImageXObject pdImage = LosslessFactory.createFromImage(document, image);
+//    	                    float imageWidth = pdImage.getWidth();
+//    	                    float imageHeight = pdImage.getHeight();
+//    	                    
+//    	                    // Centrer l'image dans la cellule
+//    	                    float xOffset = cellX + (cellWidth - imageWidth) / 2;
+//    	                    float yOffset = cellY + (cellHeight - imageHeight) / 2;
+//
+//    	                    contentStream.drawImage(pdImage, xOffset, yOffset, imageWidth, imageHeight);
+//    	                    
+//    	                    // Bordure autour de chaque image
+//    	                    contentStream.setLineWidth(1f);
+//    	                    contentStream.setStrokingColor(Color.BLACK);
+//    	                    contentStream.addRect(xOffset, yOffset, imageWidth, imageHeight);
+//    	                    contentStream.stroke();
+//    	                    
+//    	                    // Ajouter texte sous chaque image (optionnel)
+//    	                    contentStream.beginText();
+//    	                    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+//    	                    contentStream.newLineAtOffset(xOffset, yOffset - 15);
+//    	                    contentStream.showText("Photo " + (photoIndex + 1));
+//    	                    contentStream.endText();
+//    	                    
+//    	                    photoIndex++;
+//    	                }
+//    	            }
+//    	            
+//    	            page_number++;
+//    	            // Ajouter le numéro de page
+//    	    	    addPageNumber(contentStream, page, page_number );
+//
+//    	        }
+//    	    }
+//    	}
+
  
 
     private static void addTextLine(PDPageContentStream contentStream, String text, float x, float y) throws IOException {
@@ -205,115 +460,6 @@ public class PDFCreator {
 
 
     
-    /**
-     * {@code} OK
-     * @param document
-     * @param page
-     * @param selectedPerson
-     * @param contentStream
-     * @param xMargin
-     * @param yMargin
-     * @throws IOException
-     */
-    private static void addPhotosToPage(
-    	    PDDocument document,
-    	    PDPage page,
-    	    float[] layout,
-    	    List<File> listPhots,
-    	    float xMargin,
-    	    float yMargin,
-    	    float widthByPhotosCount,
-    	    float heightByPhotosCount,
-    	    int nombreDePhotosParLigne,
-    	    int nombreDePhotosParColomn,
-    	    Person selectedPerson
-    	) throws IOException {
-    	    
-    	    float pageWidth = page.getMediaBox().getWidth();
-    	    float pageHeight = page.getMediaBox().getHeight();
-    	    
-    	    float cellWidth = (pageWidth - (xMargin * (nombreDePhotosParLigne + 1))) / nombreDePhotosParLigne;
-    	    float cellHeight = (pageHeight - (yMargin * (nombreDePhotosParColomn + 1))) / nombreDePhotosParColomn;
-    	    
-    	    int photoIndex = 0;
-    	    int totalPhotos = listPhots.size();
-    	    int page_number=0;
-    	    
-    	    while (photoIndex < totalPhotos) {
-    	        
-    	        // Créer une nouvelle page si nécessaire
-    	        if (photoIndex > 0) {
-    	            page = new PDPage(page.getMediaBox());
-    	            document.addPage(page);
-    	        }
-
-    	        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-    	        	
-    	        	   // Ajouter les informations à la première page
-    	            if (page.getRotation() == 0) {  // Ajout de texte uniquement à la première page
-    	            	  float xMargin_ = 50;
-    	          	    float yMargin_ = 50;
-    	                addTextInformation(document, page, selectedPerson, contentStream,   xMargin_, yMargin_);
-    	            }
-    	              // Ajouter le texte seulement sur la première page
-				    if (page.getRotation() == 0) {  
-				        String textUser = "Dr Hamid MADANI";
-				        addTextOnFirstPage(contentStream, page, textUser);
-				    }	    
-    	      
-    	            
-    	        	 
-    	           
-    	            for (int row = 0; row < nombreDePhotosParColomn; row++) {
-    	                for (int col = 0; col < nombreDePhotosParLigne; col++) {
-    	                    
-    	                    if (photoIndex >= totalPhotos) break;
-    	                    
-    	                    float cellX = xMargin + col * (cellWidth + xMargin);
-    	                    float cellY = pageHeight - (yMargin + (row + 1) * (cellHeight + yMargin));
-    	                    
-    	                    File filePhoto = listPhots.get(photoIndex);
-    	                    BufferedImage image = Thumbnails.of(filePhoto)
-    	                        .size((int) cellWidth, (int) cellHeight)
-    	                        .keepAspectRatio(true)
-    	                        .asBufferedImage();
-
-    	                    PDImageXObject pdImage = LosslessFactory.createFromImage(document, image);
-    	                    float imageWidth = pdImage.getWidth();
-    	                    float imageHeight = pdImage.getHeight();
-    	                    
-    	                    // Centrer l'image dans la cellule
-    	                    float xOffset = cellX + (cellWidth - imageWidth) / 2;
-    	                    float yOffset = cellY + (cellHeight - imageHeight) / 2;
-
-    	                    contentStream.drawImage(pdImage, xOffset, yOffset, imageWidth, imageHeight);
-    	                    
-    	                    // Bordure autour de chaque image
-    	                    contentStream.setLineWidth(1f);
-    	                    contentStream.setStrokingColor(Color.BLACK);
-    	                    contentStream.addRect(xOffset, yOffset, imageWidth, imageHeight);
-    	                    contentStream.stroke();
-    	                    
-    	                    // Ajouter texte sous chaque image (optionnel)
-    	                    contentStream.beginText();
-    	                    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-    	                    contentStream.newLineAtOffset(xOffset, yOffset - 15);
-    	                    contentStream.showText("Photo " + (photoIndex + 1));
-    	                    contentStream.endText();
-    	                    
-    	                    photoIndex++;
-    	                }
-    	            }
-    	            
-    	            page_number++;
-    	            // Ajouter le numéro de page
-    	    	    addPageNumber(contentStream, page, page_number );
-
-    	        }
-    	    }
-    	}
-
-    
     private static void addTextInformation(
     	    PDDocument document,
     	    PDPage page,
@@ -334,7 +480,24 @@ public class PDFCreator {
     	    contentStream.showText("Nom: " + selectedPerson.getNom());
     	    contentStream.newLineAtOffset(0, -15);
     	    contentStream.showText("Prénom: " + selectedPerson.getPrenom());
+    	    contentStream.newLineAtOffset(0, -15);
+    	     
+    	    
+    	    SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy");
+	        dateFormat.setLenient(false);
+	        contentStream.showText("Né(e): " + (selectedPerson.getDateNaissance()!=null?   dateFormat.format(selectedPerson.getDateNaissance()):""));;
+	        
+	        
+    	    contentStream.newLineAtOffset(0, -15);
+    	    
+    	 // Obtenir la date actuelle
+            LocalDate today = LocalDate.now();
+            String formattedDate = today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            
+    	    contentStream.showText("Examen: " + formattedDate);
     	    contentStream.endText();
+    	    
+    	    
     	}
     
     
@@ -501,7 +664,9 @@ public class PDFCreator {
 //        }
 //    }
 
-    
+
+    private static final float MARGIN = 50;
+    private static final int FONT_SIZE = 40;
     
   	private static void addPhotosToPage_old(
   			PDDocument document,
@@ -616,7 +781,12 @@ public class PDFCreator {
 
   
  	
-	private static void addStringToPage(PDPageContentStream contentStream, float pageWidth,float xPosition, float yPosition, String textUser)
+	private static void addStringToPage(
+			PDPageContentStream contentStream, 
+			float pageWidth,
+			float xPosition, 
+			float yPosition, 
+			String textUser)
 			throws IOException { 
 		  
 		  // Ajouter le numéro de photo (à des fins de démonstration)

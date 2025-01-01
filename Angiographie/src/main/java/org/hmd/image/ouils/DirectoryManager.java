@@ -205,6 +205,8 @@ public class DirectoryManager {
 		return pdfFilePath;
 	}
 
+	
+	
 	public static String getPDFPersonExamListInDirectory(Person person, ExamTreeNode exam) {
 
 		String personWorkspace = DirectoryManager.getPersonWorkspaceDirectory(person);
@@ -259,6 +261,19 @@ public class DirectoryManager {
 			JOptionPane.showMessageDialog(null, "Erreur lors de la sauvegarde de la copie modifiée.", "Erreur",
 					JOptionPane.ERROR_MESSAGE);
 		}
+	}
+
+	public static String normalisePDFNamePersonExam(Person selectedPerson, ExamTreeNode examNode,
+			String prefixpdfname) {
+		String personWorkspace = DirectoryManager.getPersonWorkspaceDirectory(selectedPerson);
+		String pdfFilePath = personWorkspace + 
+				File.separator + 
+				examNode.getFormattedExamDate() + 
+				File.separator
+				+prefixpdfname+ "_" +
+				+ selectedPerson.getId() + "_" + examNode.getFormattedExamDate() + ".pdf";
+
+		return pdfFilePath;
 	}
 
 }

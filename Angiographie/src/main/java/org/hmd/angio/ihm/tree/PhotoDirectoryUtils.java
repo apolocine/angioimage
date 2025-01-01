@@ -149,9 +149,44 @@ public class PhotoDirectoryUtils {
         return personNode;
     }
 
+ // Méthode pour copier un nœud avec tous ses fils
+    public void copyNodeWithChildren(DefaultMutableTreeNode selectedNode, DefaultMutableTreeNode dest) {
+ 		// Récupérer le nœud sélectionné
+//         DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+
+ 		if (selectedNode != null) {
+ 			// Copier le nœud et tous ses fils
+ 			DefaultMutableTreeNode copiedNode = copyNodeRecursive(selectedNode);
+
+ 			// Ajouter le nœud copié à la racine (vous pouvez choisir un autre emplacement)
+//             DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeModel.getRoot();
+ 			dest.add(copiedNode);
+
+ 			// Actualiser le modèle de l'arbre
+//             treeModel.reload();
+ 		}
+ 	}
+
+ 	// Méthode récursive pour copier un nœud avec tous ses fils
+ 	public DefaultMutableTreeNode copyNodeRecursive(DefaultMutableTreeNode originalNode) {
+ 		DefaultMutableTreeNode copy = new DefaultMutableTreeNode(originalNode.getUserObject());
+
+ 		// Copier tous les fils récursivement
+ 		for (int i = 0; i < originalNode.getChildCount(); i++) {
+ 			DefaultMutableTreeNode child = (DefaultMutableTreeNode) originalNode.getChildAt(i);
+ 			DefaultMutableTreeNode copiedChild = copyNodeRecursive(child);
+ 			copy.add(copiedChild);
+ 		}
+
+ 		return copy;
+ 	}
+
     
-    
-    
+ 	public static void addTextToTree(DefaultMutableTreeNode node, String text) {
+		DefaultMutableTreeNode textNode = new DefaultMutableTreeNode(text);
+		node.add(textNode);
+	}
+ 	
 	public static PersonTreeNode createPhotoTreeAsStringNodes(DefaultMutableTreeNode root, Person person) {
     	
    	 String parentDirectory = DirectoryManager.getPersonWorkspaceDirectory(person);  
