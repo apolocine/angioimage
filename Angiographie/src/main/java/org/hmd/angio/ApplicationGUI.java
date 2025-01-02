@@ -128,13 +128,14 @@ public class ApplicationGUI extends JFrame {
 		panel.setLayout(new GridLayout(3, 2));
 
 		panel.add(new JLabel("Nom d'utilisateur:"));
-		loginUsername = new JTextField("drmdh@msn.com");
+		loginUsername = new JTextField(Config.getProperty("username"));
 		panel.add(loginUsername);
 
 		panel.add(new JLabel("Mot de passe:"));
-		loginPassword = new JPasswordField("azerty@26");
+		loginPassword = new JPasswordField(Config.getProperty("password"));
 		panel.add(loginPassword);
 		
+				
 		JLabel messageLabel = 	new JLabel("");
 		panel.add(messageLabel);
 		
@@ -159,6 +160,9 @@ public class ApplicationGUI extends JFrame {
 					tabbedPane.setSelectedIndex(0); // Si la connexion échoue, basculez vers l'onglet de connexion
 					messageLabel.setText("wrong username or password");
 				
+					JOptionPane.showMessageDialog(null, "wrong username or password", "Erreur",
+							JOptionPane.ERROR_MESSAGE);
+					
 					}
 
 			}

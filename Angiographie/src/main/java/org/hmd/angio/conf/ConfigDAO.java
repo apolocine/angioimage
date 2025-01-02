@@ -1,6 +1,7 @@
 package org.hmd.angio.conf;
 
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import org.hmd.angio.install.sgbd.DatabaseManager;
 
 public class ConfigDAO {
 	    
-	private static final String CONFIG_FILE = "config.properties";
+	 private static final String CONFIG_FILE = "setting"+File.pathSeparator+"config"+File.pathSeparator+"config.properties";
 	private static Properties properties; 
 	private static String tableName="tb_config";
 	

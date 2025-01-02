@@ -6,7 +6,7 @@ import java.util.Properties;
 
 public class Config {
 	
-	 private static final String CONFIG_FILE = "config.properties";
+	 private static final String CONFIG_FILE = "setting"+File.separator+"config"+File.separator+"config.properties";
 	 private static Properties properties;
 
 	 
@@ -81,6 +81,9 @@ public class Config {
         properties.setProperty("medecinUtilisateur", "Dr Hamid MADANI");
         properties.setProperty("adresse.cabinet", "\\ Cit\\u00E9 50 Logements Mesra Mostaganem");
 
+        
+        properties.setProperty("printModels.filename", "setting\\\\config\\\\printModels.ini");        
+        properties.setProperty("toolBarImagesDirectory", "setting\\images");
         
 		File file = new File(CONFIG_FILE);
 

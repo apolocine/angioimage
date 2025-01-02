@@ -18,7 +18,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -69,6 +68,7 @@ import javax.swing.tree.TreePath;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.hmd.angio.conf.Config;
 import org.hmd.angio.conf.ConfigEditorUI;
 import org.hmd.angio.conf.PrintModelManager;
 import org.hmd.angio.conf.PrintPageModelEntryUI;
@@ -94,6 +94,8 @@ import org.hmd.image.ouils.ThumbnailRenderer;
 import net.coobird.thumbnailator.Thumbnails;
 
 public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
+	
+	
 	String[] extensions = { "jpg", "jpeg", "png", "bmp", "gif" };
 	// Ajouter l'instance de PersonDAO
 	// Initialisez l'instance de PersonDAO
@@ -117,13 +119,14 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	JPanel previewPDFPanel;
 	boolean isPDFGenerated = false;
 
-	private float zoomFactor = 1.0f;
+	private float zoomFactor = 0.4f;
+
 	private int currentPage = 0;
 
 	// Appel de la classe PersonInfoEntryUI
 	PersonInfoEntryUI personInfoEntryUI = new PersonInfoEntryUI(this);
-
-	PrintModelManager modelManager = new PrintModelManager("printModels.ini");
+	 
+	PrintModelManager modelManager  ;
 
 	/**
 	 * PDF generator IHM
@@ -175,6 +178,23 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 		initializeMenu();
 
+		
+		if(!personDAO.isConnected()) {
+			
+			
+			int confirmation = JOptionPane.showConfirmDialog(frame,
+			"Aucune connection à la base de donnée vous devez vérifier la mise en route du system de gestion SGBD.<br> Modifier la configuration" + "?",
+			"Erreur de connection à la base de donnée ", JOptionPane.YES_NO_OPTION);
+
+			
+				if (confirmation == JOptionPane.YES_OPTION) {
+					// Ouvrez l'IHM de modification de la configuration
+					openConfigEditorUI();
+				}else {
+					this.dispose();
+					System.exit(confirmation);
+				}
+		}
 		// Ajoutez la liste des personnes au-dessus de la liste de photos
 		JPanel treePeoplePhotsPanel = new JPanel(new BorderLayout());
 		treePeoplePhotsPanel.add(new JLabel("Liste des personnes "), BorderLayout.NORTH);
@@ -184,9 +204,16 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 
 		// Ajoutez la liste de photos
 		JPanel treePhotosPanel = new JPanel(new BorderLayout());
-		treePhotosPanel.add(new JLabel("Tree -> Liste de Photos"), BorderLayout.NORTH);
+		treePhotosPanel.add(new JLabel("Tree -> Liste des Photos"), BorderLayout.NORTH);
 		treePhotosPanel.add(new JScrollPane(initializePhotoList()), BorderLayout.CENTER);
 
+		
+		
+		String printModels = Config.getProperty("printModels.filename");
+
+		modelManager = new PrintModelManager(printModels);
+		
+		
 		JSplitPane treeSplitDirectoryPeoplePhotoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, treePeoplePhotsPanel,
 				treePhotosPanel);
 
@@ -195,6 +222,13 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		frame.add(dashBoardSplitPane, BorderLayout.CENTER);
 		frame.setVisible(true);
 
+		
+		
+		
+		applySelectedModel();
+		
+		
+		
 	}
 
 	private JPanel initProgressBarPDFGen() {
@@ -582,42 +616,26 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 	}
 
 	private void reloadPhotosAction() {
+ 
+		List<Person> people = personDAO.findAll();
+		// DefaultMutableTreeNode root = new DefaultMutableTreeNode("Patients");
 
-		TreePath path = peopleJTree.getSelectionPath();
-
-		if (path != null) {
-			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-
-			if (selectedNode instanceof ExamTreeNode) {
-				ExamTreeNode examNode = (ExamTreeNode) selectedNode;
-
-				PhotoDirectoryUtils.createPhotoTreeAsFileNodes(examNode, examNode.getPerson());
-
-				// reloadSelectedTreeNode();
-//				try {
-//					loadPhotos(directoryExam);
-//					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-			}
-			if (selectedNode instanceof PersonTreeNode) {
-				PersonTreeNode personTreeNode = (PersonTreeNode) selectedNode;
-//				File directory = new File(DirectoryManager.getPersonWorkspaceDirectory(personTreeNode.getPerson()));
-				// reloadSelectedTreeNode();
-				PhotoDirectoryUtils.createPhotoTreeAsFileNodes(personTreeNode, personTreeNode.getPerson());
-
-//				try {
-//					loadPhotos(directory);
-//					refreshTreeNode(selectedNode); // Mise à jour de l'arborescence
-//
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-			}
+		for (Person person : people) {
+			PhotoDirectoryUtils.createPhotoTreeAsFileNodes(allRecords, person);
 		}
 
-		// reloadSelectedTreeNode();
+//		PhotoDirectoryUtils.addTextToTree(root, "Action  ->");
+////			addTextToNode("Action", today);
+//		root.add(today);
+//		root.add(allRecords);
+//		root.add(inAction);
+
+		// Rafraîchissez le modèle du JTree
+		treeModel.reload();
+ 
+		
+		
+		
 	}
 
 	// Rafraîchir un nœud spécifique de l'arbre
@@ -873,6 +891,95 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		return photoList;
 	}
 
+	
+	private JPopupMenu createPDFListPopupMenu() {
+		JPopupMenu popupMenu = new JPopupMenu();
+
+		// Ajoutez les éléments du menu
+		JMenuItem ouvirItem = new JMenuItem("Ouvrir");
+		JMenuItem afficherItem = new JMenuItem("Afficher");
+		JMenuItem imprimerItem = new JMenuItem("Imprimer");
+		JMenuItem supprimerItem = new JMenuItem("Supprimer");
+	
+	
+		// Ajoutez des actions aux éléments du menu
+		ouvirItem.addActionListener(e -> { 
+			if(!pdfJList.isSelectionEmpty()) {
+				String pdfFilePath = pdfJList.getSelectedValue().getAbsolutePath();
+			PDFCreator.openBrowseFile(pdfFilePath);
+			}else {
+				showInfoDialog("Vous devez seletionner un fichier PDF dans la liste."
+						+ "<br> S'il n'existe aucun en générer un!");
+				} 
+		});
+
+		// Ajoutez des actions aux éléments du menu
+		afficherItem.addActionListener(e -> { 
+			File selectedFile = pdfJList.getSelectedValue(); 
+			if (selectedFile != null || !pdfJList.isSelectionEmpty()) { 
+				displayPDF(selectedFile.getAbsolutePath(), previewPDFPanel);
+		  
+			} else {
+
+				// Image non encore modifiée
+				JOptionPane.showMessageDialog(null, "Vous devez choisir au moins une photo à modifier",
+						"pas de Modification", JOptionPane.INFORMATION_MESSAGE);
+			}
+
+		});
+
+		imprimerItem.addActionListener(e -> printPDF());
+		// Ajoutez des actions aux éléments du menu
+		supprimerItem.addActionListener(e -> { 
+					File selectedFile = pdfJList.getSelectedValue();
+					
+					
+					if (selectedFile != null || !pdfJList.isSelectionEmpty()) {
+						
+						int confirmation = JOptionPane.showConfirmDialog(frame,
+								"Êtes-vous sûr de vouloir supprimer la fichier : " + selectedFile.getName()+ "?",
+								"Confirmation de suppression", JOptionPane.YES_NO_OPTION);
+			
+						if (confirmation == JOptionPane.YES_OPTION) {
+			
+							File directory=selectedFile.getParentFile();
+							
+							if(!selectedFile.delete()) {
+								// Image non encore modifiée
+								JOptionPane.showMessageDialog(null, "Le fichier n'a pas ete supprimé",
+										"pas de Modification", JOptionPane.INFORMATION_MESSAGE);
+							}else {
+								
+								 
+								loadPDFListFromJTree(directory, "", Color.BLACK);
+							}
+						}
+								
+								
+				
+
+							// displayImage(selectedFile);
+					} else {
+
+						// Image non encore modifiée
+						JOptionPane.showMessageDialog(null, "Vous devez choisir au moins une photo à modifier",
+								"pas de Modification", JOptionPane.INFORMATION_MESSAGE);
+					}
+
+				});
+		// Ajoutez les éléments au menu contextuel
+		popupMenu.add(ouvirItem);
+		popupMenu.add(imprimerItem);
+		popupMenu.add(afficherItem);
+		popupMenu.add(supprimerItem);
+
+		return popupMenu;
+	}
+	
+	
+	
+	
+	
 	private JPopupMenu createPhotoListPopupMenu() {
 		JPopupMenu popupMenu = new JPopupMenu();
 
@@ -1543,6 +1650,8 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				showPopup(e);
+				
+				
 			}
 
 			@Override
@@ -1553,7 +1662,7 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 			private void showPopup(MouseEvent e) {
 				if (e.isPopupTrigger()) {
 					// Affichez le menu contextuel ici
-					createPhotoListPopupMenu().show(e.getComponent(), e.getX(), e.getY());
+					createPDFListPopupMenu().show(e.getComponent(), e.getX(), e.getY());
 				}
 			}
 		});
@@ -2800,12 +2909,23 @@ public class PhotoOrganizerTreeApp extends JFrame implements PhotoOrganizer {
 		JToolBar toolBar = new JToolBar();
 		int iconSize = 32; // Taille des icônes
 
-		ImageIcon openIcon = createResizedIcon("images/patient.png", iconSize, iconSize);
-		ImageIcon searchIcon = createResizedIcon("images/search.png", iconSize, iconSize);
-		ImageIcon pdfIcon = createResizedIcon("images/pdf.png", iconSize, iconSize);
-		ImageIcon reloadIcon = createResizedIcon("images/reload.png", iconSize, iconSize);
-		ImageIcon sortiedurgenceIcon = createResizedIcon("images/sortie-durgence.png", iconSize, iconSize);
+//		ImageIcon openIcon = createResizedIcon("setting"+File.separator+"images"+File.separator+"patient.png", iconSize, iconSize);
+//		ImageIcon searchIcon = createResizedIcon("setting"+File.separator+"images"+File.separator+"search.png", iconSize, iconSize);
+//		ImageIcon pdfIcon = createResizedIcon("setting"+File.separator+"images"+File.separator+"pdf.png", iconSize, iconSize);
+//		ImageIcon reloadIcon = createResizedIcon("setting"+File.separator+"images"+File.separator+"reload.png", iconSize, iconSize);
+//		ImageIcon sortiedurgenceIcon = createResizedIcon("setting"+File.separator+"images"+File.separator+"-durgence.png", iconSize, iconSize);
 
+		
+	 	String toolBarImagesDirectory = Config.getProperty("toolBarImagesDirectory");
+	 	
+	 	
+		ImageIcon openIcon = createResizedIcon(toolBarImagesDirectory+File.separator+"patient.png", iconSize, iconSize);
+		ImageIcon searchIcon = createResizedIcon(toolBarImagesDirectory+File.separator+"search.png", iconSize, iconSize);
+		ImageIcon pdfIcon = createResizedIcon(toolBarImagesDirectory+File.separator+"pdf.png", iconSize, iconSize);
+		ImageIcon reloadIcon = createResizedIcon(toolBarImagesDirectory+File.separator+"reload.png", iconSize, iconSize);
+		ImageIcon sortiedurgenceIcon = createResizedIcon(toolBarImagesDirectory+File.separator+"-durgence.png", iconSize, iconSize);
+		
+		
 		JButton openToolBarButton = new JButton(openIcon);
 		JButton searchToolBarButton = new JButton(searchIcon);
 		JButton pdfToolBarButton = new JButton(pdfIcon);
