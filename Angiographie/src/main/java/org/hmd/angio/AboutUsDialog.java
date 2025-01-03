@@ -1,11 +1,17 @@
 package org.hmd.angio;
-import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.BorderLayout;
+import java.awt.Desktop;
+import java.awt.Dimension;
 import java.net.URI;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.HyperlinkEvent;
 
 public class AboutUsDialog {
 
@@ -34,7 +40,7 @@ public class AboutUsDialog {
         textPane.setContentType("text/html");
         textPane.setEditable(false);
 
-        String aboutText = "<html><b>About Us</b><br>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ<br>" +
+        String aboutText = "<html><b>About Us</b><br>ب�?سْم�? اللَّه�? الرَّحْمَٰن�? الرَّح�?يم�?<br>" +
                    "Welcome to our application!"
                 + "\r\n"+
                

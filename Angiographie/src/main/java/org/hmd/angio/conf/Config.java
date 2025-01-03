@@ -77,13 +77,21 @@ public class Config {
         properties.setProperty("db.tb.name", "tb_utilisateur");
         
         properties.setProperty("username", "drmdh@msn.com");
-        properties.setProperty("password", "azery@26");
+        properties.setProperty("password", "azerty@26");
         properties.setProperty("medecinUtilisateur", "Dr Hamid MADANI");
         properties.setProperty("adresse.cabinet", "\\ Cit\\u00E9 50 Logements Mesra Mostaganem");
 
         
-        properties.setProperty("printModels.filename", "setting\\\\config\\\\printModels.ini");        
+        properties.setProperty("printModels.filename", "setting\\config\\printModels.ini");        
         properties.setProperty("toolBarImagesDirectory", "setting\\images");
+        
+        properties.setProperty("mysql_admin", "mysql\\bin\\mysqladmin.exe");
+        properties.setProperty("mysql_shutdown_com_admin", "mysql\\bin\\mysqladmin.exe -u root shutdown");
+        
+        properties.setProperty("mysql_path", "mysql\\bin\\mysqld.exe");
+        properties.setProperty("mysql_command_path", "mysql\\bin\\mysql.exe -u root -p");
+        properties.setProperty("mysql_port", "3306");
+        properties.setProperty("mysql_ini_path", "mysql\\bin\\my.ini");
         
 		File file = new File(CONFIG_FILE);
 

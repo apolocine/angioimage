@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -20,9 +21,9 @@ import javax.swing.UIManager;
 import org.hmd.angio.conf.Config;
 import org.hmd.angio.conf.ConfigPanel;
 import org.hmd.angio.conf.UserDAO;
+import org.hmd.angio.install.MySQLConfigDialog;
 import org.hmd.angio.install.sgbd.DatabaseInitializer;
 import org.hmd.angio.install.sgbd.DatabaseManager;
-import org.hmd.image.ouils.DirectoryManager;
 
 public class ApplicationGUI extends JFrame {
 
@@ -48,25 +49,30 @@ public class ApplicationGUI extends JFrame {
 		setTitle("Application");
 
 		// Onglet 1
-		JPanel tab1 = createTab1();
+		JScrollPane tab1 = createTab1();
 
 		// Onglet 2
 		JPanel tab2 = createTab2();
 
 		// Onglet 3
 		JPanel tab3 = createTab3();
-
+		
+		// Onglet 4
+		JPanel tab4 = createTab4();
+				
+		
 		// Ajout des onglets
 		tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Connexion", tab1);
 		tabbedPane.addTab("Configuration", tab2);
 		tabbedPane.addTab("Update Configuration", tab3);
-
+		tabbedPane.addTab("Gestion Mysql", tab4);
+		
 		
 
 		add(tabbedPane);
 
-		setSize(400, 300);
+		setSize(590, 430);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		
@@ -123,10 +129,10 @@ public class ApplicationGUI extends JFrame {
 	
 	
 	
-	private JPanel createTab1() {
+	private JScrollPane createTab1() {
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(3, 2));
-
+		 
+		panel.setLayout(new GridLayout(5, 2));
 		panel.add(new JLabel("Nom d'utilisateur:"));
 		loginUsername = new JTextField(Config.getProperty("username"));
 		panel.add(loginUsername);
@@ -171,7 +177,9 @@ public class ApplicationGUI extends JFrame {
 		
 		panel.add(loginButton);
 
-		return panel;
+		JScrollPane treeScrollPane = new JScrollPane(panel);
+		
+		return treeScrollPane;
 	}
 
 	private JPanel createTab2() {
@@ -290,6 +298,18 @@ public class ApplicationGUI extends JFrame {
 		return panel;
 	}
 
+
+//	gestion deu SGBD Mysql
+	private JPanel createTab4() {
+		
+		JPanel panel = new JPanel();
+
+		MySQLConfigDialog mySQLConfigDialog = new MySQLConfigDialog(this);
+		panel.add(mySQLConfigDialog  );
+
+		return panel;
+	}
+	
 	private void startApplication() {
 
 		SwingUtilities.invokeLater(() -> {
