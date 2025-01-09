@@ -39,3 +39,7 @@ En développant cette application, je n’ai pas seulement résolu un problème�
 - Après vous être connecté, l’interface utilisateur principale de l'application s’ouvrira automatiquement.
 ![Interface utilisateur](images/04IHMUser33.png)
 > **Note :** Assurez-vous que la base de données est configurée correctement pour éviter les erreurs au démarrage.
+
+## 5. Interface utilisateur
+- modification de la saturation des images en couleur RGB
+- ![Interface utilisateur](Ctratementhistograme23812.png)
