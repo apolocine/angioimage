@@ -42,4 +42,4 @@ En développant cette application, je n’ai pas seulement résolu un problème�
 
 ## 5. Interface utilisateur
 - modification de la saturation des images en couleur RGB
-- ![Interface utilisateur](Ctratementhistograme23812.png)
+- ![Interface utilisateur](images/Ctratementhistograme23812.png)
