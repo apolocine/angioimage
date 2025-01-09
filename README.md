@@ -25,7 +25,7 @@ En développant cette application, je n’ai pas seulement résolu un problème�
 
 - Toutes les informations de connexion (noms des tables, utilisateurs administrateurs et applicatifs, etc.) sont stockées dans le fichier : `settings/config/config.properties`.
 - Vous pouvez modifier ce fichier directement ou utiliser l'onglet **"Update Configuration"** dans l'application, qui permet d’ajouter, modifier ou supprimer des variables et leurs valeurs.
-
+![Interface utilisateur](images/01update_config.png)
 ## 3. Création de la base de données (si nécessaire)
 
 - Si le SGBD est opérationnel mais que la base de données n'existe pas, l'application proposera de la créer.
@@ -37,5 +37,5 @@ En développant cette application, je n’ai pas seulement résolu un problème�
 
 - Une fois la base de données créée ou la connexion établie, vous serez redirigé vers l'onglet **"Connexion"**.
 - Après vous être connecté, l’interface utilisateur principale de l'application s’ouvrira automatiquement.
-
+![Interface utilisateur](images/04IHMUser33.png)
 > **Note :** Assurez-vous que la base de données est configurée correctement pour éviter les erreurs au démarrage.
