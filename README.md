@@ -12,28 +12,7 @@ Gestion, archivage, Traitement des photos d'angiographie
     vers l'onglet <strong>"Connexion"</strong>. Après vous être connecté, l’interface utilisateur principale de l'application 
     s’ouvrira automatiquement.
 </p>
- <style>
-        
-        h1 {
-            color: #0056b3;
-        }
-        h2 {
-            color: #333;
-        }
-        ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        .note {
-            background-color: #ffffcc;
-            padding: 10px;
-            border-left: 4px solid #ffcc00;
-            margin: 20px 0;
-        }
-    </style>
+
  <h1>Guide de démarrage de l'application</h1>
 
     <h2>1. Vérification de la base de données</h2>
