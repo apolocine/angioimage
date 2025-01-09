@@ -1,5 +1,19 @@
 # Angioimage
-Gestion, archivage, Traitement des photos d'angiographie 
+## Motivation pour la création de l'application
+L'idée de développer cette application est née d'un besoin concret et pressant dans ma pratique professionnelle. Je dispose d'un appareil d'angiographie rétinienne performant, mais j'ai malheureusement perdu le logiciel de gestion des photos qui l'accompagnait. Cette perte a considérablement perturbé mon flux de travail, rendant la gestion et l'analyse des clichés angiographiques beaucoup plus complexes.
+
+Plutôt que d'opter pour une solution commerciale coûteuse ou inadaptée à mes besoins, j'ai décidé de relever un défi personnel : **concevoir une application sur mesure**. Mon objectif principal était de :
+
+- Gérer efficacement les photos angiographiques ;
+- Offrir des fonctionnalités d’analyse avancées ;
+- Répondre spécifiquement aux besoins de mon cabinet.
+
+Ce projet m’a permis de combiner mes compétences médicales et en développement logiciel pour créer une solution innovante. Il incarne également mon ambition d'utiliser les nouvelles technologies, y compris l’intelligence artificielle, pour améliorer la qualité des soins que je propose à mes patients.
+
+En développant cette application, je n’ai pas seulement résolu un problème : j’ai découvert une véritable passion pour la conception d’outils mêlant santé et technologie, avec comme fil conducteur le bien-être de mes patients et l’amélioration de ma pratique professionnelle.
+
+---
+
 # Guide de démarrage de l'application
 
 ## 1. Vérification de la base de données
