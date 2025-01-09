@@ -46,4 +46,4 @@ En développant cette application, je n’ai pas seulement résolu un problème�
 ## 5. Génération de PDF avec les photos
 - ![Interface utilisateur](images/pdf_genere24105.png)
 - ![Interface utilisateur](images/pdf_genere35.png)
-
+<img src="images/pdf_genere35.png" alt="Interface utilisateur" width="400">
