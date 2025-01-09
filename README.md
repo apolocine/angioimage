@@ -12,8 +12,43 @@ Gestion, archivage, Traitement des photos d'angiographie
     vers l'onglet <strong>"Connexion"</strong>. Après vous être connecté, l’interface utilisateur principale de l'application 
     s’ouvrira automatiquement.
 </p>
-
- <h1>Guide de démarrage de l'application</h1>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide de démarrage de l'application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            color: #0056b3;
+        }
+        h2 {
+            color: #333;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .note {
+            background-color: #ffffcc;
+            padding: 10px;
+            border-left: 4px solid #ffcc00;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Guide de démarrage de l'application</h1>
 
     <h2>1. Vérification de la base de données</h2>
     <ul>
@@ -44,3 +79,5 @@ Gestion, archivage, Traitement des photos d'angiographie
     <div class="note">
         <strong>Note :</strong> Assurez-vous que la base de données est configurée correctement pour éviter les erreurs au démarrage.
     </div>
+</body>
+</html>
