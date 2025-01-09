@@ -1,83 +1,27 @@
 # Angioimage
 Gestion, archivage, Traitement des photos d'angiographie 
-<p>
-    Au démarrage de l'application, si la base de données n'est pas en cours d'exécution, une erreur de connexion sera signalée. 
-    Avant de démarrer l'application, vous devez vous assurer que la base de données est bien lancée. 
-    Toutes les informations de connexion, les noms des tables, ainsi que les utilisateurs administrateurs et applicatifs, 
-    sont stockés dans le fichier <code>settings/config/config.properties</code>. Ces paramètres peuvent être modifiés directement dans le fichier, 
-    ou via l'onglet <strong>"Update Configuration"</strong>, qui permet d’ajouter, de modifier ou de supprimer des variables et leurs valeurs.
-    Si le SGBD est opérationnel mais que la base de données n’existe pas, l'application la créera automatiquement 
-    (tables comprises) après confirmation de votre part. Si l'installation échoue, vérifiez les paramètres de connexion 
-    (hôte ou port) avant de réessayer. Une fois la base de données installée ou la connexion établie, vous serez redirigé 
-    vers l'onglet <strong>"Connexion"</strong>. Après vous être connecté, l’interface utilisateur principale de l'application 
-    s’ouvrira automatiquement.
-</p>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guide de démarrage de l'application</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f4f4f9;
-            color: #333;
-            padding: 20px;
-        }
-        h1 {
-            color: #0056b3;
-        }
-        h2 {
-            color: #333;
-        }
-        ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        .note {
-            background-color: #ffffcc;
-            padding: 10px;
-            border-left: 4px solid #ffcc00;
-            margin: 20px 0;
-        }
-    </style>
-</head>
-<body>
-    <h1>Guide de démarrage de l'application</h1>
+# Guide de démarrage de l'application
 
-    <h2>1. Vérification de la base de données</h2>
-    <ul>
-        <li>Si la base de données n'est pas en cours d'exécution, une erreur de connexion sera signalée.</li>
-        <li>Avant de démarrer l'application, assurez-vous que la base de données est correctement lancée.</li>
-    </ul>
+## 1. Vérification de la base de données
 
-    <h2>2. Configuration des paramètres</h2>
-    <ul>
-        <li>Toutes les informations de connexion (noms des tables, utilisateurs administrateurs et applicatifs, etc.) sont stockées dans le fichier : <code>settings/config/config.properties</code>.</li>
-        <li>Vous pouvez modifier ce fichier directement ou utiliser l'onglet <strong>"Update Configuration"</strong> dans l'application, qui permet d’ajouter, modifier ou supprimer des variables et leurs valeurs.</li>
-    </ul>
+- Si la base de données n'est pas en cours d'exécution, une erreur de connexion sera signalée.
+- Avant de démarrer l'application, assurez-vous que la base de données est correctement lancée.
 
-    <h2>3. Création de la base de données (si nécessaire)</h2>
-    <ul>
-        <li>Si le SGBD est opérationnel mais que la base de données n'existe pas, l'application proposera de la créer.</li>
-        <li>Lors de ce processus d’installation, les tables seront générées et remplies automatiquement.</li>
-        <li>L'application demandera votre confirmation avant d'exécuter l’installation.</li>
-        <li>En cas d'échec, vérifiez les paramètres de connexion (nom d’hôte ou port) et relancez l’installation.</li>
-    </ul>
+## 2. Configuration des paramètres
 
-    <h2>4. Interface utilisateur</h2>
-    <ul>
-        <li>Une fois la base de données créée ou la connexion établie, vous serez redirigé vers l'onglet <strong>"Connexion"</strong>.</li>
-        <li>Après vous être connecté, l’interface utilisateur principale de l'application s’ouvrira automatiquement.</li>
-    </ul>
+- Toutes les informations de connexion (noms des tables, utilisateurs administrateurs et applicatifs, etc.) sont stockées dans le fichier : `settings/config/config.properties`.
+- Vous pouvez modifier ce fichier directement ou utiliser l'onglet **"Update Configuration"** dans l'application, qui permet d’ajouter, modifier ou supprimer des variables et leurs valeurs.
 
-    <div class="note">
-        <strong>Note :</strong> Assurez-vous que la base de données est configurée correctement pour éviter les erreurs au démarrage.
-    </div>
-</body>
-</html>
+## 3. Création de la base de données (si nécessaire)
+
+- Si le SGBD est opérationnel mais que la base de données n'existe pas, l'application proposera de la créer.
+- Lors de ce processus d’installation, les tables seront générées et remplies automatiquement.
+- L'application demandera votre confirmation avant d'exécuter l’installation.
+- En cas d'échec, vérifiez les paramètres de connexion (nom d’hôte ou port) et relancez l’installation.
+
+## 4. Interface utilisateur
+
+- Une fois la base de données créée ou la connexion établie, vous serez redirigé vers l'onglet **"Connexion"**.
+- Après vous être connecté, l’interface utilisateur principale de l'application s’ouvrira automatiquement.
+
+> **Note :** Assurez-vous que la base de données est configurée correctement pour éviter les erreurs au démarrage.
