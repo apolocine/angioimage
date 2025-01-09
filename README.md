@@ -40,6 +40,10 @@ En développant cette application, je n’ai pas seulement résolu un problème�
 ![Interface utilisateur](images/04IHMUser33.png)
 > **Note :** Assurez-vous que la base de données est configurée correctement pour éviter les erreurs au démarrage.
 
-## 5. Interface utilisateur
+## 5. Saturation des couleurs
 - modification de la saturation des images en couleur RGB
 - ![Interface utilisateur](images/Ctratementhistograme23812.png)
+## 5. Génération de PDF avec les photos
+- ![Interface utilisateur](images/pdf_genere24105.png)
+- ![Interface utilisateur](images/pdf_genere35.png)
+
