@@ -37,13 +37,13 @@ En développant cette application, je n’ai pas seulement résolu un problème�
 
 - Une fois la base de données créée ou la connexion établie, vous serez redirigé vers l'onglet **"Connexion"**.
 - Après vous être connecté, l’interface utilisateur principale de l'application s’ouvrira automatiquement.
-![Interface utilisateur](images/04IHMUser33.png)
+<img src="images/04IHMUser33.png" alt="Interface utilisateur" width="400">
 > **Note :** Assurez-vous que la base de données est configurée correctement pour éviter les erreurs au démarrage.
 
 ## 5. Saturation des couleurs
 - modification de la saturation des images en couleur RGB
-- ![Interface utilisateur](images/Ctratementhistograme23812.png)
+- <img src="images/Ctratementhistograme23812.png" alt="Interface utilisateur" width="400">
+- pdf_genere24105.png
 ## 5. Génération de PDF avec les photos
-- ![Interface utilisateur](images/pdf_genere24105.png)
-- ![Interface utilisateur](images/pdf_genere35.png)
-<img src="images/pdf_genere35.png" alt="Interface utilisateur" width="400">
+- <img src="images/pdf_genere24105.png" alt="Interface utilisateur" width="400">
+- <img src="images/pdf_genere35.png" alt="Interface utilisateur" width="400">
