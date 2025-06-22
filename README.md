@@ -305,9 +305,9 @@ graph TD
 
 ## 📚 Documentation Technique
 
-- 📖 [Document de Conception](Document_de_Conception.md)
-- 🏗️ [Document d'Architecture](Document_Architecture.md)
-- 🧪 [Plan de Test](Plan_de_Test.md)
+- 📖 [Document de Conception](Documents/Document_de_Conception.md)
+- 🏗️ [Document d'Architecture](ocuments/Document_Architecture.md)
+- 🧪 [Plan de Test](ocuments/Plan_de_Test.md)
 
 ## 🔧 Maintenance et Support
 
