@@ -1,5 +1,6 @@
 import dbConnect from '@/lib/db/mongodb'
-import Patient, { IPatient } from '@/lib/db/models/Patient'
+import { Patient } from '@/lib/db/models'
+import { IPatient } from '@/lib/db/models/Patient'
 
 export interface PaginationOptions {
   page: number
@@ -73,7 +74,7 @@ export class PatientService {
     }
   }
 
-  static async getPatientById(id: string): Promise<IPatient | null> {
+  static async getPatientById(id: string): Promise<(IPatient & { age?: number }) | null> {
     await dbConnect()
     const patient = await Patient.findById(id).lean()
     
@@ -87,7 +88,7 @@ export class PatientService {
         age--
       }
       
-      return { ...patient, age }
+      return { ...patient, age } as IPatient & { age: number }
     }
     
     return patient

@@ -4,10 +4,7 @@ import { authOptions } from '@/lib/auth/config'
 import dbConnect from '@/lib/db/mongodb'
 import { Exam } from '@/lib/db/models'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
@@ -16,23 +13,54 @@ export async function GET(
 
     await dbConnect()
 
-    const resolvedParams = await params
-    const exams = await Exam.find({ patientId: resolvedParams.id })
-      .populate('patientId', 'nom prenom')
+    const { searchParams } = new URL(request.url)
+    const type = searchParams.get('type')
+    const patientId = searchParams.get('patientId')
+    const status = searchParams.get('status')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const offset = parseInt(searchParams.get('offset') || '0')
+
+    // Construction de la requête
+    const query: any = {}
+    
+    if (type) {
+      query.type = type
+    }
+    
+    if (patientId) {
+      query.patientId = patientId
+    }
+    
+    if (status) {
+      query.status = status
+    }
+
+    const exams = await Exam.find(query)
+      .populate('patientId', 'nom prenom email dateNaissance')
+      .populate('praticien', 'name email')
       .sort({ date: -1 })
+      .limit(limit)
+      .skip(offset)
       .lean()
 
-    return NextResponse.json(exams)
+    const totalCount = await Exam.countDocuments(query)
+
+    return NextResponse.json({
+      data: exams,
+      pagination: {
+        total: totalCount,
+        limit,
+        offset,
+        hasMore: totalCount > offset + exams.length
+      }
+    })
   } catch (error) {
     console.error('Erreur récupération examens:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
@@ -49,19 +77,18 @@ export async function POST(
     
     await dbConnect()
 
-    const resolvedParams = await params
     const exam = new Exam({
       ...body,
-      patientId: resolvedParams.id,
       createdBy: session.user.id,
-      praticien: session.user.id
+      praticien: session.user.id,
+      status: body.status || 'planifie'
     })
 
     await exam.save()
     
     const populatedExam = await Exam.findById(exam._id)
-      .populate('patientId', 'nom prenom')
-      .populate('praticien', 'name')
+      .populate('patientId', 'nom prenom email')
+      .populate('praticien', 'name email')
       .lean()
 
     return NextResponse.json(populatedExam, { status: 201 })

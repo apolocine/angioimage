@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db/mongodb'
-import User from '@/lib/db/models/User'
-import Role from '@/lib/db/models/Role'
+import { User, Role } from '@/lib/db/models'
 import { hashPassword } from '@/lib/utils/crypto'
 import { registerSchema } from '@/lib/utils/validation'
 

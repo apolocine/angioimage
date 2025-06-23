@@ -1,7 +1,35 @@
 export const examensSeed = [
   {
     type: 'angiographie',
-    date: new Date('2024-06-20'),
+    date: new Date('2024-06-23T14:30:00'),
+    oeil: 'OD',
+    indication: 'Suspicion de DMLA',
+    diagnostic: '',
+    status: 'planifie',
+    angiographie: {
+      protocole: 'Protocole standard DMLA',
+      fluoresceine: {
+        injected: false
+      }
+    }
+  },
+  {
+    type: 'angiographie',
+    date: new Date('2024-06-23T16:00:00'),
+    oeil: 'OS',
+    indication: 'Contrôle évolution néovaisseaux',
+    diagnostic: '',
+    status: 'planifie',
+    angiographie: {
+      protocole: 'Protocole rétinopathie diabétique',
+      fluoresceine: {
+        injected: false
+      }
+    }
+  },
+  {
+    type: 'angiographie',
+    date: new Date('2024-06-20T10:30:00'),
     oeil: 'OD',
     indication: 'Suspicion de DMLA',
     diagnostic: 'Angiographie normale',
@@ -9,11 +37,24 @@ export const examensSeed = [
     angiographie: {
       fluoresceine: {
         injected: true,
-        injectionTime: new Date('2024-06-20T10:30:00'),
-        phases: []
+        injectionTime: new Date('2024-06-20T10:35:00')
       },
-      protocole: 'Protocole standard DMLA',
-      complications: []
+      protocole: 'Protocole standard DMLA'
+    }
+  },
+  {
+    type: 'angiographie',
+    date: new Date('2024-06-21T09:15:00'),
+    oeil: 'OS',
+    indication: 'Rétinopathie diabétique',
+    diagnostic: 'Proliférante modérée',
+    status: 'termine',
+    angiographie: {
+      fluoresceine: {
+        injected: true,
+        injectionTime: new Date('2024-06-21T09:20:00')
+      },
+      protocole: 'Protocole diabète'
     }
   },
   {

@@ -47,9 +47,29 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = await patientSchema.validate(body)
+    
+    // Convert null values to undefined for optional fields
+    const cleanedData: any = {
+      ...validatedData,
+      email: validatedData.email || undefined,
+      telephone: validatedData.telephone || undefined,
+      adresse: validatedData.adresse ? {
+        rue: validatedData.adresse.rue || undefined,
+        ville: validatedData.adresse.ville || undefined,
+        codePostal: validatedData.adresse.codePostal || undefined,
+        pays: validatedData.adresse.pays || undefined
+      } : undefined,
+      dossierMedical: validatedData.dossierMedical ? {
+        numeroSecu: validatedData.dossierMedical.numeroSecu || undefined,
+        medecin: validatedData.dossierMedical.medecin || undefined,
+        antecedents: validatedData.dossierMedical.antecedents || undefined,
+        allergies: validatedData.dossierMedical.allergies || undefined,
+        traitements: validatedData.dossierMedical.traitements || undefined
+      } : undefined
+    }
 
     const patient = await PatientService.createPatient({
-      ...validatedData,
+      ...cleanedData,
       createdBy: session.user.id
     })
 

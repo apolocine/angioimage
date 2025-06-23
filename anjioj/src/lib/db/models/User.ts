@@ -1,4 +1,4 @@
-import { Schema, model, models, Model } from 'mongoose'
+import { Schema, model, models, Model, Types } from 'mongoose'
 
 export interface IUser {
   _id?: string
@@ -6,7 +6,7 @@ export interface IUser {
   password: string
   name: string
   role: string
-  roleRef?: string
+  roleRef?: Types.ObjectId | string
   settings: {
     theme: 'light' | 'dark'
     language: string

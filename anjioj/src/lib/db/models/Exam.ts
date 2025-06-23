@@ -1,8 +1,8 @@
-import { Schema, model, models, Model } from 'mongoose'
+import { Schema, model, models, Model, Types } from 'mongoose'
 
 export interface IExam {
   _id?: string
-  patientId: string
+  patientId: Types.ObjectId | string
   type: 'angiographie' | 'retinographie' | 'oct'
   date: Date
   oeil: 'OD' | 'OS' | 'OU'
@@ -24,13 +24,13 @@ export interface IExam {
     complications?: string[]
   }
   status: 'planifie' | 'en_cours' | 'termine' | 'annule'
-  praticien?: string
+  praticien?: Types.ObjectId | string
   rapport?: {
     generated: boolean
     pdfUrl?: string
     template?: string
   }
-  createdBy?: string
+  createdBy?: Types.ObjectId | string
   createdAt?: Date
   updatedAt?: Date
 }

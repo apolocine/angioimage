@@ -22,7 +22,7 @@ export default function EditPatientPage() {
     formState: { errors },
     reset
   } = useForm<PatientInput>({
-    resolver: yupResolver(patientSchema)
+    resolver: yupResolver(patientSchema) as any
   })
 
   useEffect(() => {

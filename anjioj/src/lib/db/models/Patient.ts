@@ -1,4 +1,4 @@
-import { Schema, model, models, Model } from 'mongoose'
+import { Schema, model, models, Model, Types } from 'mongoose'
 
 export interface IPatient {
   _id?: string
@@ -26,7 +26,7 @@ export interface IPatient {
     importedAt?: Date
     tags?: string[]
   }
-  createdBy?: string
+  createdBy?: Types.ObjectId | string
   createdAt?: Date
   updatedAt?: Date
 }

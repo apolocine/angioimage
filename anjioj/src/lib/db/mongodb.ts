@@ -2,9 +2,9 @@ import mongoose from 'mongoose'
 
 declare global {
   var mongoose: {
-    conn: typeof mongoose | null
-    promise: Promise<typeof mongoose> | null
-  }
+    conn: any
+    promise: Promise<any> | null
+  } | undefined
 }
 
 const MONGODB_URI = process.env.MONGO_URI
@@ -15,10 +15,10 @@ if (!MONGODB_URI) {
   )
 }
 
-let cached = global.mongoose
+let cached = global.mongoose || { conn: null, promise: null }
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null }
+if (!global.mongoose) {
+  global.mongoose = cached
 }
 
 async function dbConnect() {
@@ -31,18 +31,14 @@ async function dbConnect() {
       bufferCommands: false,
     }
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-      console.log('MongoDB connected successfully')
-      return mongoose
-    }).catch((error) => {
-      console.error('MongoDB connection error:', error)
-      throw error
-    })
+    cached.promise = mongoose.connect(MONGODB_URI!, opts)
   }
 
   try {
     cached.conn = await cached.promise
+    console.log('MongoDB connected successfully')
   } catch (e) {
+    console.error('MongoDB connection error:', e)
     cached.promise = null
     throw e
   }

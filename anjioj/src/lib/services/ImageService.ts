@@ -1,6 +1,6 @@
 import dbConnect from '@/lib/db/mongodb'
-import Image, { IImage } from '@/lib/db/models/Image'
-import Exam from '@/lib/db/models/Exam'
+import { Image, Exam } from '@/lib/db/models'
+import { IImage } from '@/lib/db/models/Image'
 import { StorageService } from './StorageService'
 
 export interface CreateImageData {

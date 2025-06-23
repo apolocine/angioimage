@@ -17,8 +17,8 @@ export const patientSchema = yup.object({
   prenom: yup.string().required('Prénom requis'),
   dateNaissance: yup.date().required('Date de naissance requise').max(new Date(), 'Date invalide'),
   sexe: yup.string().oneOf(['M', 'F']).required('Sexe requis'),
-  email: yup.string().email('Email invalide').nullable(),
-  telephone: yup.string().nullable(),
+  email: yup.string().email('Email invalide').nullable().optional(),
+  telephone: yup.string().nullable().optional(),
   adresse: yup.object({
     rue: yup.string().nullable(),
     ville: yup.string().nullable(),
@@ -34,6 +34,18 @@ export const patientSchema = yup.object({
   }).nullable()
 })
 
+export const examSchema = yup.object({
+  patientId: yup.string().required('Patient requis'),
+  type: yup.string().oneOf(['angiographie', 'retinographie', 'oct']).required('Type requis'),
+  date: yup.date().required('Date requise'),
+  oeil: yup.string().oneOf(['OD', 'OS', 'OU']).required('Œil requis'),
+  indication: yup.string().required('Indication requise'),
+  angiographie: yup.object({
+    protocole: yup.string().required('Protocole requis pour angiographie')
+  }).optional()
+})
+
 export type LoginInput = yup.InferType<typeof loginSchema>
 export type RegisterInput = yup.InferType<typeof registerSchema>
 export type PatientInput = yup.InferType<typeof patientSchema>
+export type ExamInput = yup.InferType<typeof examSchema>

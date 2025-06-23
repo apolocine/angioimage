@@ -18,7 +18,7 @@ export default function NewPatientPage() {
     handleSubmit,
     formState: { errors }
   } = useForm<PatientInput>({
-    resolver: yupResolver(patientSchema),
+    resolver: yupResolver(patientSchema) as any,
     defaultValues: {
       adresse: {
         pays: 'France'

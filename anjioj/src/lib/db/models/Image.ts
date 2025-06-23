@@ -1,8 +1,8 @@
-import { Schema, model, models, Model } from 'mongoose'
+import { Schema, model, models, Model, Types } from 'mongoose'
 
 export interface IImage {
   _id?: string
-  examenId: string
+  examenId: Types.ObjectId | string
   filename: string
   originalName?: string
   url: string
@@ -61,7 +61,7 @@ export interface IImage {
     quality?: 'excellente' | 'bonne' | 'moyenne' | 'mauvaise'
   }
   status: 'uploaded' | 'processing' | 'ready' | 'error'
-  uploadedBy: string
+  uploadedBy: Types.ObjectId | string
   createdAt?: Date
   updatedAt?: Date
 }

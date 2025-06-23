@@ -1,8 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import dbConnect from '@/lib/db/mongodb'
-import User from '@/lib/db/models/User'
-import Role from '@/lib/db/models/Role'
+import { User, Role } from '@/lib/db/models'
 import { comparePassword } from '@/lib/utils/crypto'
 
 export const authOptions: NextAuthOptions = {
