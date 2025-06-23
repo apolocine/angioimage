@@ -15,14 +15,14 @@
 
 | Élément | Description | DEV | TEST |
 |---------|-------------|-----|------|
-| **Formulaire de connexion** | Form avec email/password | ❌ | ❌ |
-| - Champ email | Input type="email" avec validation | ❌ | ❌ |
-| - Champ password | Input type="password" avec toggle visibility | ❌ | ❌ |
-| - Bouton "Se connecter" | Submit button avec loading state | ❌ | ❌ |
-| - Checkbox "Se souvenir" | Remember me functionality | ❌ | ❌ |
-| **Messages d'erreur** | Affichage erreurs validation/auth | ❌ | ❌ |
+| **Formulaire de connexion** | Form avec email/password | ✅ | ❌ |
+| - Champ email | Input type="email" avec validation | ✅ | ❌ |
+| - Champ password | Input type="password" avec toggle visibility | ✅ | ❌ |
+| - Bouton "Se connecter" | Submit button avec loading state | ✅ | ❌ |
+| - Checkbox "Se souvenir" | Remember me functionality | ✅ | ❌ |
+| **Messages d'erreur** | Affichage erreurs validation/auth | ✅ | ❌ |
 | **Lien mot de passe oublié** | Redirection vers reset password | ❌ | ❌ |
-| **Logo/Branding** | Logo Angioimage + tagline | ❌ | ❌ |
+| **Logo/Branding** | Logo Angioimage + tagline | ✅ | ❌ |
 | **Mode sombre/clair** | Toggle theme button | ❌ | ❌ |
 | **Responsive design** | Mobile/tablet/desktop layouts | ❌ | ❌ |
 
@@ -31,15 +31,15 @@
 
 | Élément | Description | DEV | TEST |
 |---------|-------------|-----|------|
-| **Formulaire d'inscription** | Form création utilisateur | ❌ | ❌ |
-| - Champ nom complet | Input text avec validation | ❌ | ❌ |
-| - Champ email | Input email avec vérification unicité | ❌ | ❌ |
-| - Champ password | Input password avec force indicator | ❌ | ❌ |
+| **Formulaire d'inscription** | Form création utilisateur | ✅ | ❌ |
+| - Champ nom complet | Input text avec validation | ✅ | ❌ |
+| - Champ email | Input email avec vérification unicité | ✅ | ❌ |
+| - Champ password | Input password avec force indicator | ✅ | ❌ |
 | - Confirmation password | Input avec validation match | ❌ | ❌ |
-| - Sélection rôle | Select (admin/doctor/assistant) | ❌ | ❌ |
-| **Conditions d'utilisation** | Checkbox + lien vers CGU | ❌ | ❌ |
-| **Bouton inscription** | Submit avec validation complète | ❌ | ❌ |
-| **Lien retour connexion** | Redirection vers /login | ❌ | ❌ |
+| - Sélection rôle | Select (admin/doctor/assistant) | ✅ | ❌ |
+| **Conditions d'utilisation** | Checkbox + lien vers CGU | ✅ | ❌ |
+| **Bouton inscription** | Submit avec validation complète | ✅ | ❌ |
+| **Lien retour connexion** | Redirection vers /login | ✅ | ❌ |
 
 ---
 
@@ -50,29 +50,29 @@
 
 | Élément | Description | DEV | TEST |
 |---------|-------------|-----|------|
-| **Header navigation** | Barre navigation principale | ❌ | ❌ |
-| - Logo Angioimage | Logo cliquable vers dashboard | ❌ | ❌ |
-| - Menu utilisateur | Dropdown (profil/déconnexion) | ❌ | ❌ |
+| **Header navigation** | Barre navigation principale | ✅ | ❌ |
+| - Logo Angioimage | Logo cliquable vers dashboard | ✅ | ❌ |
+| - Menu utilisateur | Dropdown (profil/déconnexion) | ✅ | ❌ |
 | - Notifications | Bell icon avec badge count | ❌ | ❌ |
 | - Recherche globale | Search bar avec autocomplete | ❌ | ❌ |
-| **Sidebar navigation** | Menu latéral avec liens | ❌ | ❌ |
-| - Lien Patients | Navigation vers /dashboard/patients | ❌ | ❌ |
-| - Lien Images | Navigation vers /dashboard/images | ❌ | ❌ |
-| - Lien Angiographie | Navigation vers /dashboard/angiography | ❌ | ❌ |
-| - Lien Rapports | Navigation vers /dashboard/reports | ❌ | ❌ |
-| - Lien Paramètres | Navigation vers /dashboard/settings | ❌ | ❌ |
-| **Widgets statistiques** | Cards avec métriques | ❌ | ❌ |
-| - Total patients | Nombre total avec évolution | ❌ | ❌ |
-| - Examens du jour | Nombre d'examens programmés | ❌ | ❌ |
-| - Images traitées | Nombre d'images de la semaine | ❌ | ❌ |
-| - Rapports générés | Nombre de rapports du mois | ❌ | ❌ |
+| **Sidebar navigation** | Menu latéral avec liens | ✅ | ❌ |
+| - Lien Patients | Navigation vers /dashboard/patients | ✅ | ❌ |
+| - Lien Images | Navigation vers /dashboard/images | ✅ | ❌ |
+| - Lien Angiographie | Navigation vers /dashboard/angiography | ✅ | ❌ |
+| - Lien Rapports | Navigation vers /dashboard/reports | ✅ | ❌ |
+| - Lien Paramètres | Navigation vers /dashboard/settings | ✅ | ❌ |
+| **Widgets statistiques** | Cards avec métriques | ✅ | ❌ |
+| - Total patients | Nombre total avec évolution | ✅ | ❌ |
+| - Examens du jour | Nombre d'examens programmés | ✅ | ❌ |
+| - Images traitées | Nombre d'images de la semaine | ✅ | ❌ |
+| - Rapports générés | Nombre de rapports du mois | ✅ | ❌ |
 | **Graphique activité** | Chart.js ligne temps réel | ❌ | ❌ |
-| **Liste examens récents** | Table avec derniers examens | ❌ | ❌ |
+| **Liste examens récents** | Table avec derniers examens | ✅ | ❌ |
 | **Alertes/Notifications** | Panel notifications importantes | ❌ | ❌ |
-| **Actions rapides** | Boutons actions fréquentes | ❌ | ❌ |
-| - Nouveau patient | Bouton vers /dashboard/patients/new | ❌ | ❌ |
-| - Nouvel examen | Bouton modal création examen | ❌ | ❌ |
-| - Import images | Bouton upload rapide | ❌ | ❌ |
+| **Actions rapides** | Boutons actions fréquentes | ✅ | ❌ |
+| - Nouveau patient | Bouton vers /dashboard/patients/new | ✅ | ❌ |
+| - Nouvel examen | Bouton modal création examen | ✅ | ❌ |
+| - Import images | Bouton upload rapide | ✅ | ❌ |
 
 ---
 
@@ -83,19 +83,19 @@
 
 | Élément | Description | DEV | TEST |
 |---------|-------------|-----|------|
-| **Header page** | Titre + bouton nouveau patient | ❌ | ❌ |
-| - Titre "Patients" | H1 avec compteur total | ❌ | ❌ |
-| - Bouton "Nouveau patient" | Navigation vers /dashboard/patients/new | ❌ | ❌ |
-| **Barre de recherche** | Search input avec filtres | ❌ | ❌ |
-| - Champ recherche | Input text avec debounce | ❌ | ❌ |
+| **Header page** | Titre + bouton nouveau patient | ✅ | ❌ |
+| - Titre "Patients" | H1 avec compteur total | ✅ | ❌ |
+| - Bouton "Nouveau patient" | Navigation vers /dashboard/patients/new | ✅ | ❌ |
+| **Barre de recherche** | Search input avec filtres | ✅ | ❌ |
+| - Champ recherche | Input text avec debounce | ✅ | ❌ |
 | - Filtre par âge | Select range d'âge | ❌ | ❌ |
 | - Filtre par genre | Select M/F/Tous | ❌ | ❌ |
-| - Bouton recherche | Submit search avec loading | ❌ | ❌ |
+| - Bouton recherche | Submit search avec loading | ✅ | ❌ |
 | - Bouton reset | Clear all filters | ❌ | ❌ |
-| **Table patients** | Table responsive avec données | ❌ | ❌ |
+| **Table patients** | Table responsive avec données | ✅ | ❌ |
 | - Colonne photo | Avatar/initiales patient | ❌ | ❌ |
-| - Colonne nom/prénom | Nom complet cliquable | ❌ | ❌ |
-| - Colonne âge | Âge calculé automatiquement | ❌ | ❌ |
+| - Colonne nom/prénom | Nom complet cliquable | ✅ | ❌ |
+| - Colonne âge | Âge calculé automatiquement | ✅ | ❌ |
 | - Colonne dernière visite | Date dernier examen | ❌ | ❌ |
 | - Colonne nb examens | Count total examens | ❌ | ❌ |
 | - Colonne actions | Dropdown (voir/éditer/supprimer) | ❌ | ❌ |
@@ -580,5 +580,65 @@
 - [ ] Documentation
 - [ ] Code review
 
-**Dernière mise à jour** : 2024-01-15  
-**Prochaine révision** : 2024-01-22
+---
+
+## 🔒 EXIGENCES DE SÉCURITÉ ET GESTION DES DONNÉES
+
+### ⚡ Règles Critiques
+1. **Aucune donnée mock ou hardcodée** : Toutes les données doivent provenir de la base de données via seeding
+2. **Mots de passe hashés** : Tous les mots de passe doivent être stockés sous forme hashée (bcrypt ou similaire)
+3. **Configuration MongoDB** : 
+   ```
+   MONGO_URI='mongodb://devuser:devpass26@localhost:27017/angiographiedb?authSource=angiographiedb'
+   ```
+4. **Gestion des rôles** : Les rôles doivent être gérés comme des modules complets (modèle, contrôleur, routes) au même titre que :
+   - Module Patient
+   - Module User
+   - Module Image
+   - Module Report
+   - Module Angiography
+   - **Module Role** (avec CRUD complet)
+
+### 📋 Checklist Sécurité
+- [ ] **Authentification**
+  - [ ] Hashage des mots de passe (bcrypt)
+  - [ ] JWT tokens sécurisés
+  - [ ] Refresh tokens
+  - [ ] Sessions sécurisées
+  
+- [ ] **Base de données**
+  - [ ] Configuration MongoDB sécurisée
+  - [ ] Aucune donnée sensible en clair
+  - [ ] Scripts de seeding pour toutes les données
+  - [ ] Validation des inputs côté serveur
+
+- [ ] **Gestion des rôles**
+  - [ ] Modèle Role avec permissions
+  - [ ] Middleware de vérification des rôles
+  - [ ] CRUD complet pour la gestion des rôles
+  - [ ] Attribution dynamique des permissions
+
+### 🌱 Structure de Seeding
+```javascript
+// Structure attendue pour les seeders
+/seeds
+  ├── users.seed.js       // Utilisateurs avec mots de passe hashés
+  ├── roles.seed.js       // Rôles et permissions
+  ├── patients.seed.js    // Données patients
+  ├── images.seed.js      // Métadonnées images
+  ├── reports.seed.js     // Rapports
+  └── index.js           // Script principal de seeding
+```
+
+### ⚠️ Points d'Attention
+1. **Variables d'environnement** : Toutes les configurations sensibles doivent être dans `.env`
+2. **Validation des données** : Validation côté serveur obligatoire (Joi, Yup, etc.)
+3. **Sanitization** : Nettoyage des inputs utilisateur contre XSS/Injection
+4. **CORS** : Configuration stricte des origines autorisées
+5. **Rate limiting** : Protection contre les attaques brute force
+6. **Logs de sécurité** : Traçabilité des actions sensibles
+
+---
+
+**Dernière mise à jour** : 2025-06-22  
+**Prochaine révision** : 2025-06-29
