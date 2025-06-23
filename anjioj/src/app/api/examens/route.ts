@@ -11,7 +11,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
+    console.log('Tentative de connexion à la base de données...')
     await dbConnect()
+    console.log('Connexion à la base de données réussie')
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type')
@@ -35,6 +37,7 @@ export async function GET(request: NextRequest) {
       query.status = status
     }
 
+    console.log('Recherche d\'examens avec query:', query)
     const exams = await Exam.find(query)
       .populate('patientId', 'nom prenom email dateNaissance')
       .populate('praticien', 'name email')
@@ -43,6 +46,7 @@ export async function GET(request: NextRequest) {
       .skip(offset)
       .lean()
 
+    console.log('Examens trouvés:', exams.length)
     const totalCount = await Exam.countDocuments(query)
 
     return NextResponse.json({

@@ -22,7 +22,7 @@ export async function GET(
       .sort({ date: -1 })
       .lean()
 
-    return NextResponse.json(exams)
+    return NextResponse.json({ data: exams })
   } catch (error) {
     console.error('Erreur récupération examens:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })

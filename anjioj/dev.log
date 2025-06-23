@@ -1,0 +1,108 @@
+
+> anjioj@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.3.4
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.100.35:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.3s
+ ✓ Compiled /middleware in 493ms (207 modules)
+Middleware - pathname: /api/patients token: false
+Middleware - pathname: /dashboard/examens/68599164940c2fbd8f5514d4/view token: true
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 3.4s (986 modules)
+ GET /dashboard/examens/68599164940c2fbd8f5514d4/view 404 in 4141ms
+Middleware - pathname: /dashboard/examens/68599164940c2fbd8f5514d4/view token: true
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET /dashboard/examens/68599164940c2fbd8f5514d4/view 404 in 188ms
+Middleware - pathname: / token: true
+ ○ Compiling / ...
+ ✓ Compiled / in 2s (1031 modules)
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET / 307 in 2441ms
+Middleware - pathname: /dashboard token: true
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1278ms (1141 modules)
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET /dashboard 200 in 1869ms
+ ✓ Compiled /_not-found in 329ms (1145 modules)
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET /_next/static/chunks/main-app.js?v=1750717566386 404 in 637ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 629ms
+Middleware - pathname: /dashboard token: true
+ GET /dashboard 200 in 196ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 114ms
+ GET /_next/static/chunks/main-app.js?v=1750717583094 404 in 104ms
+Middleware - pathname: /dashboard/patients/new token: true
+ ○ Compiling /dashboard/patients/new ...
+ ✓ Compiled /dashboard/patients/new in 544ms (1172 modules)
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET /dashboard/patients/new 200 in 870ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 119ms
+ GET /_next/static/chunks/main-app.js?v=1750717586528 404 in 113ms
+Middleware - pathname: /dashboard/patients token: true
+ ○ Compiling /dashboard/patients ...
+ ✓ Compiled /dashboard/patients in 688ms (1191 modules)
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET /dashboard/patients 200 in 1037ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 114ms
+ GET /_next/static/chunks/main-app.js?v=1750717593329 404 in 107ms
+Middleware - pathname: /dashboard/patients token: true
+ GET /dashboard/patients 200 in 114ms
+ GET /_next/static/chunks/main-app.js?v=1750717629715 404 in 129ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 125ms
+Middleware - pathname: /dashboard/patients token: true
+ GET /dashboard/patients 200 in 102ms
+ GET /_next/static/media/569ce4b8f30dc480-s.p.woff2 404 in 187ms
+ GET /_next/static/media/93f479601ee12b01-s.p.woff2 404 in 183ms
+ GET /_next/static/chunks/main-app.js?v=1750717631573 404 in 180ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 176ms
+ ✓ Compiled /favicon.ico in 231ms (792 modules)
+ GET /favicon.ico 200 in 485ms
+Middleware - pathname: /dashboard/patients token: true
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET /dashboard/patients 200 in 334ms
+ GET /_next/static/media/93f479601ee12b01-s.p.woff2 404 in 185ms
+ GET /_next/static/media/569ce4b8f30dc480-s.p.woff2 404 in 189ms
+ GET /_next/static/chunks/main-app.js?v=1750717633245 404 in 183ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 184ms
+ GET /favicon.ico 200 in 10ms
+Middleware - pathname: /dashboard/patients token: true
+ GET /dashboard/patients 200 in 85ms
+ GET /_next/static/media/93f479601ee12b01-s.p.woff2 404 in 173ms
+ GET /_next/static/media/569ce4b8f30dc480-s.p.woff2 404 in 179ms
+ GET /_next/static/chunks/main-app.js?v=1750717634608 404 in 172ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 169ms
+ GET /favicon.ico 200 in 13ms
+Middleware - pathname: /dashboard/angiography token: true
+ ○ Compiling /dashboard/angiography ...
+ ✓ Compiled /dashboard/angiography in 591ms (1207 modules)
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET /dashboard/angiography 200 in 982ms
+ GET /_next/static/media/569ce4b8f30dc480-s.p.woff2 404 in 199ms
+ GET /_next/static/media/93f479601ee12b01-s.p.woff2 404 in 174ms
+ GET /_next/static/chunks/main-app.js?v=1750717645824 404 in 145ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 121ms
+Middleware - pathname: /dashboard/patients/new token: true
+ GET /dashboard/patients/new 200 in 132ms
+ GET /_next/static/media/569ce4b8f30dc480-s.p.woff2 404 in 173ms
+ GET /_next/static/media/93f479601ee12b01-s.p.woff2 404 in 174ms
+ GET /_next/static/chunks/main-app.js?v=1750717649544 404 in 169ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 169ms
+Middleware - pathname: /dashboard/patients token: true
+ GET /dashboard/patients 200 in 124ms
+ GET /_next/static/media/93f479601ee12b01-s.p.woff2 404 in 202ms
+ GET /_next/static/media/569ce4b8f30dc480-s.p.woff2 404 in 206ms
+ GET /_next/static/chunks/main-app.js?v=1750717702419 404 in 197ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 194ms

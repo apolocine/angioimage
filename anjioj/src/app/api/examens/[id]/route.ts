@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/config'
 import dbConnect from '@/lib/db/mongodb'
-import { Exam } from '@/lib/db/models'
+import { Exam, Image } from '@/lib/db/models'
 
 export async function GET(
   request: NextRequest,
@@ -26,7 +26,18 @@ export async function GET(
       return NextResponse.json({ error: 'Examen non trouvé' }, { status: 404 })
     }
 
-    return NextResponse.json(exam)
+    // Récupérer les images associées à cet examen
+    const images = await Image.find({ examenId: resolvedParams.id })
+      .sort({ createdAt: -1 })
+      .lean()
+
+    // Ajouter les images à l'examen
+    const examWithImages = {
+      ...exam,
+      images
+    }
+
+    return NextResponse.json({ data: examWithImages })
   } catch (error) {
     console.error('Erreur récupération examen:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
@@ -66,7 +77,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Examen non trouvé' }, { status: 404 })
     }
 
-    return NextResponse.json(exam)
+    return NextResponse.json({ data: exam })
   } catch (error: any) {
     console.error('Erreur mise à jour examen:', error)
     

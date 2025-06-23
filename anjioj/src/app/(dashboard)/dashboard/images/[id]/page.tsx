@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { 
@@ -61,6 +61,8 @@ interface ImageData {
 
 export default function ImageViewerPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
+  const examId = searchParams.get('examId')
   const [image, setImage] = useState<ImageData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -174,13 +176,23 @@ export default function ImageViewerPage() {
     return (
       <div className="text-center">
         <div className="mb-4">
-          <Link
-            href="/dashboard/images"
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-          >
-            <ArrowLeftIcon className="h-4 w-4 mr-1" />
-            Retour aux images
-          </Link>
+          {examId ? (
+            <Link
+              href={`/dashboard/examens/${examId}/view`}
+              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            >
+              <ArrowLeftIcon className="h-4 w-4 mr-1" />
+              Retour à l'examen
+            </Link>
+          ) : (
+            <Link
+              href="/dashboard/images"
+              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            >
+              <ArrowLeftIcon className="h-4 w-4 mr-1" />
+              Retour aux images
+            </Link>
+          )}
         </div>
         <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
           {error || 'Image non trouvée'}
@@ -195,13 +207,23 @@ export default function ImageViewerPage() {
       <div className={`${isFullscreen ? 'absolute top-0 left-0 right-0 z-10' : ''} bg-white border-b border-gray-200 px-6 py-4`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link
-              href="/dashboard/images"
-              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-            >
-              <ArrowLeftIcon className="h-4 w-4 mr-1" />
-              Retour aux images
-            </Link>
+            {examId ? (
+              <Link
+                href={`/dashboard/examens/${examId}/view`}
+                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+              >
+                <ArrowLeftIcon className="h-4 w-4 mr-1" />
+                Retour à l'examen
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard/images"
+                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+              >
+                <ArrowLeftIcon className="h-4 w-4 mr-1" />
+                Retour aux images
+              </Link>
+            )}
             
             <div>
               <h1 className="text-xl font-semibold text-gray-900">{image.originalName}</h1>
@@ -266,7 +288,7 @@ export default function ImageViewerPage() {
             </button>
             
             <Link
-              href={`/dashboard/images/${image._id}/edit`}
+              href={`/dashboard/images/${image._id}/edit${examId ? `?examId=${examId}` : ''}`}
               className="p-2 text-gray-500 hover:text-gray-700"
               title="Éditer"
             >

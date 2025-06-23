@@ -9,6 +9,7 @@ export interface CreateImageData {
   originalName: string
   mimeType: string
   uploadedBy: string
+  imageType?: 'fond_oeil_normal' | 'fond_oeil_rouge' | 'fond_oeil_vert' | 'fond_oeil_bleu' | 'angiographie_fluoresceine' | 'angiographie_icg' | 'oct' | 'retinographie' | 'autofluorescence' | 'infrarouge' | 'autre'
   angiography?: {
     phase?: 'precoce' | 'intermediaire' | 'tardive'
     timeFromInjection?: number
@@ -80,6 +81,7 @@ export class ImageService {
         mimeType: data.mimeType,
         size: uploadResult.size,
         dimensions: uploadResult.dimensions,
+        imageType: data.imageType || 'fond_oeil_normal',
         metadata: {
           medical: {
             modality: exam.type,

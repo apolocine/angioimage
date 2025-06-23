@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('file') as File
     const examId = formData.get('examId') as string
+    const imageType = formData.get('imageType') as string
     const phase = formData.get('phase') as string
     const timeFromInjection = formData.get('timeFromInjection') as string
     const fluoresceinVisible = formData.get('fluoresceinVisible') as string
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest) {
       originalName: file.name,
       mimeType: file.type,
       uploadedBy: session.user.id,
+      imageType: imageType as any || 'fond_oeil_normal',
       angiography: Object.keys(angiographyData).length > 0 ? angiographyData : undefined
     })
 

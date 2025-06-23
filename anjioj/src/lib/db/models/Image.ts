@@ -13,6 +13,7 @@ export interface IImage {
     width: number
     height: number
   }
+  imageType?: 'fond_oeil_normal' | 'fond_oeil_rouge' | 'fond_oeil_vert' | 'fond_oeil_bleu' | 'angiographie_fluoresceine' | 'angiographie_icg' | 'oct' | 'retinographie' | 'autofluorescence' | 'infrarouge' | 'autre'
   metadata?: {
     camera?: string
     lens?: string
@@ -20,6 +21,9 @@ export interface IImage {
     exposure?: string
     focal?: string
     flash?: boolean
+    filter?: string
+    illumination?: string
+    mydriasis?: boolean
     gps?: {
       latitude: number
       longitude: number
@@ -91,6 +95,11 @@ const ImageSchema = new Schema<IImage>({
     type: Number, 
     required: true 
   },
+  imageType: {
+    type: String,
+    enum: ['fond_oeil_normal', 'fond_oeil_rouge', 'fond_oeil_vert', 'fond_oeil_bleu', 'angiographie_fluoresceine', 'angiographie_icg', 'oct', 'retinographie', 'autofluorescence', 'infrarouge', 'autre'],
+    default: 'fond_oeil_normal'
+  },
   dimensions: {
     width: Number,
     height: Number
@@ -102,6 +111,9 @@ const ImageSchema = new Schema<IImage>({
     exposure: String,
     focal: String,
     flash: Boolean,
+    filter: String,
+    illumination: String,
+    mydriasis: Boolean,
     gps: {
       latitude: Number,
       longitude: Number

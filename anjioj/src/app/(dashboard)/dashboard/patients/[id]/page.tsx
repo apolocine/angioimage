@@ -15,7 +15,10 @@ import {
   DocumentIcon,
   EyeIcon,
   PlusIcon,
-  CameraIcon
+  CameraIcon,
+  PhotoIcon,
+  ClockIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline'
 
 interface Patient {
@@ -54,6 +57,7 @@ interface Exam {
   images?: Array<{
     _id: string
     filename: string
+    imageType?: string
     phase?: string
   }>
 }
@@ -95,7 +99,10 @@ export default function PatientDetailPage() {
       const response = await fetch(`/api/patients/${patientId}/examens`)
       if (response.ok) {
         const data = await response.json()
-        setExamens(data.data || [])
+        console.log('Examens reçus:', data) // Debug
+        setExamens(Array.isArray(data) ? data : data.data || [])
+      } else {
+        console.error('Erreur API examens:', response.status, await response.text())
       }
     } catch (error) {
       console.error('Erreur lors du chargement des examens:', error)
@@ -401,108 +408,283 @@ export default function PatientDetailPage() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="space-y-8">
               {/* Examens programmés */}
-              <div className="lg:col-span-2">
-                <h3 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                   <CalendarIcon className="h-5 w-5 mr-2 text-blue-500" />
-                  Examens programmés ({examens.filter(e => ['planifie', 'en_cours'].includes(e.status)).length})
+                  Examens programmés ({examens.filter(e => e.status === 'planifie').length})
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {examens.filter(e => ['planifie', 'en_cours'].includes(e.status)).map((examen) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {examens.filter(e => e.status === 'planifie').map((examen) => (
                     <div key={examen._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-900">{examen.type}</h4>
-                          <p className="text-xs text-gray-500">{examen.oeil}</p>
-                        </div>
-                        {getStatusBadge(examen.status)}
-                      </div>
-                      
-                      <div className="mb-3">
-                        <div className="flex items-center text-xs text-gray-500 mb-1">
-                          <CalendarIcon className="h-4 w-4 mr-1" />
-                          {formatDateTime(examen.date)}
-                        </div>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <CameraIcon className="h-4 w-4 mr-1" />
-                          {examen.images?.length || 0} image(s)
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="text-base font-medium text-gray-900">{examen.type}</h4>
+                            {getStatusBadge(examen.status)}
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <CalendarIcon className="h-4 w-4 mr-2" />
+                              {formatDateTime(examen.date)}
+                            </div>
+                            <div className="flex items-center">
+                              <EyeIcon className="h-4 w-4 mr-2" />
+                              {examen.oeil}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
                       {examen.indication && (
-                        <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-                          {examen.indication}
-                        </p>
+                        <div className="mb-4 p-3 bg-gray-50 rounded-md">
+                          <p className="text-sm font-medium text-gray-700 mb-1">Indication :</p>
+                          <p className="text-sm text-gray-600">{examen.indication}</p>
+                        </div>
                       )}
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex space-x-2">
+                      {/* Images par type */}
+                      {examen.images && examen.images.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Images ({examen.images.length})</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {Object.entries(
+                              examen.images.reduce((acc, img) => {
+                                const type = img.imageType || 'autre'
+                                if (!acc[type]) acc[type] = []
+                                acc[type].push(img)
+                                return acc
+                              }, {} as Record<string, typeof examen.images>)
+                            ).map(([type, images]) => (
+                              <div key={type} className="text-center">
+                                <div className="bg-gray-100 p-2 rounded">
+                                  <CameraIcon className="h-6 w-6 mx-auto text-gray-400 mb-1" />
+                                  <p className="text-xs text-gray-600">
+                                    {type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                  </p>
+                                  <p className="text-xs font-medium text-gray-900">{images.length}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <div className="flex space-x-3">
                           <Link
                             href={`/dashboard/examens/${examen._id}/view`}
-                            className="text-indigo-600 hover:text-indigo-900 text-xs"
+                            className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900"
                             title="Voir les détails"
                           >
-                            <EyeIcon className="h-4 w-4" />
+                            <EyeIcon className="h-4 w-4 mr-1" />
+                            Voir
                           </Link>
                           <Link
                             href={`/dashboard/angiography/capture/${examen._id}`}
-                            className="text-green-600 hover:text-green-900 text-xs"
+                            className="inline-flex items-center text-sm text-green-600 hover:text-green-900"
                             title="Capturer des images"
                           >
-                            <CameraIcon className="h-4 w-4" />
+                            <CameraIcon className="h-4 w-4 mr-1" />
+                            Capturer
                           </Link>
-                          <button
-                            onClick={() => handleDeleteExam(examen._id)}
-                            className="text-red-600 hover:text-red-900 text-xs"
-                            title="Supprimer"
+                          <Link
+                            href={`/dashboard/examens/${examen._id}/upload`}
+                            className="inline-flex items-center text-sm text-purple-600 hover:text-purple-900"
+                            title="Ajouter des images"
                           >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
+                            <PhotoIcon className="h-4 w-4 mr-1" />
+                            Ajouter
+                          </Link>
                         </div>
+                        <button
+                          onClick={() => handleDeleteExam(examen._id)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Supprimer"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
-                {examens.filter(e => ['planifie', 'en_cours'].includes(e.status)).length === 0 && (
+                {examens.filter(e => e.status === 'planifie').length === 0 && (
                   <div className="text-center py-6 text-gray-500 border border-gray-200 rounded-lg">
                     <CalendarIcon className="h-8 w-8 mx-auto mb-2 text-gray-300" />
                     <p className="text-sm">Aucun examen programmé</p>
+                    <Link
+                      href={`/dashboard/patients/${patient._id}/examens/new`}
+                      className="mt-2 inline-flex items-center text-indigo-600 hover:text-indigo-800 text-sm"
+                    >
+                      <PlusIcon className="h-4 w-4 mr-1" />
+                      Programmer un examen
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Examens en cours */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                  <ClockIcon className="h-5 w-5 mr-2 text-yellow-500" />
+                  Examens en cours ({examens.filter(e => e.status === 'en_cours').length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {examens.filter(e => e.status === 'en_cours').map((examen) => (
+                    <div key={examen._id} className="border border-yellow-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-yellow-50">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="text-base font-medium text-gray-900">{examen.type}</h4>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              <ClockIcon className="h-3 w-3 mr-1" />
+                              En cours
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <CalendarIcon className="h-4 w-4 mr-2" />
+                              {formatDateTime(examen.date)}
+                            </div>
+                            <div className="flex items-center">
+                              <EyeIcon className="h-4 w-4 mr-2" />
+                              {examen.oeil}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {examen.indication && (
+                        <div className="mb-4 p-3 bg-yellow-100 rounded-md">
+                          <p className="text-sm font-medium text-gray-700 mb-1">Indication :</p>
+                          <p className="text-sm text-gray-600">{examen.indication}</p>
+                        </div>
+                      )}
+
+                      {/* Images par type */}
+                      {examen.images && examen.images.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Images en cours ({examen.images.length})</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {Object.entries(
+                              examen.images.reduce((acc, img) => {
+                                const type = img.imageType || 'autre'
+                                if (!acc[type]) acc[type] = []
+                                acc[type].push(img)
+                                return acc
+                              }, {} as Record<string, typeof examen.images>)
+                            ).map(([type, images]) => (
+                              <div key={type} className="text-center">
+                                <div className="bg-yellow-200 p-2 rounded">
+                                  <CameraIcon className="h-6 w-6 mx-auto text-yellow-600 mb-1" />
+                                  <p className="text-xs text-gray-600">
+                                    {type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                  </p>
+                                  <p className="text-xs font-medium text-gray-900">{images.length}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-3 border-t border-yellow-200">
+                        <div className="flex space-x-3">
+                          <Link
+                            href={`/dashboard/angiography/capture/${examen._id}`}
+                            className="inline-flex items-center text-sm text-green-600 hover:text-green-900"
+                            title="Continuer la capture"
+                          >
+                            <CameraIcon className="h-4 w-4 mr-1" />
+                            Continuer
+                          </Link>
+                          <Link
+                            href={`/dashboard/examens/${examen._id}/view`}
+                            className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900"
+                            title="Voir les détails"
+                          >
+                            <EyeIcon className="h-4 w-4 mr-1" />
+                            Voir
+                          </Link>
+                          <Link
+                            href={`/dashboard/examens/${examen._id}/upload`}
+                            className="inline-flex items-center text-sm text-purple-600 hover:text-purple-900"
+                            title="Ajouter des images"
+                          >
+                            <PhotoIcon className="h-4 w-4 mr-1" />
+                            Ajouter
+                          </Link>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteExam(examen._id)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Supprimer"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {examens.filter(e => e.status === 'en_cours').length === 0 && (
+                  <div className="text-center py-6 text-gray-500 border border-gray-200 rounded-lg">
+                    <ClockIcon className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                    <p className="text-sm">Aucun examen en cours</p>
                   </div>
                 )}
               </div>
 
               {/* Examens terminés */}
-              <div className="lg:col-span-1">
-                <h3 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                   <DocumentIcon className="h-5 w-5 mr-2 text-green-500" />
                   Examens terminés ({examens.filter(e => e.status === 'termine').length})
                 </h3>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {examens.filter(e => e.status === 'termine').map((examen) => (
-                    <div key={examen._id} className="border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow bg-green-50">
-                      <div className="flex items-start justify-between mb-2">
+                    <div key={examen._id} className="border border-green-200 rounded-lg p-4 hover:shadow-sm transition-shadow bg-green-50">
+                      <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h4 className="text-sm font-medium text-gray-900">{examen.type}</h4>
-                          <p className="text-xs text-gray-500">{examen.oeil}</p>
-                        </div>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Terminé
-                        </span>
-                      </div>
-                      
-                      <div className="mb-2">
-                        <div className="flex items-center text-xs text-gray-500 mb-1">
-                          <CalendarIcon className="h-3 w-3 mr-1" />
-                          {formatDateTime(examen.date)}
-                        </div>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <CameraIcon className="h-3 w-3 mr-1" />
-                          {examen.images?.length || 0} image(s)
+                          <div className="flex items-center space-x-2 mb-2">
+                            <h4 className="text-sm font-medium text-gray-900">{examen.type}</h4>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <CheckCircleIcon className="h-3 w-3 mr-1" />
+                              Terminé
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mb-2">{examen.oeil}</p>
+                          <div className="flex items-center text-xs text-gray-500 mb-1">
+                            <CalendarIcon className="h-3 w-3 mr-1" />
+                            {formatDateTime(examen.date)}
+                          </div>
+                          <div className="flex items-center text-xs text-gray-500">
+                            <CameraIcon className="h-3 w-3 mr-1" />
+                            {examen.images?.length || 0} image(s)
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between">
+                      {/* Miniatures des types d'images */}
+                      {examen.images && examen.images.length > 0 && (
+                        <div className="mb-3">
+                          <div className="flex flex-wrap gap-1">
+                            {Array.from(new Set(examen.images.map(img => img.imageType || 'autre')))
+                              .slice(0, 4)
+                              .map(type => (
+                                <div
+                                  key={type}
+                                  className="inline-flex items-center px-2 py-1 bg-green-200 text-green-800 text-xs rounded"
+                                  title={type.replace(/_/g, ' ')}
+                                >
+                                  {type.split('_')[0]}
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-3 border-t border-green-200">
                         <div className="flex space-x-2">
                           <Link
                             href={`/dashboard/examens/${examen._id}/view`}
@@ -518,14 +700,21 @@ export default function PatientDetailPage() {
                           >
                             <DocumentIcon className="h-4 w-4" />
                           </Link>
-                          <button
-                            onClick={() => handleDeleteExam(examen._id)}
-                            className="text-red-600 hover:text-red-900 text-xs"
-                            title="Supprimer"
+                          <Link
+                            href={`/dashboard/examens/${examen._id}/upload`}
+                            className="text-purple-600 hover:text-purple-900 text-xs"
+                            title="Ajouter des images"
                           >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
+                            <PhotoIcon className="h-4 w-4" />
+                          </Link>
                         </div>
+                        <button
+                          onClick={() => handleDeleteExam(examen._id)}
+                          className="text-red-600 hover:text-red-900 text-xs"
+                          title="Supprimer"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   ))}

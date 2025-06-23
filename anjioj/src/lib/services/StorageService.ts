@@ -169,4 +169,18 @@ export class StorageService {
     const maxSize = 50 * 1024 * 1024 // 50MB
     return size <= maxSize
   }
+
+  static async getImageBuffer(imageUrl: string): Promise<Buffer> {
+    try {
+      // Enlever le préfixe /uploads pour obtenir le chemin relatif
+      const relativePath = imageUrl.replace('/uploads/', '')
+      const fullPath = path.join(this.uploadDir, relativePath)
+      
+      const buffer = await fs.readFile(fullPath)
+      return buffer
+    } catch (error) {
+      console.error('Erreur lors de la lecture du fichier image:', error)
+      throw new Error('Fichier image non trouvé')
+    }
+  }
 }

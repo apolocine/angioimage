@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { 
@@ -59,6 +59,8 @@ const DEFAULT_SETTINGS: RGBSettings = {
 export default function ImageEditPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const examId = searchParams.get('examId')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const originalImageRef = useRef<HTMLImageElement>(null)
   
@@ -183,7 +185,10 @@ export default function ImageEditPage() {
 
       if (response.ok) {
         const newImage = await response.json()
-        router.push(`/dashboard/images/${newImage._id}`)
+        const redirectUrl = examId 
+          ? `/dashboard/images/${newImage._id}?examId=${examId}`
+          : `/dashboard/images/${newImage._id}`
+        router.push(redirectUrl)
       } else {
         throw new Error('Erreur lors de la sauvegarde')
       }
@@ -209,13 +214,23 @@ export default function ImageEditPage() {
     return (
       <div className="text-center">
         <div className="mb-4">
-          <Link
-            href="/dashboard/images"
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-          >
-            <ArrowLeftIcon className="h-4 w-4 mr-1" />
-            Retour aux images
-          </Link>
+          {examId ? (
+            <Link
+              href={`/dashboard/examens/${examId}/view`}
+              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            >
+              <ArrowLeftIcon className="h-4 w-4 mr-1" />
+              Retour à l'examen
+            </Link>
+          ) : (
+            <Link
+              href="/dashboard/images"
+              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            >
+              <ArrowLeftIcon className="h-4 w-4 mr-1" />
+              Retour aux images
+            </Link>
+          )}
         </div>
         <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
           {error || 'Image non trouvée'}
@@ -230,13 +245,23 @@ export default function ImageEditPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link
-              href={`/dashboard/images/${image._id}`}
-              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-            >
-              <ArrowLeftIcon className="h-4 w-4 mr-1" />
-              Retour au viewer
-            </Link>
+            {examId ? (
+              <Link
+                href={`/dashboard/images/${image._id}?examId=${examId}`}
+                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+              >
+                <ArrowLeftIcon className="h-4 w-4 mr-1" />
+                Retour au viewer
+              </Link>
+            ) : (
+              <Link
+                href={`/dashboard/images/${image._id}`}
+                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+              >
+                <ArrowLeftIcon className="h-4 w-4 mr-1" />
+                Retour au viewer
+              </Link>
+            )}
             
             <div>
               <h1 className="text-xl font-semibold text-gray-900">
