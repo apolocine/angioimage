@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rapport d'Examen Ophtalmologique</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px 20px 20px 20px; 
+      color: #1f2937; 
+      background: #ffffff;
+      font-size: 12px;
+    }
+    .header { 
+      text-align: center; 
+      border-bottom: 2px solid #2563eb; 
+      padding-bottom: 20px; 
+      margin-bottom: 25px; 
+    }
+    .title { 
+      font-size: 24px; 
+      font-weight: bold; 
+      color: #1f2937; 
+      margin-bottom: 10px; 
+    }
+    .subtitle { 
+      font-size: 16px; 
+      color: #64748b; 
+    }
+    .section { 
+      margin-bottom: 25px; 
+    }
+    .section-title { 
+      font-size: 16px; 
+      font-weight: bold; 
+      color: #1f2937; 
+      border-bottom: 1px solid #e5e7eb; 
+      padding-bottom: 5px; 
+      margin-bottom: 15px; 
+    }
+    .patient-info { 
+      background: #f9fafb; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+    }
+    .exam-item { 
+      background: #f3f4f6; 
+      padding: 10px; 
+      margin-bottom: 10px; 
+      border-radius: 5px; 
+    }
+    .image-grid { 
+      display: grid; 
+      grid-template-columns: repeat(1, 1fr); 
+      gap: 15px; 
+      margin: 20px 0; 
+    }
+    .image-item { 
+      text-align: center; 
+      border: 1px solid #e5e7eb; 
+      padding: 10px; 
+      border-radius: 5px; 
+    }
+    .metadata { 
+      font-size: 10px; 
+      color: #64748b; 
+      text-align: center; 
+      margin-top: 30px; 
+      border-top: 1px solid #e5e7eb; 
+      padding-top: 15px; 
+    }
+    .template-info {
+      font-size: 10px;
+      color: #64748b;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">RAPPORT D'EXAMEN OPHTALMOLOGIQUE</div>
+    <div class="subtitle">Rapport - angiographie OU - MADANI Hamid</div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">INFORMATIONS PATIENT</div>
+    <div class="patient-info">
+      <strong>Nom :</strong> MADANI Hamid<br>
+      <strong>Date de naissance :</strong> 03/10/1972<br>
+      <strong>Âge :</strong> 52 ans<br>
+      <strong>Date du rapport :</strong> 24/06/2025
+      
+    </div>
+  </div>
+  
+
+  
+  <div class="section">
+    <div class="section-title">INTRODUCTION</div>
+    <p>Rapport d'examen angiographie réalisé le 24/06/2025 pour l'œil OU.</p>
+  </div>
+  
+
+  
+  <div class="section">
+    <div class="section-title">EXAMENS RÉALISÉS (1)</div>
+    
+    <div class="exam-item">
+      <strong>angiographie</strong> - OU<br>
+      <em>Date :</em> 24/06/2025<br>
+      <em>Indication :</em> DNID
+    </div>
+    
+  </div>
+  
+
+  
+  <div class="section">
+    <div class="section-title">OBSERVATIONS CLINIQUES</div>
+    <p>Observations en cours d'analyse.</p>
+  </div>
+  
+
+  
+  <div class="section">
+    <div class="section-title">IMAGES INCLUSES (3)</div>
+    
+    <div class="image-grid">
+      
+      <div class="image-item">
+        
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmZWYzYzciLz4KICAgIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjEzMCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzZiNzI4MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgICA8dGV4dCB4PSIxNTAiIHk9IjIwMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzc0MTUxIj5Gb25kIGQnxZNpbCBub3JtYWw8L3RleHQ+CiAgICA8dGV4dCB4PSIxNTAiIHk9IjIyMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNmI3MjgwIj5mb25kLW9laWwtMzAweDIwOC5qcGc8L3RleHQ+CiAgPC9zdmc+" style="width: 100%; height: 200px; object-fit: contain; margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 5px;" />
+        
+        <div style="font-size: 11px; color: #374151; text-align: center;">fond-oeil-300x208.jpg</div>
+      </div>
+      
+      <div class="image-item">
+        
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmZWYzYzciLz4KICAgIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjEzMCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzZiNzI4MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgICA8dGV4dCB4PSIxNTAiIHk9IjIwMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzc0MTUxIj5Gb25kIGQnxZNpbCBub3JtYWw8L3RleHQ+CiAgICA8dGV4dCB4PSIxNTAiIHk9IjIyMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNmI3MjgwIj5mb25kLW9laWwtMzAweDIwOC5qcGc8L3RleHQ+CiAgPC9zdmc+" style="width: 100%; height: 200px; object-fit: contain; margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 5px;" />
+        
+        <div style="font-size: 11px; color: #374151; text-align: center;">fond-oeil-300x208.jpg</div>
+      </div>
+      
+      <div class="image-item">
+        
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmZWYzYzciLz4KICAgIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjEzMCIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzZiNzI4MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgICA8dGV4dCB4PSIxNTAiIHk9IjIwMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzc0MTUxIj5Gb25kIGQnxZNpbCBub3JtYWw8L3RleHQ+CiAgICA8dGV4dCB4PSIxNTAiIHk9IjIyMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNmI3MjgwIj5icm9jaHVyZV9hbmdpb2dyYXBoaWVfcmV0aWVubmUucG5nPC90ZXh0PgogIDwvc3ZnPg==" style="width: 100%; height: 200px; object-fit: contain; margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 5px;" />
+        
+        <div style="font-size: 11px; color: #374151; text-align: center;">brochure_angiographie_retienne.png</div>
+      </div>
+      
+    </div>
+    
+  </div>
+  
+
+  
+
+  
+
+  
+  <div class="metadata">
+    Rapport généré automatiquement par Angioimage<br>
+    Format : A4 • portrait<br>
+    Configuration : 2 photos par page <br>
+    Généré le 24/06/2025 à 20:28:08
+  </div>
+  
+</body>
+</html>
