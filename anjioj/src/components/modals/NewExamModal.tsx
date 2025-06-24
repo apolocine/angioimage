@@ -40,12 +40,14 @@ export default function NewExamModal({ isOpen, onClose, onSuccess, preselectedPa
     formState: { errors },
     reset,
     watch,
-    setValue
+    setValue,
+    getValues
   } = useForm<ExamInput>({
     resolver: yupResolver(examSchema) as any,
     defaultValues: {
       type: 'angiographie',
       date: new Date(),
+      patientId: preselectedPatientId || '',
       angiographie: {
         protocole: protocolOptions[0]
       }
@@ -61,13 +63,27 @@ export default function NewExamModal({ isOpen, onClose, onSuccess, preselectedPa
       const defaultDate = new Date()
       defaultDate.setHours(defaultDate.getHours() + 1)
       setValue('date', defaultDate)
-      
-      // Preselect patient if provided
-      if (preselectedPatientId) {
+    }
+  }, [isOpen, setValue])
+
+  // Separate effect to set patient ID after patients are loaded
+  useEffect(() => {
+    if (preselectedPatientId && patients.length > 0) {
+      // Verify the patient exists in the list before setting
+      const patientExists = patients.some(p => p._id === preselectedPatientId)
+      if (patientExists) {
+        console.log('Setting preselected patient:', preselectedPatientId)
         setValue('patientId', preselectedPatientId)
+        // Force form to update
+        setTimeout(() => {
+          const currentValue = getValues('patientId')
+          console.log('Current patient value after set:', currentValue)
+        }, 100)
+      } else {
+        console.warn('Preselected patient not found in list:', preselectedPatientId)
       }
     }
-  }, [isOpen, setValue, preselectedPatientId])
+  }, [preselectedPatientId, patients, setValue, getValues])
 
   const fetchPatients = async () => {
     try {
@@ -151,10 +167,16 @@ export default function NewExamModal({ isOpen, onClose, onSuccess, preselectedPa
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Patient *
+                    {preselectedPatientId && (
+                      <span className="ml-2 text-xs text-indigo-600">
+                        (présélectionné)
+                      </span>
+                    )}
                   </label>
                   <select
                     {...register('patientId')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    defaultValue={preselectedPatientId || ''}
                   >
                     <option value="">Sélectionner un patient</option>
                     {patients.map(patient => (
