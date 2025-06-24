@@ -146,7 +146,7 @@ ReportSchema.pre(/^find/, function(next) {
     },
     {
       path: 'metadata.generatedBy',
-      select: 'nom email'
+      select: 'name email'
     }
   ])
   next()

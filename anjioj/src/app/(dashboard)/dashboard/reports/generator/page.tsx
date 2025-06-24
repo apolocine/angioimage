@@ -67,6 +67,12 @@ interface ReportData {
     includeHeader: boolean
     includeFooter: boolean
     includePageNumbers: boolean
+    margins?: {
+      top: number
+      right: number
+      bottom: number
+      left: number
+    }
   }
 }
 
@@ -83,6 +89,7 @@ export default function ReportGeneratorPage() {
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [loadingImages, setLoadingImages] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   
   const [reportData, setReportData] = useState<ReportData>({
     title: '',
@@ -102,7 +109,13 @@ export default function ReportGeneratorPage() {
       imagesPerRow: 2,
       includeHeader: true,
       includeFooter: true,
-      includePageNumbers: true
+      includePageNumbers: true,
+      margins: {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 20
+      }
     }
   })
 
@@ -122,13 +135,13 @@ export default function ReportGeneratorPage() {
   }, [editId])
 
   useEffect(() => {
-    if (reportData.patientId) {
+    if (reportData.patientId && !isEditing) {
       fetchExams(reportData.patientId)
     }
   }, [reportData.patientId])
 
   useEffect(() => {
-    if (reportData.examIds.length > 0) {
+    if (reportData.examIds.length > 0 && !isEditing) {
       fetchImages(reportData.examIds)
     }
   }, [reportData.examIds])
@@ -202,14 +215,71 @@ export default function ReportGeneratorPage() {
   }
 
   const loadExistingReport = async (reportId: string) => {
+    setLoading(true)
     try {
       const response = await fetch(`/api/reports/${reportId}`)
       const data = await response.json()
       if (response.ok) {
-        setReportData(data)
+        console.log('Loaded report:', data)
+        
+        // Extraire les IDs depuis les objets populés
+        const patientId = data.patientId?._id || data.patientId
+        const examIds = data.examIds?.map((exam: any) => 
+          typeof exam === 'object' ? exam._id : exam
+        ) || []
+        const imageIds = data.imageIds?.map((img: any) => 
+          typeof img === 'object' ? img._id : img
+        ) || []
+        
+        // Mettre à jour le reportData avec les bonnes valeurs
+        setReportData({
+          title: data.title || '',
+          patientId: patientId,
+          examIds: examIds,
+          imageIds: imageIds,
+          templateId: data.templateId || '',
+          format: data.format || 'A4',
+          orientation: data.orientation || 'portrait',
+          content: {
+            introduction: data.content?.introduction || '',
+            conclusion: data.content?.conclusion || '',
+            findings: data.content?.findings || '',
+            recommendations: data.content?.recommendations || ''
+          },
+          layout: {
+            imagesPerRow: data.layout?.imagesPerRow || 2,
+            includeHeader: data.layout?.includeHeader !== false,
+            includeFooter: data.layout?.includeFooter !== false,
+            includePageNumbers: data.layout?.includePageNumbers !== false,
+            margins: data.layout?.margins || {
+              top: 20,
+              right: 20,
+              bottom: 20,
+              left: 20
+            }
+          }
+        })
+        
+        // Charger les examens si un patient est sélectionné
+        if (patientId) {
+          await fetchExams(patientId)
+        }
+        
+        // Charger les images si des examens sont sélectionnés
+        if (examIds.length > 0) {
+          await fetchImages(examIds)
+        }
+        
+        // Marquer comme édition pour éviter les reset
+        setIsEditing(true)
+        
+        // Aller directement à l'étape 3 (Contenu) pour l'édition
+        setCurrentStep(3)
       }
     } catch (error) {
       console.error('Erreur lors du chargement du rapport:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -716,7 +786,7 @@ export default function ReportGeneratorPage() {
           Retour aux rapports
         </Link>
         <h1 className="mt-2 text-2xl font-bold text-gray-900">
-          {editId ? 'Modifier le rapport' : 'Nouveau rapport'}
+          {editId ? 'Édition du rapport' : 'Nouveau rapport'}
         </h1>
       </div>
 

@@ -45,6 +45,25 @@ export async function POST(
     const images = await Image.find({
       _id: { $in: report.imageIds }
     }).lean()
+    
+    // Charger les images en base64 pour les inclure dans le HTML
+    const imagesWithBase64 = await Promise.all(images.map(async (img: any) => {
+      try {
+        // Pour l'instant, utiliser un placeholder
+        // En production, il faudrait récupérer l'image réelle
+        const placeholderSvg = generateImagePlaceholder(img.imageType, img.originalName)
+        return {
+          ...img,
+          base64: placeholderSvg
+        }
+      } catch (error) {
+        console.error('Erreur chargement image:', error)
+        return {
+          ...img,
+          base64: null
+        }
+      }
+    }))
 
     // TODO: Implémenter la génération PDF
     // Ceci est un exemple simplifié - dans la réalité il faudrait:
@@ -54,7 +73,7 @@ export async function POST(
     // 4. Mettre à jour le rapport avec les métadonnées
 
     // Simulation de génération PDF
-    const pdfContent = await generatePdfContent(report, images)
+    const pdfContent = await generatePdfContent(report, imagesWithBase64)
     
     // Créer le répertoire de stockage s'il n'existe pas
     const reportsDir = path.join(process.cwd(), 'storage', 'reports')
@@ -91,6 +110,36 @@ export async function POST(
     console.error('Erreur génération PDF:', error)
     return NextResponse.json({ message: 'Erreur lors de la génération PDF' }, { status: 500 })
   }
+}
+
+function generateImagePlaceholder(imageType: string, filename: string) {
+  const typeLabels: Record<string, string> = {
+    'fond_oeil_normal': 'Fond d\'œil normal',
+    'fond_oeil_rouge': 'Fond d\'œil rouge',
+    'angiographie_fluoresceine': 'Angiographie',
+    'oct': 'OCT',
+    'retinographie': 'Rétinographie'
+  }
+  
+  const typeColors: Record<string, string> = {
+    'fond_oeil_normal': '#fef3c7',
+    'fond_oeil_rouge': '#fee2e2',
+    'angiographie_fluoresceine': '#dbeafe',
+    'oct': '#dcfce7',
+    'retinographie': '#f3e8ff'
+  }
+  
+  const label = typeLabels[imageType] || 'Image'
+  const bgColor = typeColors[imageType] || '#e5e7eb'
+  
+  const svg = `<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="${bgColor}"/>
+    <circle cx="150" cy="130" r="60" fill="none" stroke="#6b7280" stroke-width="2"/>
+    <text x="150" y="200" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#374151">${label}</text>
+    <text x="150" y="220" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#6b7280">${filename || 'Image'}</text>
+  </svg>`
+  
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
 }
 
 async function generatePdfContent(report: any, images: any[]) {
@@ -181,10 +230,14 @@ async function generatePdfContent(report: any, images: any[]) {
     <div class="image-grid">
       ${images.map((img: any) => `
       <div class="image-item">
-        <div style="height: 150px; background: #f3f4f6; border: 1px dashed #d1d5db; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
-          <span style="color: #6b7280; font-size: 12px;">Image : ${img.imageType || 'Type inconnu'}</span>
-        </div>
-        <div style="font-size: 11px; color: #374151;">${img.originalName || 'Sans nom'}</div>
+        ${img.base64 ? `
+          <img src="${img.base64}" style="width: 100%; height: 200px; object-fit: contain; margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 5px;" />
+        ` : `
+          <div style="height: 200px; background: #f3f4f6; border: 1px dashed #d1d5db; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+            <span style="color: #6b7280; font-size: 12px;">Image : ${img.imageType || 'Type inconnu'}</span>
+          </div>
+        `}
+        <div style="font-size: 11px; color: #374151; text-align: center;">${img.originalName || 'Sans nom'}</div>
       </div>
       `).join('')}
     </div>

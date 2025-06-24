@@ -50,7 +50,7 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session || !session.user?.id) {
       return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
     }
 
@@ -58,6 +58,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
+    console.log('PUT /api/reports/[id] - Session user:', session.user)
     const {
       title,
       patientId,
@@ -71,41 +72,68 @@ export async function PUT(
       status
     } = body
 
-    const report = await Report.findById(id)
+    // Construire l'objet de mise à jour
+    const updateData: any = {}
+    const unsetData: any = {}
+    
+    if (title !== undefined) updateData.title = title
+    if (patientId !== undefined) updateData.patientId = patientId
+    if (examIds !== undefined) updateData.examIds = examIds
+    if (imageIds !== undefined) updateData.imageIds = imageIds
+    if (format !== undefined) updateData.format = format
+    if (orientation !== undefined) updateData.orientation = orientation
+    if (status !== undefined) updateData.status = status
+    
+    // Gérer templateId
+    if (templateId !== undefined && templateId !== '' && templateId !== null) {
+      updateData.templateId = templateId
+    } else if (templateId === '' || templateId === null) {
+      unsetData.templateId = 1
+    }
+    
+    // Gérer le contenu
+    if (content) {
+      updateData['content.introduction'] = content.introduction
+      updateData['content.conclusion'] = content.conclusion
+      updateData['content.findings'] = content.findings
+      updateData['content.recommendations'] = content.recommendations
+    }
+    
+    // Gérer le layout
+    if (layout) {
+      if (layout.imagesPerRow !== undefined) updateData['layout.imagesPerRow'] = layout.imagesPerRow
+      if (layout.includeHeader !== undefined) updateData['layout.includeHeader'] = layout.includeHeader
+      if (layout.includeFooter !== undefined) updateData['layout.includeFooter'] = layout.includeFooter
+      if (layout.includePageNumbers !== undefined) updateData['layout.includePageNumbers'] = layout.includePageNumbers
+      
+      // Gérer les marges
+      if (layout.margins) {
+        updateData['layout.margins.top'] = layout.margins.top || 20
+        updateData['layout.margins.right'] = layout.margins.right || 20
+        updateData['layout.margins.bottom'] = layout.margins.bottom || 20
+        updateData['layout.margins.left'] = layout.margins.left || 20
+      }
+    }
+    
+    // S'assurer que metadata.generatedBy existe
+    updateData['metadata.generatedBy'] = session.user.id
+
+    // Construire la requête de mise à jour
+    const updateQuery: any = { $set: updateData }
+    if (Object.keys(unsetData).length > 0) {
+      updateQuery.$unset = unsetData
+    }
+
+    // Mettre à jour le document
+    const report = await Report.findByIdAndUpdate(
+      id,
+      updateQuery,
+      { new: true, runValidators: true }
+    )
+    
     if (!report) {
       return NextResponse.json({ message: 'Rapport non trouvé' }, { status: 404 })
     }
-
-    // Mise à jour des champs
-    if (title !== undefined) report.title = title
-    if (patientId !== undefined) report.patientId = patientId
-    if (examIds !== undefined) report.examIds = examIds
-    if (imageIds !== undefined) report.imageIds = imageIds
-    if (templateId !== undefined) report.templateId = templateId
-    if (format !== undefined) report.format = format
-    if (orientation !== undefined) report.orientation = orientation
-    if (status !== undefined) report.status = status
-
-    if (content) {
-      report.content = {
-        introduction: content.introduction || report.content.introduction,
-        conclusion: content.conclusion || report.content.conclusion,
-        findings: content.findings || report.content.findings,
-        recommendations: content.recommendations || report.content.recommendations
-      }
-    }
-
-    if (layout) {
-      report.layout = {
-        imagesPerRow: layout.imagesPerRow || report.layout.imagesPerRow,
-        includeHeader: layout.includeHeader !== undefined ? layout.includeHeader : report.layout.includeHeader,
-        includeFooter: layout.includeFooter !== undefined ? layout.includeFooter : report.layout.includeFooter,
-        includePageNumbers: layout.includePageNumbers !== undefined ? layout.includePageNumbers : report.layout.includePageNumbers,
-        margins: layout.margins || report.layout.margins
-      }
-    }
-
-    await report.save()
 
     // Populate les références pour la réponse
     await report.populate([
@@ -119,13 +147,24 @@ export async function PUT(
       },
       {
         path: 'metadata.generatedBy',
-        select: 'nom email'
+        select: 'name email'
       }
     ])
 
     return NextResponse.json(report)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur PUT /api/reports/[id]:', error)
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.keys(error.errors).map(key => ({
+        field: key,
+        message: error.errors[key].message
+      }))
+      console.error('Erreurs de validation:', validationErrors)
+      return NextResponse.json({ 
+        message: 'Erreur de validation', 
+        errors: validationErrors 
+      }, { status: 400 })
+    }
     return NextResponse.json({ message: 'Erreur serveur' }, { status: 500 })
   }
 }
