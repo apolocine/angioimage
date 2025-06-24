@@ -15,7 +15,8 @@ import {
   UserIcon,
   CalendarIcon,
   ClockIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline'
 
 interface Patient {
@@ -33,12 +34,21 @@ interface Exam {
   indication: string
 }
 
+interface Template {
+  _id: string
+  name: string
+  description: string
+  category: string
+  isDefault: boolean
+}
+
 interface Report {
   _id: string
   title: string
   patientId: Patient
   examIds: Exam[]
   imageIds: string[]
+  templateId?: Template
   status: 'draft' | 'final' | 'archived'
   format: string
   orientation: string
@@ -482,6 +492,37 @@ export default function ReportViewerPage() {
               </div>
             </dl>
           </div>
+
+          {/* Template actuel */}
+          {report.templateId && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <DocumentTextIcon className="h-5 w-5 mr-2" />
+                Template
+              </h3>
+              <div className="space-y-2">
+                <div>
+                  <dt className="text-gray-500 text-sm">Nom</dt>
+                  <dd className="text-gray-900 font-medium">{report.templateId.name}</dd>
+                </div>
+                {report.templateId.description && (
+                  <div>
+                    <dt className="text-gray-500 text-sm">Description</dt>
+                    <dd className="text-gray-900 text-sm">{report.templateId.description}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt className="text-gray-500 text-sm">Catégorie</dt>
+                  <dd className="text-gray-900 text-sm capitalize">{report.templateId.category}</dd>
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-xs text-gray-500">
+                  Pour changer le template, utilisez le bouton "Éditer" ci-dessus
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

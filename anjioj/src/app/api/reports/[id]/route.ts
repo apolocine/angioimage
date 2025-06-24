@@ -28,6 +28,10 @@ export async function GET(
           select: 'type date oeil indication'
         },
         {
+          path: 'templateId',
+          select: 'name description category isDefault'
+        },
+        {
           path: 'metadata.generatedBy',
           select: 'name email'
         }
@@ -146,6 +150,10 @@ export async function PUT(
         select: 'type date oeil indication'
       },
       {
+        path: 'templateId',
+        select: 'name description category'
+      },
+      {
         path: 'metadata.generatedBy',
         select: 'name email'
       }
@@ -165,6 +173,88 @@ export async function PUT(
         errors: validationErrors 
       }, { status: 400 })
     }
+    return NextResponse.json({ message: 'Erreur serveur' }, { status: 500 })
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || !session.user?.id) {
+      return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
+    }
+
+    await dbConnect()
+
+    const { id } = await params
+    const body = await request.json()
+    
+    // Pour PATCH, on ne met à jour que les champs fournis
+    const updateData: any = {}
+    const unsetData: any = {}
+    
+    // Gérer templateId spécifiquement
+    if ('templateId' in body) {
+      if (body.templateId && body.templateId !== '') {
+        updateData.templateId = body.templateId
+      } else {
+        unsetData.templateId = 1
+      }
+    }
+    
+    // Ajouter d'autres champs si fournis
+    Object.keys(body).forEach(key => {
+      if (key !== 'templateId' && body[key] !== undefined) {
+        updateData[key] = body[key]
+      }
+    })
+    
+    // Construire la requête de mise à jour
+    const updateQuery: any = {}
+    if (Object.keys(updateData).length > 0) {
+      updateQuery.$set = updateData
+    }
+    if (Object.keys(unsetData).length > 0) {
+      updateQuery.$unset = unsetData
+    }
+
+    // Mettre à jour le document
+    const report = await Report.findByIdAndUpdate(
+      id,
+      updateQuery,
+      { new: true, runValidators: true }
+    )
+    
+    if (!report) {
+      return NextResponse.json({ message: 'Rapport non trouvé' }, { status: 404 })
+    }
+
+    // Populate les références pour la réponse
+    await report.populate([
+      {
+        path: 'patientId',
+        select: 'nom prenom dateNaissance'
+      },
+      {
+        path: 'examIds',
+        select: 'type date oeil indication'
+      },
+      {
+        path: 'templateId',
+        select: 'name description category'
+      },
+      {
+        path: 'metadata.generatedBy',
+        select: 'name email'
+      }
+    ])
+
+    return NextResponse.json(report)
+  } catch (error: any) {
+    console.error('Erreur PATCH /api/reports/[id]:', error)
     return NextResponse.json({ message: 'Erreur serveur' }, { status: 500 })
   }
 }

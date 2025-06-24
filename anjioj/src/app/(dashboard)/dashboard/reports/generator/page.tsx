@@ -230,6 +230,7 @@ export default function ReportGeneratorPage() {
         const imageIds = data.imageIds?.map((img: any) => 
           typeof img === 'object' ? img._id : img
         ) || []
+        const templateId = data.templateId?._id || data.templateId || ''
         
         // Mettre à jour le reportData avec les bonnes valeurs
         setReportData({
@@ -237,7 +238,7 @@ export default function ReportGeneratorPage() {
           patientId: patientId,
           examIds: examIds,
           imageIds: imageIds,
-          templateId: data.templateId || '',
+          templateId: templateId,
           format: data.format || 'A4',
           orientation: data.orientation || 'portrait',
           content: {
@@ -466,6 +467,18 @@ export default function ReportGeneratorPage() {
                   </option>
                 ))}
               </select>
+              {reportData.templateId && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-sm text-blue-800">
+                    <strong>Template sélectionné:</strong> {templates.find(t => t._id === reportData.templateId)?.name}
+                  </p>
+                  {templates.find(t => t._id === reportData.templateId)?.description && (
+                    <p className="text-sm text-blue-600 mt-1">
+                      {templates.find(t => t._id === reportData.templateId)?.description}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -763,6 +776,15 @@ export default function ReportGeneratorPage() {
                   <div className="flex justify-between">
                     <dt className="text-gray-500">Format:</dt>
                     <dd className="text-gray-900">{reportData.format} {reportData.orientation}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-gray-500">Template:</dt>
+                    <dd className="text-gray-900">
+                      {reportData.templateId 
+                        ? templates.find(t => t._id === reportData.templateId)?.name || 'Template personnalisé'
+                        : 'Template par défaut'
+                      }
+                    </dd>
                   </div>
                 </dl>
               </div>

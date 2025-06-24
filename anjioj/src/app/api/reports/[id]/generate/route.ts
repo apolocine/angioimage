@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/config'
 import dbConnect from '@/lib/db/mongodb'
 import Report from '@/lib/db/models/Report'
+import ReportTemplate from '@/lib/db/models/ReportTemplate'
 import Image from '@/lib/db/models/Image'
 import path from 'path'
 import fs from 'fs'
@@ -34,6 +35,10 @@ export async function POST(
         {
           path: 'examIds',
           select: 'type date oeil indication'
+        },
+        {
+          path: 'templateId',
+          select: 'name layout sections styling'
         }
       ])
     
@@ -72,7 +77,7 @@ export async function POST(
     // 3. Sauvegarder le fichier
     // 4. Mettre à jour le rapport avec les métadonnées
 
-    // Simulation de génération PDF
+    // Simulation de génération PDF avec template
     const pdfContent = await generatePdfContent(report, imagesWithBase64)
     
     // Créer le répertoire de stockage s'il n'existe pas
@@ -147,7 +152,24 @@ async function generatePdfContent(report: any, images: any[]) {
   const patient = report.patientId || {}
   const examens = report.examIds || []
   const content = report.content || {}
-  const layout = report.layout || {}
+  
+  // Utiliser le template s'il est défini, sinon utiliser les valeurs par défaut
+  const template = report.templateId || {}
+  const templateLayout = template.layout || {}
+  const templateSections = template.sections || {}
+  const templateStyling = template.styling || {}
+  
+  // Combiner les layouts (template prioritaire)
+  const layout = {
+    imagesPerPage: templateLayout.imagesPerPage || report.layout?.imagesPerRow || 2,
+    imagesPerRow: templateLayout.imagesPerRow || report.layout?.imagesPerRow || 2,
+    format: templateLayout.format || report.format || 'A4',
+    orientation: templateLayout.orientation || report.orientation || 'portrait',
+    margins: templateLayout.margins || report.layout?.margins || { top: 20, right: 20, bottom: 20, left: 20 },
+    includeHeader: templateSections.header?.enabled !== false ? (report.layout?.includeHeader !== false) : false,
+    includeFooter: templateSections.footer?.enabled !== false ? (report.layout?.includeFooter !== false) : false,
+    includePageNumbers: report.layout?.includePageNumbers !== false
+  }
 
   // Calculer l'âge du patient
   const calculateAge = (birthDate: string) => {
@@ -162,33 +184,124 @@ async function generatePdfContent(report: any, images: any[]) {
     return age + ' ans'
   }
 
-  // Génération du contenu HTML pour un meilleur rendu
+  // Styles basés sur le template
+  const fontFamily = templateStyling.fontFamily || 'Arial, sans-serif'
+  const colors = templateStyling.colors || {
+    primary: '#2563eb',
+    secondary: '#64748b', 
+    text: '#1f2937',
+    background: '#ffffff'
+  }
+  const fontSize = templateStyling.fontSize || {
+    title: 24,
+    heading: 16,
+    body: 12,
+    caption: 10
+  }
+  const spacing = templateStyling.spacing || {
+    sectionGap: 25,
+    paragraphGap: 15
+  }
+
+  // Déterminer les colonnes de grille selon imagesPerPage
+  const getGridColumns = (imagesPerPage: number) => {
+    switch (imagesPerPage) {
+      case 1: return 1
+      case 2: return 1 // 2 images verticalement
+      case 4: return 2 // grille 2x2
+      case 6: return 2 // grille 2x3
+      default: return layout.imagesPerRow || 2
+    }
+  }
+
+  // Génération du contenu HTML avec template
   const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Rapport d'Examen Ophtalmologique</title>
+  <title>${template.name ? `${template.name} - ` : ''}Rapport d'Examen Ophtalmologique</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
-    .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
-    .title { font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 10px; }
-    .subtitle { font-size: 18px; color: #6b7280; }
-    .section { margin-bottom: 25px; }
-    .section-title { font-size: 16px; font-weight: bold; color: #1f2937; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; margin-bottom: 15px; }
-    .patient-info { background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    .exam-item { background: #f3f4f6; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-    .image-grid { display: grid; grid-template-columns: repeat(${layout.imagesPerRow || 2}, 1fr); gap: 15px; margin: 20px 0; }
-    .image-item { text-align: center; border: 1px solid #e5e7eb; padding: 10px; border-radius: 5px; }
-    .metadata { font-size: 12px; color: #6b7280; text-align: center; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 15px; }
+    body { 
+      font-family: ${fontFamily}; 
+      margin: ${layout.margins.top}px ${layout.margins.right}px ${layout.margins.bottom}px ${layout.margins.left}px; 
+      color: ${colors.text}; 
+      background: ${colors.background};
+      font-size: ${fontSize.body}px;
+    }
+    .header { 
+      text-align: center; 
+      border-bottom: 2px solid ${colors.primary}; 
+      padding-bottom: 20px; 
+      margin-bottom: ${spacing.sectionGap}px; 
+    }
+    .title { 
+      font-size: ${fontSize.title}px; 
+      font-weight: bold; 
+      color: ${colors.text}; 
+      margin-bottom: 10px; 
+    }
+    .subtitle { 
+      font-size: ${fontSize.heading}px; 
+      color: ${colors.secondary}; 
+    }
+    .section { 
+      margin-bottom: ${spacing.sectionGap}px; 
+    }
+    .section-title { 
+      font-size: ${fontSize.heading}px; 
+      font-weight: bold; 
+      color: ${colors.text}; 
+      border-bottom: 1px solid #e5e7eb; 
+      padding-bottom: 5px; 
+      margin-bottom: ${spacing.paragraphGap}px; 
+    }
+    .patient-info { 
+      background: #f9fafb; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+    }
+    .exam-item { 
+      background: #f3f4f6; 
+      padding: 10px; 
+      margin-bottom: 10px; 
+      border-radius: 5px; 
+    }
+    .image-grid { 
+      display: grid; 
+      grid-template-columns: repeat(${getGridColumns(layout.imagesPerPage)}, 1fr); 
+      gap: 15px; 
+      margin: 20px 0; 
+    }
+    .image-item { 
+      text-align: center; 
+      border: 1px solid #e5e7eb; 
+      padding: 10px; 
+      border-radius: 5px; 
+    }
+    .metadata { 
+      font-size: ${fontSize.caption}px; 
+      color: ${colors.secondary}; 
+      text-align: center; 
+      margin-top: 30px; 
+      border-top: 1px solid #e5e7eb; 
+      padding-top: 15px; 
+    }
+    .template-info {
+      font-size: ${fontSize.caption}px;
+      color: ${colors.secondary};
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
+  ${layout.includeHeader ? `<div class="header">` : '<div>'}
     <div class="title">RAPPORT D'EXAMEN OPHTALMOLOGIQUE</div>
     <div class="subtitle">${report.title || 'Rapport sans titre'}</div>
   </div>
 
+  ${templateSections.patientInfo?.enabled !== false ? `
   <div class="section">
     <div class="section-title">INFORMATIONS PATIENT</div>
     <div class="patient-info">
@@ -196,16 +309,19 @@ async function generatePdfContent(report: any, images: any[]) {
       <strong>Date de naissance :</strong> ${patient.dateNaissance ? new Date(patient.dateNaissance).toLocaleDateString('fr-FR') : 'Non renseignée'}<br>
       <strong>Âge :</strong> ${patient.dateNaissance ? calculateAge(patient.dateNaissance) : 'Non calculable'}<br>
       <strong>Date du rapport :</strong> ${new Date().toLocaleDateString('fr-FR')}
+      ${template.name ? `<br><span class="template-info">Template utilisé: ${template.name}</span>` : ''}
     </div>
   </div>
+  ` : ''}
 
-  ${content.introduction ? `
+  ${templateSections.introduction?.enabled !== false && content.introduction ? `
   <div class="section">
     <div class="section-title">INTRODUCTION</div>
     <p>${content.introduction}</p>
   </div>
   ` : ''}
 
+  ${templateSections.examInfo?.enabled !== false ? `
   <div class="section">
     <div class="section-title">EXAMENS RÉALISÉS (${examens.length})</div>
     ${examens.map((exam: any) => `
@@ -216,14 +332,16 @@ async function generatePdfContent(report: any, images: any[]) {
     </div>
     `).join('')}
   </div>
+  ` : ''}
 
-  ${content.findings ? `
+  ${templateSections.findings?.enabled !== false && content.findings ? `
   <div class="section">
     <div class="section-title">OBSERVATIONS CLINIQUES</div>
     <p>${content.findings}</p>
   </div>
   ` : ''}
 
+  ${templateSections.images?.enabled !== false ? `
   <div class="section">
     <div class="section-title">IMAGES INCLUSES (${images.length})</div>
     ${images.length > 0 ? `
@@ -243,27 +361,30 @@ async function generatePdfContent(report: any, images: any[]) {
     </div>
     ` : '<p><em>Aucune image incluse dans ce rapport.</em></p>'}
   </div>
+  ` : ''}
 
-  ${content.conclusion ? `
+  ${templateSections.conclusion?.enabled !== false && content.conclusion ? `
   <div class="section">
     <div class="section-title">CONCLUSION</div>
     <p>${content.conclusion}</p>
   </div>
   ` : ''}
 
-  ${content.recommendations ? `
+  ${templateSections.recommendations?.enabled !== false && content.recommendations ? `
   <div class="section">
     <div class="section-title">RECOMMANDATIONS</div>
     <p>${content.recommendations}</p>
   </div>
   ` : ''}
 
+  ${layout.includeFooter ? `
   <div class="metadata">
     Rapport généré automatiquement par Angioimage<br>
-    Format : ${report.format || 'A4'} • ${report.orientation || 'Portrait'}<br>
-    Configuration : ${layout.imagesPerRow || 2} images par ligne<br>
+    Format : ${layout.format} • ${layout.orientation}<br>
+    Configuration : ${layout.imagesPerPage} photo${layout.imagesPerPage > 1 ? 's' : ''} par page ${template.name ? `• Template: ${template.name}` : ''}<br>
     Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}
   </div>
+  ` : ''}
 </body>
 </html>`
 
