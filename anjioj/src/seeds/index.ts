@@ -4,6 +4,8 @@ import { rolesSeed } from './roles.seed'
 import { getUsersSeed } from './users.seed'
 import { patientsSeed } from './patients.seed'
 import { examensSeed } from './examens.seed'
+import { seedReports } from './reports.seed'
+import { seedImages } from './images.seed'
 
 async function seed() {
   try {
@@ -63,6 +65,12 @@ async function seed() {
     
     const examens = await Exam.insertMany(examensWithData)
     console.log(`✅ ${examens.length} examens créés`)
+
+    // Seed images
+    await seedImages()
+
+    // Seed reports templates
+    await seedReports()
 
     console.log('🎉 Seeding terminé avec succès!')
     process.exit(0)

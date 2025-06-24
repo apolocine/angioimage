@@ -42,7 +42,16 @@ const navigation = [
   },
   { name: 'Images', href: '/dashboard/images', icon: PhotoIcon },
   { name: 'Angiographie', href: '/dashboard/angiography', icon: BeakerIcon },
-  { name: 'Rapports', href: '/dashboard/reports', icon: DocumentTextIcon },
+  { 
+    name: 'Rapports', 
+    href: '/dashboard/reports', 
+    icon: DocumentTextIcon,
+    subItems: [
+      { name: 'Liste des rapports', href: '/dashboard/reports', icon: DocumentTextIcon },
+      { name: 'Nouveau rapport', href: '/dashboard/reports/generator', icon: PlusIcon },
+      { name: 'Templates', href: '/dashboard/reports/templates', icon: DocumentIcon }
+    ]
+  },
   { name: 'Paramètres', href: '/dashboard/settings', icon: Cog6ToothIcon },
 ]
 

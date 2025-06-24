@@ -15,16 +15,16 @@
 
 | Élément | Description | DEV | TEST |
 |---------|-------------|-----|------|
-| **Formulaire de connexion** | Form avec email/password | ✅ | ❌ |
-| - Champ email | Input type="email" avec validation | ✅ | ❌ |
-| - Champ password | Input type="password" avec toggle visibility | ✅ | ❌ |
-| - Bouton "Se connecter" | Submit button avec loading state | ✅ | ❌ |
-| - Checkbox "Se souvenir" | Remember me functionality | ✅ | ❌ |
-| **Messages d'erreur** | Affichage erreurs validation/auth | ✅ | ❌ |
+| **Formulaire de connexion** | Form avec email/password | ✅ | ✅ |
+| - Champ email | Input type="email" avec validation | ✅ | ✅ |
+| - Champ password | Input type="password" avec toggle visibility | ✅ | ✅ |
+| - Bouton "Se connecter" | Submit button avec loading state | ✅ | ✅ |
+| - Checkbox "Se souvenir" | Remember me functionality | ✅ | ✅ |
+| **Messages d'erreur** | Affichage erreurs validation/auth | ✅ | ✅ |
 | **Lien mot de passe oublié** | Redirection vers reset password | ❌ | ❌ |
-| **Logo/Branding** | Logo Angioimage + tagline | ✅ | ❌ |
+| **Logo/Branding** | Logo Angioimage + tagline | ✅ | ✅ |
 | **Mode sombre/clair** | Toggle theme button | ❌ | ❌ |
-| **Responsive design** | Mobile/tablet/desktop layouts | ❌ | ❌ |
+| **Responsive design** | Mobile/tablet/desktop layouts | ✅ | ✅ |
 
 ### `/register` - Page d'Inscription
 **Description** : Création de nouveaux comptes utilisateur
@@ -98,6 +98,7 @@
 | - Colonne âge | Âge calculé automatiquement | ✅ | ❌ |
 | - Colonne dernière visite | Date dernier examen | ❌ | ❌ |
 | - Colonne nb examens | Count total examens | ❌ | ❌ |
+| - Lien + examen | Bouton ajout examen par patient | ✅ | ✅ |
 | - Colonne actions | Dropdown (voir/éditer/supprimer) | ❌ | ❌ |
 | **Pagination** | Navigation pages avec info | ❌ | ❌ |
 | - Boutons prev/next | Navigation avec disabled states | ❌ | ❌ |
@@ -155,12 +156,13 @@
 | - Contact | Email, tél, adresse | ❌ | ❌ |
 | - Médical | Antécédents, allergies | ❌ | ❌ |
 | - Statistiques | Nb examens, dernière visite | ❌ | ❌ |
-| **Liste examens** | Table avec examens patient | ❌ | ❌ |
-| - Colonne date | Date examen cliquable | ❌ | ❌ |
-| - Colonne type | Badge type examen | ❌ | ❌ |
-| - Colonne statut | Badge statut coloré | ❌ | ❌ |
-| - Colonne actions | Liens voir/rapport | ❌ | ❌ |
-| **Bouton nouvel examen** | Modal création examen | ❌ | ❌ |
+| **Liste examens** | Table avec examens patient | ✅ | ❌ |
+| - Colonne date | Date examen cliquable | ✅ | ❌ |
+| - Colonne type | Badge type examen | ✅ | ❌ |
+| - Colonne statut | Badge statut coloré | ✅ | ❌ |
+| - Colonne actions | Liens voir/rapport | ✅ | ❌ |
+| **Bouton nouvel examen** | Modal création examen | ✅ | ✅ |
+| **Trois types examens** | Programmés/En cours/Terminés | ✅ | ✅ |
 
 ### `/dashboard/patients/[id]/edit` - Édition Patient
 **Description** : Formulaire de modification d'un patient existant
@@ -202,21 +204,21 @@
 
 | Élément | Description | DEV | TEST |
 |---------|-------------|-----|------|
-| **Header galerie** | Titre + upload button | ❌ | ❌ |
-| **Filtres images** | Filtres par patient/date/type | ❌ | ❌ |
+| **Header galerie** | Titre + upload button | ✅ | ❌ |
+| **Filtres images** | Filtres par patient/date/type | ✅ | ❌ |
 | - Filtre patient | Select avec recherche | ❌ | ❌ |
 | - Filtre date | Date range picker | ❌ | ❌ |
-| - Filtre type | Select modalité | ❌ | ❌ |
+| - Filtre type | Select modalité | ✅ | ❌ |
 | - Filtre traitement | Checkbox (originale/modifiée) | ❌ | ❌ |
-| **Vue grille** | Grid responsive images | ❌ | ❌ |
-| - Thumbnail image | Image avec overlay info | ❌ | ❌ |
-| - Info patient | Nom patient overlay | ❌ | ❌ |
-| - Date capture | Date/heure overlay | ❌ | ❌ |
-| - Actions rapides | Boutons voir/éditer/supprimer | ❌ | ❌ |
-| **Sélection multiple** | Checkbox pour actions batch | ❌ | ❌ |
-| **Actions groupées** | Supprimer/Exporter sélection | ❌ | ❌ |
+| **Vue grille** | Grid responsive images | ✅ | ✅ |
+| - Thumbnail image | Image avec overlay info | ✅ | ✅ |
+| - Info patient | Nom patient overlay | ✅ | ✅ |
+| - Date capture | Date/heure overlay | ✅ | ✅ |
+| - Actions rapides | Boutons voir/éditer/supprimer | ✅ | ✅ |
+| **Sélection multiple** | Checkbox pour actions batch | ✅ | ❌ |
+| **Actions groupées** | Supprimer/Exporter sélection | ✅ | ❌ |
 | **Upload zone** | Drag & drop area | ❌ | ❌ |
-| **Pagination** | Navigation avec lazy loading | ❌ | ❌ |
+| **Pagination** | Navigation avec lazy loading | ✅ | ❌ |
 
 ### `/dashboard/images/upload` - Upload Images
 **Description** : Interface d'upload d'images
@@ -236,32 +238,33 @@
 
 | Élément | Description | DEV | TEST |
 |---------|-------------|-----|------|
-| **Viewer principal** | Canvas avec zoom/pan | ❌ | ❌ |
-| **Toolbar** | Outils manipulation | ❌ | ❌ |
-| - Zoom in/out | Boutons +/- | ❌ | ❌ |
-| - Fit to screen | Bouton ajuster écran | ❌ | ❌ |
+| **Viewer principal** | Canvas avec zoom/pan | ✅ | ✅ |
+| **Toolbar** | Outils manipulation | ✅ | ✅ |
+| - Zoom in/out | Boutons +/- | ✅ | ✅ |
+| - Fit to screen | Bouton ajuster écran | ✅ | ✅ |
 | - Rotation | Boutons rotation 90° | ❌ | ❌ |
-| - Plein écran | Toggle fullscreen | ❌ | ❌ |
-| **Panel informations** | Métadonnées image | ❌ | ❌ |
+| - Plein écran | Toggle fullscreen | ✅ | ✅ |
+| **Panel informations** | Métadonnées image | ✅ | ✅ |
 | **Historique** | Versions précédentes | ❌ | ❌ |
 | **Annotations** | Outils annotation | ❌ | ❌ |
 | **Navigation** | Prev/next dans série | ❌ | ❌ |
+| **Navigation retour examen** | Lien retour vers examen origine | ✅ | ✅ |
 
 ### `/dashboard/images/[id]/editor` - Éditeur Image
 **Description** : Éditeur d'image intégré
 
 | Élément | Description | DEV | TEST |
 |---------|-------------|-----|------|
-| **Canvas édition** | Zone édition interactive | ❌ | ❌ |
-| **Panel outils** | Sidebar avec outils | ❌ | ❌ |
-| - **Ajustements basiques** |  | ❌ | ❌ |
-| -- Slider luminosité | Range input -100/+100 | ❌ | ❌ |
-| -- Slider contraste | Range input -100/+100 | ❌ | ❌ |
-| -- Slider saturation | Range input -100/+100 | ❌ | ❌ |
-| - **Couleurs RVB** |  | ❌ | ❌ |
-| -- Slider rouge | Range input 0-255 | ❌ | ❌ |
-| -- Slider vert | Range input 0-255 | ❌ | ❌ |
-| -- Slider bleu | Range input 0-255 | ❌ | ❌ |
+| **Canvas édition** | Zone édition interactive | ✅ | ✅ |
+| **Panel outils** | Sidebar avec outils | ✅ | ✅ |
+| - **Ajustements basiques** |  | ✅ | ✅ |
+| -- Slider luminosité | Range input -100/+100 | ✅ | ✅ |
+| -- Slider contraste | Range input -100/+100 | ✅ | ✅ |
+| -- Slider saturation | Range input -100/+100 | ✅ | ✅ |
+| - **Couleurs RVB** |  | ✅ | ✅ |
+| -- Slider rouge | Range input 0-255 | ✅ | ✅ |
+| -- Slider vert | Range input 0-255 | ✅ | ✅ |
+| -- Slider bleu | Range input 0-255 | ✅ | ✅ |
 | - **Filtres** |  | ❌ | ❌ |
 | -- Égalisation histogramme | Checkbox auto | ❌ | ❌ |
 | -- Netteté | Slider 0-200% | ❌ | ❌ |
@@ -271,10 +274,59 @@
 | -- Outil cercle | Bouton activation | ❌ | ❌ |
 | -- Outil texte | Bouton activation | ❌ | ❌ |
 | -- Outil mesure | Bouton activation | ❌ | ❌ |
-| **Preview temps réel** | Aperçu modifications | ❌ | ❌ |
-| **Historique undo/redo** | Boutons annuler/refaire | ❌ | ❌ |
-| **Boutons actions** | Sauvegarder/Annuler/Reset | ❌ | ❌ |
+| **Preview temps réel** | Aperçu modifications | ✅ | ✅ |
+| **Historique undo/redo** | Boutons annuler/refaire | ✅ | ✅ |
+| **Boutons actions** | Sauvegarder/Annuler/Reset | ✅ | ✅ |
 | **Comparaison avant/après** | Slider avant/après | ❌ | ❌ |
+| **Préréglages médicaux** | Presets pour fond œil/angiographie | ✅ | ✅ |
+| **Navigation retour examen** | Lien retour vers examen origine | ✅ | ✅ |
+
+---
+
+## 🔬 GESTION EXAMENS
+
+### `/dashboard/examens/scheduled` - Examens Programmés
+**Description** : Liste des examens programmés
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Liste examens** | Table examens programmés | ✅ | ✅ |
+| **Filtres** | Par date/patient/type | ✅ | ❌ |
+| **Actions** | Voir/Éditer/Démarrer | ✅ | ❌ |
+
+### `/dashboard/examens/completed` - Examens Terminés
+**Description** : Liste des examens terminés
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Liste examens** | Table examens terminés | ✅ | ✅ |
+| **Filtres** | Par date/patient/type | ✅ | ❌ |
+| **Actions** | Voir/Rapport/Archiver | ✅ | ❌ |
+
+### `/dashboard/examens/[id]/view` - Vue Examen
+**Description** : Vue détaillée d'un examen avec galerie d'images
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Header examen** | Infos patient + examen | ✅ | ✅ |
+| **Galerie images** | Grid responsive images | ✅ | ✅ |
+| **Filtres images** | Par type d'image | ✅ | ✅ |
+| **Sélection multiple** | Actions groupées | ✅ | ❌ |
+| **Modes affichage** | Grille/Liste | ✅ | ✅ |
+| **Recherche images** | Recherche par nom | ✅ | ❌ |
+| **Navigation vers images** | Liens avec contexte examen | ✅ | ✅ |
+| **Upload images** | Ajout images à l'examen | ✅ | ✅ |
+| **Thumbnails réelles** | Aperçus vrais images | ✅ | ✅ |
+
+### `/dashboard/examens/new` - Nouvel Examen
+**Description** : Création d'un nouvel examen
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Modal création** | Formulaire compact | ✅ | ✅ |
+| **Sélection patient** | Dropdown patients | ✅ | ✅ |
+| **Configuration examen** | Type/œil/indication | ✅ | ✅ |
+| **Validation** | Contrôles saisie | ✅ | ❌ |
 
 ---
 
@@ -640,5 +692,498 @@
 
 ---
 
-**Dernière mise à jour** : 2025-06-22  
-**Prochaine révision** : 2025-06-29
+## 📊 ANALYSE PHASE 3 - ÉLÉMENTS RESTANTS
+
+### 🟢 **TERMINÉ** - Patient/Examen/Image/Angiographie
+
+#### Fonctionnalités Majeures Implémentées :
+- ✅ **Navigation complète** : Liens "+ examen" dans liste patients
+- ✅ **Workflow médical** : Patient → Examens multiples → Images typées
+- ✅ **Trois types d'examens** : Programmés/En cours/Terminés avec badges colorés
+- ✅ **Galerie d'images avancée** : Vue examen avec grille, filtres, sélection multiple
+- ✅ **Éditeur RGB complet** : Ajustements colorimétriques avec préréglages médicaux
+- ✅ **Viewer d'images professionnel** : Zoom, pan, plein écran, métadonnées
+- ✅ **Navigation contextuelle** : Retour vers examen depuis pages d'images
+- ✅ **Thumbnails réelles** : Aperçus d'images authentiques vs placeholders
+- ✅ **Types d'images médicales** : Fond d'œil (normal/rouge/vert/bleu), angiographie, OCT
+- ✅ **API REST complète** : Endpoints patient/examen/image avec pagination
+
+### 🟡 **EN COURS** - Tests et Optimisations
+
+#### Tests Unitaires et d'Intégration :
+- ⏳ Tests API endpoints (patients, examens, images)
+- ⏳ Tests composants React (modales, formulaires)
+- ⏳ Tests workflow complet (création patient → examen → images)
+- ⏳ Tests performance upload/affichage images
+
+### 🔴 **PRIORITÉ PHASE 3** - Éléments Critiques Manquants
+
+#### 1. **PATIENTS** - Fonctionnalités Essentielles
+- ❌ **Formulaire patient complet** : Multi-étapes avec infos médicales
+- ❌ **Page détail patient** : Onglets (infos/examens/images/historique)
+- ❌ **Filtres avancés** : Par âge, genre, dernière visite
+- ❌ **Upload photo patient** : Avatar avec redimensionnement
+
+#### 2. **EXAMENS** - Workflow Médical
+- ❌ **Statuts d'examen dynamiques** : Progression programmed → in_progress → completed
+- ❌ **Page édition examen** : Modification après création
+- ❌ **Upload durant examen** : Interface dédiée capture d'images
+- ❌ **Validation temporelle** : Contrôles dates/heures cohérentes
+
+#### 3. **IMAGES** - Traitement Médical
+- ❌ **Upload drag & drop** : Interface moderne avec preview
+- ❌ **Annotations médicales** : Outils flèche/cercle/texte/mesure
+- ❌ **Filtres avancés** : Égalisation histogramme, netteté, flou
+- ❌ **Comparaison images** : Vue côte à côte avant/après
+- ❌ **Export batch** : Sélection multiple → ZIP/PDF
+
+#### 4. **ANGIOGRAPHIE** - Module Spécialisé
+- ❌ **Interface capture temps réel** : Contrôles injection fluorescéine
+- ❌ **Timeline phases** : Précoce/Intermédiaire/Tardive avec timer
+- ❌ **Séquence automatique** : Capture programmée par intervalles
+- ❌ **Analyse séquences** : Player vidéo avec navigation temporelle
+
+### 🎯 **RECOMMANDATIONS PHASE 4**
+
+#### Ordre de Priorité :
+1. **Formulaires patients complets** (critique pour adoption)
+2. **Upload drag & drop images** (UX essentielle)
+3. **Annotations médicales de base** (valeur métier)
+4. **Module angiographie simplifié** (différenciation)
+
+#### Estimation Effort :
+- **Patients complets** : 2-3 jours
+- **Upload avancé** : 1-2 jours  
+- **Annotations** : 3-4 jours
+- **Angiographie base** : 5-7 jours
+
+**Total Phase 3 restante** : ~15 jours développement + 5 jours tests
+
+---
+
+## 📋 LISTE DÉTAILLÉE PAGES À DÉVELOPPER
+
+### 👥 MODULE PATIENTS
+
+#### `/dashboard/patients/new` - Création Patient
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Étape 1 - Informations personnelles
+  - [ ] Input nom (obligatoire)
+  - [ ] Input prénom (obligatoire) 
+  - [ ] Date picker naissance (obligatoire)
+  - [ ] Radio buttons genre (M/F)
+  - [ ] Input numéro sécurité sociale (format mask)
+- [ ] Étape 2 - Contact
+  - [ ] Input email (validation)
+  - [ ] Input téléphone (format)
+  - [ ] Input adresse rue
+  - [ ] Input code postal (validation)
+  - [ ] Input ville (autocomplete)
+  - [ ] Select pays (défaut France)
+- [ ] Étape 3 - Informations médicales
+  - [ ] Input médecin traitant
+  - [ ] Textarea antécédents
+  - [ ] Tags input allergies
+  - [ ] Tags input traitements actuels
+
+**Boutons :**
+- [ ] Bouton "Précédent" (navigation étapes)
+- [ ] Bouton "Suivant" (validation + navigation)
+- [ ] Bouton "Annuler" (retour liste)
+- [ ] Bouton "Créer patient" (soumission finale)
+
+**Liens :**
+- [ ] Lien retour vers `/dashboard/patients`
+- [ ] Breadcrumb navigation
+
+---
+
+#### `/dashboard/patients/[id]` - Détail Patient
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Upload photo patient (drag & drop + crop)
+
+**Boutons :**
+- [ ] Bouton "Éditer patient"
+- [ ] Bouton "Supprimer patient" (modal confirmation)
+- [ ] Bouton "Nouvel examen" (modal)
+- [ ] Bouton "Exporter données"
+
+**Liens :**
+- [ ] Onglet "Informations" (actif par défaut)
+- [ ] Onglet "Examens" 
+- [ ] Onglet "Images"
+- [ ] Onglet "Historique"
+- [ ] Liens vers examens individuels
+- [ ] Lien retour liste patients
+
+---
+
+#### `/dashboard/patients/[id]/edit` - Édition Patient
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Formulaire pré-rempli (même structure que création)
+- [ ] Tous les champs modifiables
+
+**Boutons :**
+- [ ] Bouton "Sauvegarder" (avec dirty state)
+- [ ] Bouton "Annuler" (confirmation si changements)
+- [ ] Bouton "Réinitialiser"
+
+**Liens :**
+- [ ] Lien retour vers détail patient
+
+---
+
+### 🔬 MODULE EXAMENS
+
+#### `/dashboard/examens/[id]/edit` - Édition Examen
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Select type examen
+- [ ] Date picker date/heure
+- [ ] Select œil (OD/OG/Bilatéral)
+- [ ] Textarea indication
+- [ ] Textarea diagnostic
+- [ ] Select statut (programmé/en cours/terminé)
+
+**Boutons :**
+- [ ] Bouton "Sauvegarder"
+- [ ] Bouton "Annuler"
+- [ ] Bouton "Supprimer examen"
+- [ ] Bouton "Démarrer examen" (si programmé)
+- [ ] Bouton "Terminer examen" (si en cours)
+
+**Liens :**
+- [ ] Lien vers patient
+- [ ] Lien vers galerie images
+- [ ] Lien retour liste examens
+
+---
+
+#### `/dashboard/examens/capture/[id]` - Interface Capture
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Upload zone drag & drop
+- [ ] Select type image (fond œil, angiographie, etc.)
+- [ ] Input métadonnées image
+- [ ] Checkbox "Image de référence"
+
+**Boutons :**
+- [ ] Bouton "Capturer image"
+- [ ] Bouton "Upload fichier"
+- [ ] Bouton "Supprimer image"
+- [ ] Bouton "Terminer capture"
+- [ ] Bouton "Pause"
+
+**Liens :**
+- [ ] Lien retour examen
+- [ ] Liens vers éditeur image
+- [ ] Lien vers viewer image
+
+---
+
+### 🖼️ MODULE IMAGES
+
+#### `/dashboard/images/upload` - Upload Images
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Zone drag & drop (multi-fichiers)
+- [ ] Select patient obligatoire
+- [ ] Select/créer examen
+- [ ] Select type image par fichier
+- [ ] Input métadonnées par image
+- [ ] Progress bars upload
+
+**Boutons :**
+- [ ] Bouton "Sélectionner fichiers"
+- [ ] Bouton "Supprimer fichier"
+- [ ] Bouton "Démarrer upload"
+- [ ] Bouton "Annuler upload"
+- [ ] Bouton "Terminer"
+
+**Liens :**
+- [ ] Lien retour galerie
+- [ ] Liens preview images
+
+---
+
+#### `/dashboard/images/[id]/annotations` - Annotations Image
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Formulaire annotation (type/texte/couleur)
+- [ ] Input coordonnées annotation
+
+**Boutons :**
+- [ ] Bouton "Outil flèche"
+- [ ] Bouton "Outil cercle"
+- [ ] Bouton "Outil rectangle"
+- [ ] Bouton "Outil texte"
+- [ ] Bouton "Outil mesure"
+- [ ] Bouton "Supprimer annotation"
+- [ ] Bouton "Sauvegarder annotations"
+
+**Liens :**
+- [ ] Lien retour viewer
+- [ ] Lien vers éditeur RGB
+
+---
+
+### 💉 MODULE ANGIOGRAPHIE
+
+#### `/dashboard/angiography` - Planning Angiographie
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Filtres par date (date picker range)
+- [ ] Filtre par praticien
+- [ ] Filtre par statut
+- [ ] Recherche patient
+
+**Boutons :**
+- [ ] Bouton "Nouvel examen angiographie"
+- [ ] Bouton "Vue calendrier"
+- [ ] Bouton "Vue liste"
+- [ ] Boutons action sur examens
+
+**Liens :**
+- [ ] Liens vers examens individuels
+- [ ] Lien vers interface capture
+- [ ] Lien vers analyse séquences
+
+---
+
+#### `/dashboard/angiography/capture/[examId]` - Capture Angiographie
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Checkbox "Fluorescéine injectée"
+- [ ] Time picker heure injection
+- [ ] Input intervalle capture (secondes)
+- [ ] Select qualité image
+- [ ] Select phase angiographie
+
+**Boutons :**
+- [ ] Bouton "Démarrer injection"
+- [ ] Bouton "Capture manuelle"
+- [ ] Bouton "Capture automatique"
+- [ ] Bouton "Pause capture"
+- [ ] Bouton "Stop capture"
+- [ ] Bouton "Terminer examen"
+
+**Liens :**
+- [ ] Lien retour planning
+- [ ] Liens vers images capturées
+- [ ] Lien vers analyse
+
+---
+
+#### `/dashboard/angiography/analysis/[examId]` - Analyse Séquences
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Contrôles player vidéo
+- [ ] Input annotations temporelles
+- [ ] Select vitesse lecture
+- [ ] Checkbox mode loop
+
+**Boutons :**
+- [ ] Bouton "Play/Pause"
+- [ ] Bouton "Stop"
+- [ ] Bouton "Image précédente"
+- [ ] Bouton "Image suivante"
+- [ ] Bouton "Exporter séquence"
+- [ ] Bouton "Générer rapport"
+
+**Liens :**
+- [ ] Lien retour capture
+- [ ] Lien vers images individuelles
+- [ ] Lien export vidéo
+
+---
+
+### 📄 MODULE RAPPORTS
+
+#### `/dashboard/reports` - Liste Rapports
+**Statut** : ✅ Développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [x] Filtres par date (date picker range)
+- [x] Filtre par statut
+- [x] Recherche patient/titre
+
+**Boutons :**
+- [x] Bouton "Nouveau rapport"
+- [x] Bouton "Templates"
+- [x] Actions rapports (voir/éditer/supprimer)
+- [x] Export sélection
+
+**Liens :**
+- [x] Liens vers rapports individuels
+- [x] Lien vers générateur
+- [x] Lien vers templates
+
+---
+
+#### `/dashboard/reports/[id]` - Viewer Rapport
+**Statut** : ✅ Développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [x] Viewer PDF intégré
+
+**Boutons :**
+- [x] Bouton "Générer PDF"
+- [x] Bouton "Télécharger"
+- [x] Bouton "Imprimer"
+- [x] Bouton "Éditer"
+- [x] Bouton "Supprimer"
+
+**Liens :**
+- [x] Lien retour liste rapports
+- [x] Liens vers examens inclus
+
+---
+
+#### `/dashboard/reports/generator` - Générateur Rapport
+**Statut** : ✅ Développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [x] Select patient (avec recherche)
+- [x] Select examens patient
+- [x] Checkbox sélection images
+- [x] Select template rapport
+- [x] Select format (A4/A5/Letter)
+- [x] Radio orientation (Portrait/Paysage)
+- [x] Input titre rapport
+- [x] Rich text editor introduction
+- [x] Rich text editor conclusion
+
+**Boutons :**
+- [x] Bouton "Étape suivante"
+- [x] Bouton "Étape précédente"
+- [x] Bouton "Prévisualiser"
+- [x] Bouton "Générer PDF"
+- [x] Bouton "Sauvegarder brouillon"
+- [x] Bouton "Annuler"
+
+**Liens :**
+- [x] Lien retour liste rapports
+- [x] Liens preview images
+
+---
+
+#### `/dashboard/reports/templates` - Gestion Templates
+**Statut** : ✅ Développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [x] Formulaire nouveau template
+- [x] Éditeur visuel template
+- [x] Input nom template
+- [x] Textarea description
+- [x] Configuration mise en page
+
+**Boutons :**
+- [x] Bouton "Nouveau template"
+- [x] Bouton "Dupliquer template"
+- [x] Bouton "Supprimer template"
+- [x] Bouton "Prévisualiser"
+- [x] Bouton "Sauvegarder"
+
+**Liens :**
+- [x] Lien vers éditeur template
+- [x] Lien retour rapports
+
+---
+
+### ⚙️ MODULE PARAMÈTRES
+
+#### `/dashboard/settings/profile` - Profil Utilisateur
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Upload photo profil
+- [ ] Input nom
+- [ ] Input email
+- [ ] Input téléphone
+- [ ] Select langue (FR/EN)
+- [ ] Select timezone
+- [ ] Toggle notifications email
+- [ ] Toggle notifications push
+- [ ] Input ancien mot de passe
+- [ ] Input nouveau mot de passe
+- [ ] Input confirmation mot de passe
+
+**Boutons :**
+- [ ] Bouton "Sauvegarder profil"
+- [ ] Bouton "Changer mot de passe"
+- [ ] Bouton "Annuler modifications"
+
+**Liens :**
+- [ ] Lien retour dashboard
+- [ ] Liens autres onglets settings
+
+---
+
+#### `/dashboard/settings/application` - Configuration App
+**Statut** : ❌ Non développé ❌ Non testé ❌ Non validé
+
+**Formulaires :**
+- [ ] Select thème (dark/light/auto)
+- [ ] Select format dates
+- [ ] Radio unités mesure (métrique/imperial)
+- [ ] Select qualité images
+- [ ] Toggle auto-sauvegarde
+- [ ] Input intervalle sauvegarde
+
+**Boutons :**
+- [ ] Bouton "Sauvegarder"
+- [ ] Bouton "Réinitialiser défaut"
+- [ ] Bouton "Exporter configuration"
+- [ ] Bouton "Importer configuration"
+
+**Liens :**
+- [ ] Liens autres onglets settings
+
+---
+
+## 📊 RÉSUMÉ DÉVELOPPEMENT PHASE 3
+
+**Pages à développer** : 15 pages principales
+**Formulaires** : 45 formulaires complexes  
+**Boutons** : 85 boutons interactifs
+**Liens** : 55 liens navigation
+
+**Répartition par module :**
+- **Patients** : 3 pages, 15 formulaires, 11 boutons, 8 liens
+- **Examens** : 2 pages, 8 formulaires, 10 boutons, 6 liens  
+- **Images** : 2 pages, 8 formulaires, 12 boutons, 4 liens
+- **Angiographie** : 3 pages, 12 formulaires, 18 boutons, 9 liens
+- **Rapports** : 2 pages, 9 formulaires, 11 boutons, 4 liens
+- **Paramètres** : 2 pages, 13 formulaires, 7 boutons, 3 liens
+
+**Estimation effort révisée :**
+- **Développement** : 22-27 jours (vs 15 jours initial)
+- **Tests** : 8-10 jours (vs 5 jours initial)  
+- **Validation** : 4-5 jours
+
+**Total Phase 3 restante** : 34-42 jours (vs 20 jours initial)
+
+**Priorisation recommandée :**
+1. **MODULE PATIENTS** (critique adoption) - 8 jours
+2. **MODULE IMAGES upload** (UX essentielle) - 4 jours
+3. **MODULE EXAMENS édition** (workflow) - 3 jours
+4. **MODULE ANGIOGRAPHIE capture** (différenciation) - 7 jours
+5. **MODULE RAPPORTS** (valeur ajoutée) - 5 jours
+
+---
+
+**Dernière mise à jour** : 2025-06-24  
+**Prochaine révision** : 2025-07-01
