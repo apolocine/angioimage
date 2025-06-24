@@ -7,11 +7,7 @@ import ReportTemplate from '@/lib/db/models/ReportTemplate'
 import Image from '@/lib/db/models/Image'
 import path from 'path'
 import fs from 'fs'
-
-// Note: Pour une implémentation complète, il faudrait installer des packages comme:
-// - puppeteer (génération PDF)
-// - @react-pdf/renderer (alternative React)
-// - jsPDF (génération côté client)
+import puppeteer from 'puppeteer'
 
 export async function POST(
   request: NextRequest,
@@ -26,6 +22,8 @@ export async function POST(
     await dbConnect()
 
     const { id } = await params
+    const body = await request.json().catch(() => ({}))
+    const outputFormat = body.format || 'pdf' // 'pdf' ou 'html'
     const report = await Report.findById(id)
       .populate([
         {
@@ -51,34 +49,27 @@ export async function POST(
       _id: { $in: report.imageIds }
     }).lean()
     
-    // Charger les images en base64 pour les inclure dans le HTML
+    // Charger les images réelles en base64
     const imagesWithBase64 = await Promise.all(images.map(async (img: any) => {
       try {
-        // Pour l'instant, utiliser un placeholder
-        // En production, il faudrait récupérer l'image réelle
+        const base64 = await loadImageAsBase64(img.url, img.mimeType)
+        return {
+          ...img,
+          base64: base64
+        }
+      } catch (error) {
+        console.error('Erreur chargement image:', error)
+        // Fallback vers placeholder en cas d'erreur
         const placeholderSvg = generateImagePlaceholder(img.imageType, img.originalName)
         return {
           ...img,
           base64: placeholderSvg
         }
-      } catch (error) {
-        console.error('Erreur chargement image:', error)
-        return {
-          ...img,
-          base64: null
-        }
       }
     }))
 
-    // TODO: Implémenter la génération PDF
-    // Ceci est un exemple simplifié - dans la réalité il faudrait:
-    // 1. Générer le HTML du rapport avec les données
-    // 2. Convertir en PDF avec puppeteer ou similaire
-    // 3. Sauvegarder le fichier
-    // 4. Mettre à jour le rapport avec les métadonnées
-
-    // Simulation de génération PDF avec template
-    const pdfContent = await generatePdfContent(report, imagesWithBase64)
+    // Générer le HTML du rapport
+    const htmlContent = await generatePdfContent(report, imagesWithBase64)
     
     // Créer le répertoire de stockage s'il n'existe pas
     const reportsDir = path.join(process.cwd(), 'storage', 'reports')
@@ -86,13 +77,21 @@ export async function POST(
       fs.mkdirSync(reportsDir, { recursive: true })
     }
 
-    // Nom du fichier PDF
-    const filename = `rapport-${report._id}-${Date.now()}.pdf`
-    const filePath = path.join(reportsDir, filename)
-
-    // TODO: Remplacer par la vraie génération PDF
-    // Pour l'instant, on crée juste un fichier texte
-    fs.writeFileSync(filePath, pdfContent)
+    // Générer le fichier selon le format demandé
+    let filename: string
+    let filePath: string
+    
+    if (outputFormat === 'html') {
+      // Générer un fichier HTML
+      filename = `rapport-${report._id}-${Date.now()}.html`
+      filePath = path.join(reportsDir, filename)
+      fs.writeFileSync(filePath, htmlContent, 'utf-8')
+    } else {
+      // Générer un PDF avec Puppeteer
+      filename = `rapport-${report._id}-${Date.now()}.pdf`
+      filePath = path.join(reportsDir, filename)
+      await generatePdfWithPuppeteer(htmlContent, filePath, report)
+    }
 
     // Mettre à jour le rapport avec les métadonnées
     report.metadata.generatedAt = new Date()
@@ -104,7 +103,8 @@ export async function POST(
     await report.save()
 
     return NextResponse.json({
-      message: 'PDF généré avec succès',
+      message: `${outputFormat.toUpperCase()} généré avec succès`,
+      format: outputFormat,
       metadata: {
         filename,
         fileSize: report.metadata.fileSize,
@@ -114,6 +114,84 @@ export async function POST(
   } catch (error) {
     console.error('Erreur génération PDF:', error)
     return NextResponse.json({ message: 'Erreur lors de la génération PDF' }, { status: 500 })
+  }
+}
+
+async function loadImageAsBase64(imagePath: string, mimeType: string): Promise<string> {
+  try {
+    // Construire le chemin complet vers l'image
+    // imagePath commence par /uploads/images/ donc on l'ajoute au public
+    let fullPath = path.join(process.cwd(), 'public', imagePath)
+    
+    // Si le chemin ne commence pas par /uploads, essayer de l'ajouter
+    if (!imagePath.startsWith('/uploads')) {
+      fullPath = path.join(process.cwd(), 'public/uploads/images', imagePath)
+    }
+    
+    console.log('Tentative de chargement de l\'image:', fullPath)
+    
+    // Vérifier que le fichier existe
+    if (!fs.existsSync(fullPath)) {
+      throw new Error(`Image non trouvée: ${fullPath}`)
+    }
+    
+    // Lire l'image et la convertir en base64
+    const imageBuffer = fs.readFileSync(fullPath)
+    const base64String = imageBuffer.toString('base64')
+    
+    console.log(`Image chargée avec succès: ${fullPath} (${imageBuffer.length} bytes)`)
+    
+    return `data:${mimeType};base64,${base64String}`
+  } catch (error) {
+    console.error('Erreur lors du chargement de l\'image:', error)
+    throw error
+  }
+}
+
+async function generatePdfWithPuppeteer(htmlContent: string, filePath: string, report: any) {
+  let browser
+  try {
+    // Lancer Puppeteer
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    })
+    
+    const page = await browser.newPage()
+    
+    // Définir le contenu HTML
+    await page.setContent(htmlContent, {
+      waitUntil: 'networkidle0'
+    })
+    
+    // Déterminer les options PDF selon le format et orientation
+    const format = report.format || 'A4'
+    const orientation = report.orientation || 'portrait'
+    const landscape = orientation === 'landscape'
+    
+    // Générer le PDF
+    const pdfBuffer = await page.pdf({
+      path: filePath,
+      format: format as any,
+      landscape: landscape,
+      printBackground: true,
+      margin: {
+        top: '20px',
+        right: '20px',
+        bottom: '20px',
+        left: '20px'
+      }
+    })
+    
+    console.log(`PDF généré avec succès: ${filePath}`)
+    
+  } catch (error) {
+    console.error('Erreur lors de la génération PDF avec Puppeteer:', error)
+    throw error
+  } finally {
+    if (browser) {
+      await browser.close()
+    }
   }
 }
 
@@ -271,14 +349,22 @@ async function generatePdfContent(report: any, images: any[]) {
     .image-grid { 
       display: grid; 
       grid-template-columns: repeat(${getGridColumns(layout.imagesPerPage)}, 1fr); 
-      gap: 15px; 
-      margin: 20px 0; 
+      gap: 20px; 
+      margin: 25px 0; 
     }
     .image-item { 
       text-align: center; 
-      border: 1px solid #e5e7eb; 
-      padding: 10px; 
-      border-radius: 5px; 
+      border: 2px solid #e5e7eb; 
+      padding: 15px; 
+      border-radius: 8px; 
+      background: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .image-item img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     .metadata { 
       font-size: ${fontSize.caption}px; 
@@ -293,9 +379,43 @@ async function generatePdfContent(report: any, images: any[]) {
       color: ${colors.secondary};
       font-style: italic;
     }
+    
+    /* Styles spécifiques pour l'affichage HTML */
+    @media screen {
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f9fafb;
+      }
+      .report-container {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      }
+      .image-item:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease;
+      }
+    }
+    
+    /* Styles pour l'impression */
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        background: white;
+      }
+      .report-container {
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="report-container">
   ${layout.includeHeader ? `<div class="header">` : '<div>'}
     <div class="title">RAPPORT D'EXAMEN OPHTALMOLOGIQUE</div>
     <div class="subtitle">${report.title || 'Rapport sans titre'}</div>
@@ -349,9 +469,9 @@ async function generatePdfContent(report: any, images: any[]) {
       ${images.map((img: any) => `
       <div class="image-item">
         ${img.base64 ? `
-          <img src="${img.base64}" style="width: 100%; height: 200px; object-fit: contain; margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 5px;" />
+          <img src="${img.base64}" alt="${img.originalName || 'Image médicale'}" style="max-width: 100%; height: auto; margin-bottom: 12px;" />
         ` : `
-          <div style="height: 200px; background: #f3f4f6; border: 1px dashed #d1d5db; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+          <div style="height: 200px; background: #f3f4f6; border: 1px dashed #d1d5db; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; border-radius: 5px;">
             <span style="color: #6b7280; font-size: 12px;">Image : ${img.imageType || 'Type inconnu'}</span>
           </div>
         `}
@@ -385,6 +505,7 @@ async function generatePdfContent(report: any, images: any[]) {
     Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}
   </div>
   ` : ''}
+  </div>
 </body>
 </html>`
 

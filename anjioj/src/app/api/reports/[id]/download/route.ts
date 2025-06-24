@@ -25,22 +25,35 @@ export async function GET(
     }
 
     if (!report.metadata.filePath || !fs.existsSync(report.metadata.filePath)) {
-      return NextResponse.json({ message: 'Fichier PDF non trouvé' }, { status: 404 })
+      return NextResponse.json({ message: 'Fichier non trouvé' }, { status: 404 })
     }
 
     // Lire le fichier
     const fileBuffer = fs.readFileSync(report.metadata.filePath)
     const filename = path.basename(report.metadata.filePath)
+    const fileExtension = path.extname(filename).toLowerCase()
 
-    // Déterminer le type MIME - pour l'instant on traite tout comme HTML
-    const content = fileBuffer.toString('utf-8')
-    const mimeType = 'text/html'
+    // Déterminer le type MIME selon l'extension
+    let mimeType: string
+    let content: string | Buffer
+    
+    if (fileExtension === '.html') {
+      mimeType = 'text/html'
+      content = fileBuffer.toString('utf-8')
+    } else if (fileExtension === '.pdf') {
+      mimeType = 'application/pdf'
+      content = fileBuffer
+    } else {
+      // Fallback pour les anciens fichiers
+      mimeType = 'text/html'
+      content = fileBuffer.toString('utf-8')
+    }
 
-    // Retourner le fichier HTML
+    // Retourner le fichier
     return new NextResponse(content, {
       headers: {
         'Content-Type': mimeType,
-        'Content-Disposition': `inline; filename="${encodeURIComponent(filename.replace('.pdf', '.html'))}"`,
+        'Content-Disposition': `inline; filename="${encodeURIComponent(filename)}"`,
       },
     })
   } catch (error) {

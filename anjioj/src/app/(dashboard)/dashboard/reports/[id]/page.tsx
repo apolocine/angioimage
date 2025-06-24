@@ -16,7 +16,9 @@ import {
   CalendarIcon,
   ClockIcon,
   InformationCircleIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  Cog6ToothIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
 interface Patient {
@@ -87,6 +89,8 @@ export default function ReportViewerPage() {
   const [error, setError] = useState('')
   const [pdfUrl, setPdfUrl] = useState('')
   const [loadingPdf, setLoadingPdf] = useState(false)
+  const [outputFormat, setOutputFormat] = useState<'pdf' | 'html'>('pdf')
+  const [showFormatSelector, setShowFormatSelector] = useState(false)
 
   useEffect(() => {
     if (reportId) {
@@ -119,20 +123,27 @@ export default function ReportViewerPage() {
     setLoadingPdf(true)
     try {
       const response = await fetch(`/api/reports/${reportId}/generate`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          format: outputFormat
+        })
       })
       
       if (response.ok) {
         const data = await response.json()
         setPdfUrl(`/api/reports/${reportId}/download`)
+        setShowFormatSelector(false)
         // Rafraîchir les données du rapport
         fetchReport()
       } else {
-        throw new Error('Erreur lors de la génération du PDF')
+        throw new Error(`Erreur lors de la génération du ${outputFormat.toUpperCase()}`)
       }
     } catch (error) {
-      console.error('Erreur génération PDF:', error)
-      alert('Erreur lors de la génération du PDF')
+      console.error('Erreur génération:', error)
+      alert(`Erreur lors de la génération du ${outputFormat.toUpperCase()}`)
     } finally {
       setLoadingPdf(false)
     }
@@ -271,23 +282,32 @@ export default function ReportViewerPage() {
           
           <div className="mt-4 sm:mt-0 flex items-center space-x-3">
             {!pdfUrl ? (
-              <button
-                onClick={handleGeneratePdf}
-                disabled={loadingPdf}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {loadingPdf ? (
-                  <>
-                    <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
-                    Génération...
-                  </>
-                ) : (
-                  <>
-                    <DocumentIcon className="h-4 w-4 mr-2" />
-                    Générer PDF
-                  </>
-                )}
-              </button>
+              <>
+                <button
+                  onClick={() => setShowFormatSelector(true)}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                  Options
+                </button>
+                <button
+                  onClick={handleGeneratePdf}
+                  disabled={loadingPdf}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {loadingPdf ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+                      Génération...
+                    </>
+                  ) : (
+                    <>
+                      <DocumentIcon className="h-4 w-4 mr-2" />
+                      Générer {outputFormat.toUpperCase()}
+                    </>
+                  )}
+                </button>
+              </>
             ) : (
               <>
                 <button
@@ -350,26 +370,35 @@ export default function ReportViewerPage() {
                     Rapport non généré
                   </h3>
                   <p className="text-center mb-6">
-                    Le PDF de ce rapport n'a pas encore été généré.
-                    Cliquez sur "Générer PDF" pour créer le document.
+                    Le rapport n'a pas encore été généré.
+                    Choisissez le format et cliquez sur "Générer" pour créer le document.
                   </p>
-                  <button
-                    onClick={handleGeneratePdf}
-                    disabled={loadingPdf}
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-                  >
-                    {loadingPdf ? (
-                      <>
-                        <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
-                        Génération...
-                      </>
-                    ) : (
-                      <>
-                        <DocumentIcon className="h-4 w-4 mr-2" />
-                        Générer PDF
-                      </>
-                    )}
-                  </button>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setShowFormatSelector(true)}
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                      <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                      Options
+                    </button>
+                    <button
+                      onClick={handleGeneratePdf}
+                      disabled={loadingPdf}
+                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {loadingPdf ? (
+                        <>
+                          <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+                          Génération...
+                        </>
+                      ) : (
+                        <>
+                          <DocumentIcon className="h-4 w-4 mr-2" />
+                          Générer {outputFormat.toUpperCase()}
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -525,6 +554,86 @@ export default function ReportViewerPage() {
           )}
         </div>
       </div>
+
+      {/* Modal de sélection du format */}
+      {showFormatSelector && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">
+                Choisir le format de sortie
+              </h3>
+              <button
+                onClick={() => setShowFormatSelector(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="px-6 py-4">
+              <div className="space-y-4">
+                <label className="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="format"
+                    value="pdf"
+                    checked={outputFormat === 'pdf'}
+                    onChange={(e) => setOutputFormat(e.target.value as 'pdf' | 'html')}
+                    className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                  />
+                  <div className="ml-3 flex-1">
+                    <div className="font-medium text-gray-900">PDF</div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Format PDF optimisé pour l'impression et l'archivage. 
+                      {' '}Peut avoir des problèmes d'affichage avec certaines images.
+                    </p>
+                  </div>
+                </label>
+                
+                <label className="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="format"
+                    value="html"
+                    checked={outputFormat === 'html'}
+                    onChange={(e) => setOutputFormat(e.target.value as 'pdf' | 'html')}
+                    className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                  />
+                  <div className="ml-3 flex-1">
+                    <div className="font-medium text-gray-900">HTML</div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Format HTML avec images intégrées. Meilleur affichage des images, 
+                      {' '}visualisable directement dans le navigateur.
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowFormatSelector(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => {
+                    setShowFormatSelector(false)
+                    handleGeneratePdf()
+                  }}
+                  disabled={loadingPdf}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  Générer {outputFormat.toUpperCase()}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
