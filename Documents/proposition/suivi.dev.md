@@ -471,165 +471,6 @@
 
 ---
 
-## ⚙️ PARAMÈTRES
-
-### `/dashboard/settings` - Paramètres Généraux
-**Description** : Configuration générale application
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Onglets paramètres** | Navigation settings | ❌ | ❌ |
-| - Onglet Profil | Settings utilisateur | ❌ | ❌ |
-| - Onglet Application | Config app | ❌ | ❌ |
-| - Onglet Sécurité | Paramètres sécurité | ❌ | ❌ |
-| - Onglet Sauvegarde | Backup/restore | ❌ | ❌ |
-
-### `/dashboard/settings/profile` - Profil Utilisateur
-**Description** : Gestion du profil utilisateur
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Photo profil** | Avatar avec upload | ❌ | ❌ |
-| **Informations personnelles** | Form édition profil | ❌ | ❌ |
-| - Input nom | Text input | ❌ | ❌ |
-| - Input email | Email input | ❌ | ❌ |
-| - Input téléphone | Tel input | ❌ | ❌ |
-| **Préférences** | Config personnelles | ❌ | ❌ |
-| - Select langue | FR/EN | ❌ | ❌ |
-| - Select timezone | Timezone picker | ❌ | ❌ |
-| - Toggle notifications | Email/Push | ❌ | ❌ |
-| **Changement mot de passe** | Form sécurisé | ❌ | ❌ |
-| - Input ancien password | Password input | ❌ | ❌ |
-| - Input nouveau password | Password avec force | ❌ | ❌ |
-| - Input confirmation | Validation match | ❌ | ❌ |
-
-### `/dashboard/settings/application` - Configuration App
-**Description** : Paramètres de l'application
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Thème** | Sélection dark/light/auto | ❌ | ❌ |
-| **Format dates** | Select format d'affichage | ❌ | ❌ |
-| **Unités mesure** | Métrique/Imperial | ❌ | ❌ |
-| **Qualité images** | Select compression | ❌ | ❌ |
-| **Auto-sauvegarde** | Toggle + intervalle | ❌ | ❌ |
-
-### `/dashboard/settings/security` - Sécurité
-**Description** : Paramètres de sécurité
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Sessions actives** | Liste sessions avec révocation | ❌ | ❌ |
-| **Logs d'activité** | Table activité récente | ❌ | ❌ |
-| **2FA** | Configuration authentification 2 facteurs | ❌ | ❌ |
-| **API Keys** | Gestion clés API | ❌ | ❌ |
-
-### `/dashboard/settings/backup` - Sauvegarde
-**Description** : Gestion des sauvegardes
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Sauvegarde manuelle** | Bouton export données | ❌ | ❌ |
-| **Planification** | Config backup automatique | ❌ | ❌ |
-| **Historique sauvegardes** | Liste avec restore | ❌ | ❌ |
-| **Import données** | Upload fichier backup | ❌ | ❌ |
-
----
-
-## 🔧 ADMINISTRATION
-
-### `/dashboard/admin` - Panel Admin
-**Description** : Interface d'administration (role admin uniquement)
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Gestion utilisateurs** | CRUD utilisateurs | ❌ | ❌ |
-| **Statistiques globales** | Métriques système | ❌ | ❌ |
-| **Logs système** | Monitoring activité | ❌ | ❌ |
-| **Configuration système** | Paramètres avancés | ❌ | ❌ |
-
-### `/dashboard/admin/users` - Gestion Utilisateurs
-**Description** : Administration des comptes utilisateur
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Table utilisateurs** | Liste avec actions admin | ❌ | ❌ |
-| **Bouton nouvel utilisateur** | Création compte | ❌ | ❌ |
-| **Actions utilisateur** | Activer/Désactiver/Supprimer | ❌ | ❌ |
-| **Gestion rôles** | Attribution permissions | ❌ | ❌ |
-
----
-
-## 📱 COMPOSANTS GLOBAUX
-
-### Navigation & Layout
-**Description** : Composants de navigation et mise en page
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Header responsive** | Barre navigation adaptative | ❌ | ❌ |
-| **Sidebar collapse** | Menu latéral rétractable | ❌ | ❌ |
-| **Breadcrumb** | Fil d'Ariane automatique | ❌ | ❌ |
-| **Footer** | Pied de page avec infos | ❌ | ❌ |
-| **Loading states** | Spinners et skeletons | ❌ | ❌ |
-| **Error boundaries** | Gestion erreurs React | ❌ | ❌ |
-
-### Modals & Dialogs
-**Description** : Fenêtres modales et dialogues
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Modal confirmation** | Dialogue oui/non | ❌ | ❌ |
-| **Modal formulaire** | Form dans modal | ❌ | ❌ |
-| **Modal viewer** | Affichage image/PDF | ❌ | ❌ |
-| **Toast notifications** | Messages temporaires | ❌ | ❌ |
-| **Alert banners** | Alertes persistantes | ❌ | ❌ |
-
-### Forms & Inputs
-**Description** : Composants de formulaire
-
-| Élément | Description | DEV | TEST |
-|---------|-------------|-----|------|
-| **Input text** | Champ texte avec validation | ❌ | ❌ |
-| **Input email** | Validation email | ❌ | ❌ |
-| **Input password** | Avec toggle visibilité | ❌ | ❌ |
-| **Date picker** | Sélecteur date | ❌ | ❌ |
-| **Select** | Dropdown avec recherche | ❌ | ❌ |
-| **Checkbox** | Case à cocher | ❌ | ❌ |
-| **Radio buttons** | Boutons radio | ❌ | ❌ |
-| **File upload** | Upload avec drag & drop | ❌ | ❌ |
-| **Rich text editor** | Éditeur WYSIWYG | ❌ | ❌ |
-
----
-
-## 📊 ÉTAT D'AVANCEMENT GLOBAL
-
-### Statistiques de Développement
-- **Total éléments à développer** : 351
-- **Éléments développés** : 154 ✅ 
-- **Éléments testés** : 38 ✅
-- **Progression DEV** : 43.9%
-- **Progression TEST** : 10.8%
-
-### Modules Terminés (DEV)
-- **Rapports** : Module complet développé ✅
-  - Liste rapports avec filtres et pagination
-  - Générateur 4 étapes avec validation
-  - Viewer rapport avec métadonnées
-  - Templates de base
-  - Génération PDF avec placeholders images
-  - Mode édition de rapports existants
-  - Bouton génération rapide depuis examens
-
-### Corrections Techniques Majeures (Phase 4)
-- **Base de données** : Seeding de 7 examens et 22 images pour tests
-- **Next.js 15** : Migration vers params async (`{ params: Promise<{ id: string }> }`)
-- **API imports** : Correction `connectDB` → `dbConnect` dans tous les endpoints
-- **Validation** : Gestion des erreurs mongoose avec messages détaillés
-- **Images** : Système de placeholders SVG base64 pour prévisualisation
-- **Debug tools** : Endpoints et boutons debug pour troubleshooting
-- **Report editing** : Chargement et pré-remplissage de données existantes
-
 ### Priorisation par Phase
 
 #### Phase 1 : Core (Priorité Haute)
@@ -657,12 +498,201 @@
 - [x] Génération rapide depuis examens
 - [x] API backend complète (CRUD rapports)
 
-#### Phase 5 : Administration (Priorité Basse)
-- [ ] Paramètres utilisateur
-- [ ] Panel admin
-- [ ] Sauvegarde/restore
+#### Phase 5 : Administration (Priorité Basse) ✅ TERMINÉ
+- [x] Paramètres utilisateur (profil, app, sécurité, backup)
+- [x] Panel admin avec statistiques système
+- [x] Gestion des utilisateurs avec permissions
+- [x] Navigation sidebar mise à jour
+- [x] Contrôle d'accès basé sur les rôles
 
 ---
+
+## ⚙️ PARAMÈTRES (phase 5)
+
+### `/dashboard/settings` - Paramètres Généraux
+**Description** : Configuration générale application
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Onglets paramètres** | Navigation settings | ✅ | ❌ |
+| - Onglet Profil | Settings utilisateur | ✅ | ❌ |
+| - Onglet Application | Config app | ✅ | ❌ |
+| - Onglet Sécurité | Paramètres sécurité | ✅ | ❌ |
+| - Onglet Sauvegarde | Backup/restore | ✅ | ❌ |
+
+### `/dashboard/settings/profile` - Profil Utilisateur
+**Description** : Gestion du profil utilisateur
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Photo profil** | Avatar avec upload | ✅ | ❌ |
+| **Informations personnelles** | Form édition profil | ✅ | ❌ |
+| - Input nom | Text input | ✅ | ❌ |
+| - Input email | Email input | ✅ | ❌ |
+| - Input téléphone | Tel input | ✅ | ❌ |
+| **Préférences** | Config personnelles | ✅ | ❌ |
+| - Select langue | FR/EN | ✅ | ❌ |
+| - Select timezone | Timezone picker | ✅ | ❌ |
+| - Toggle notifications | Email/Push | ✅ | ❌ |
+| **Changement mot de passe** | Form sécurisé | ✅ | ❌ |
+| - Input ancien password | Password input | ✅ | ❌ |
+| - Input nouveau password | Password avec force | ✅ | ❌ |
+| - Input confirmation | Validation match | ✅ | ❌ |
+
+### `/dashboard/settings/application` - Configuration App
+**Description** : Paramètres de l'application
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Thème** | Sélection dark/light/auto | ✅ | ❌ |
+| **Format dates** | Select format d'affichage | ✅ | ❌ |
+| **Unités mesure** | Métrique/Imperial | ✅ | ❌ |
+| **Qualité images** | Select compression | ✅ | ❌ |
+| **Auto-sauvegarde** | Toggle + intervalle | ✅ | ❌ |
+
+### `/dashboard/settings/security` - Sécurité
+**Description** : Paramètres de sécurité
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Sessions actives** | Liste sessions avec révocation | ✅ | ❌ |
+| **Logs d'activité** | Table activité récente | ✅ | ❌ |
+| **2FA** | Configuration authentification 2 facteurs | ✅ | ❌ |
+| **API Keys** | Gestion clés API | ✅ | ❌ |
+
+### `/dashboard/settings/backup` - Sauvegarde
+**Description** : Gestion des sauvegardes
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Sauvegarde manuelle** | Bouton export données | ✅ | ❌ |
+| **Planification** | Config backup automatique | ✅ | ❌ |
+| **Historique sauvegardes** | Liste avec restore | ✅ | ❌ |
+| **Import données** | Upload fichier backup | ✅ | ❌ |
+
+---
+
+## 🔧 ADMINISTRATION (phase 5)
+
+### `/dashboard/admin` - Panel Admin
+**Description** : Interface d'administration (role admin uniquement)
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Gestion utilisateurs** | CRUD utilisateurs | ✅ | ❌ |
+| **Statistiques globales** | Métriques système | ✅ | ❌ |
+| **Logs système** | Monitoring activité | ✅ | ❌ |
+| **Configuration système** | Paramètres avancés | ✅ | ❌ |
+
+### `/dashboard/admin/users` - Gestion Utilisateurs
+**Description** : Administration des comptes utilisateur
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Table utilisateurs** | Liste avec actions admin | ✅ | ❌ |
+| **Bouton nouvel utilisateur** | Création compte | ✅ | ❌ |
+| **Actions utilisateur** | Activer/Désactiver/Supprimer | ✅ | ❌ |
+| **Gestion rôles** | Attribution permissions | ✅ | ❌ |
+
+---
+
+## 📱 COMPOSANTS GLOBAUX (phase 5)
+
+### Navigation & Layout
+**Description** : Composants de navigation et mise en page
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Header responsive** | Barre navigation adaptative | ❌ | ❌ |
+| **Sidebar collapse** | Menu latéral rétractable | ❌ | ❌ |
+| **Breadcrumb** | Fil d'Ariane automatique | ❌ | ❌ |
+| **Footer** | Pied de page avec infos | ❌ | ❌ |
+| **Loading states** | Spinners et skeletons | ❌ | ❌ |
+| **Error boundaries** | Gestion erreurs React | ❌ | ❌ |
+
+### Modals & Dialogs (phase 5)
+**Description** : Fenêtres modales et dialogues
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Modal confirmation** | Dialogue oui/non | ❌ | ❌ |
+| **Modal formulaire** | Form dans modal | ❌ | ❌ |
+| **Modal viewer** | Affichage image/PDF | ❌ | ❌ |
+| **Toast notifications** | Messages temporaires | ❌ | ❌ |
+| **Alert banners** | Alertes persistantes | ❌ | ❌ |
+
+### Forms & Inputs (phase 5)
+**Description** : Composants de formulaire
+
+| Élément | Description | DEV | TEST |
+|---------|-------------|-----|------|
+| **Input text** | Champ texte avec validation | ❌ | ❌ |
+| **Input email** | Validation email | ❌ | ❌ |
+| **Input password** | Avec toggle visibilité | ❌ | ❌ |
+| **Date picker** | Sélecteur date | ❌ | ❌ |
+| **Select** | Dropdown avec recherche | ❌ | ❌ |
+| **Checkbox** | Case à cocher | ❌ | ❌ |
+| **Radio buttons** | Boutons radio | ❌ | ❌ |
+| **File upload** | Upload avec drag & drop | ❌ | ❌ |
+| **Rich text editor** | Éditeur WYSIWYG | ❌ | ❌ |
+
+---
+
+## 📊 ÉTAT D'AVANCEMENT GLOBAL
+
+### Statistiques de Développement
+- **Total éléments à développer** : 351
+- **Éléments développés** : 198 ✅ 
+- **Éléments testés** : 38 ✅
+- **Progression DEV** : 56.4%
+- **Progression TEST** : 10.8%
+
+### Modules Terminés (DEV)
+- **Rapports** : Module complet développé ✅
+  - Liste rapports avec filtres et pagination
+  - Générateur 4 étapes avec validation
+  - Viewer rapport avec métadonnées
+  - Templates de base
+  - Génération PDF avec placeholders images
+  - Mode édition de rapports existants
+  - Bouton génération rapide depuis examens
+
+- **Paramètres** : Module complet développé ✅
+  - Page principale avec navigation par cartes
+  - Profil utilisateur avec photo et préférences
+  - Configuration application (thème, formats, etc.)
+  - Sécurité (sessions, 2FA, API keys, logs)
+  - Sauvegarde/restore avec planification automatique
+
+- **Administration** : Module complet développé ✅
+  - Dashboard admin avec statistiques système
+  - Gestion utilisateurs avec filtres et actions bulk
+  - Contrôle d'accès basé sur les rôles
+  - Navigation sidebar mise à jour
+  - Interface réservée aux administrateurs
+
+### Corrections Techniques Majeures (Phase 4)
+- **Base de données** : Seeding de 7 examens et 22 images pour tests
+- **Next.js 15** : Migration vers params async (`{ params: Promise<{ id: string }> }`)
+- **API imports** : Correction `connectDB` → `dbConnect` dans tous les endpoints
+- **Validation** : Gestion des erreurs mongoose avec messages détaillés
+- **Images** : Système de placeholders SVG base64 pour prévisualisation
+- **Debug tools** : Endpoints et boutons debug pour troubleshooting
+- **Report editing** : Chargement et pré-remplissage de données existantes
+
+### Nouvelles Fonctionnalités (Phase 5)
+- **Navigation dynamique** : Sidebar avec sous-menus et contrôle d'accès par rôle
+- **Gestion des rôles** : Système de permissions admin/doctor/assistant
+- **Sélection automatique** : Correction du modal NewExam pour présélectionner le patient
+- **Interface responsive** : Toutes les pages optimisées pour mobile/tablet/desktop
+- **UX améliorée** : Messages de feedback, loading states, animations
+- **Architecture modulaire** : Structure claire pour settings et administration
+
+
+
+
+
+
 
 ## 📝 Notes de Développement
 

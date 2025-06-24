@@ -122,12 +122,12 @@ export async function POST(request: NextRequest) {
     await template.save()
 
     // Populate les références pour la réponse
-    await template.populate({
+    const populatedTemplate = await ReportTemplate.findById(template._id).populate({
       path: 'createdBy',
       select: 'nom email'
     })
 
-    return NextResponse.json(template, { status: 201 })
+    return NextResponse.json(populatedTemplate, { status: 201 })
   } catch (error) {
     console.error('Erreur POST /api/reports/templates:', error)
     return NextResponse.json({ message: 'Erreur serveur' }, { status: 500 })

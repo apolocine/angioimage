@@ -10,7 +10,7 @@ import {
   DocumentTextIcon,
   Square3Stack3DIcon,
   StarIcon,
-  DuplicateIcon,
+  DocumentDuplicateIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
@@ -25,6 +25,7 @@ interface ReportTemplate {
   layout: {
     format: string
     orientation: string
+    imagesPerPage: number
     imagesPerRow: number
   }
   createdBy: {
@@ -35,11 +36,32 @@ interface ReportTemplate {
   updatedAt: string
 }
 
+const getCategoryLabel = (category: string) => {
+  const labels: Record<string, string> = {
+    'general': 'Général',
+    'angiography': 'Angiographie',
+    'oct': 'OCT',
+    'retinography': 'Rétinographie',
+    'custom': 'Personnalisé'
+  }
+  return labels[category] || category
+}
+
+const getCategoryColor = (category: string) => {
+  const colors: Record<string, string> = {
+    'general': 'bg-gray-100 text-gray-800',
+    'angiography': 'bg-blue-100 text-blue-800',
+    'oct': 'bg-green-100 text-green-800',
+    'retinography': 'bg-purple-100 text-purple-800',
+    'custom': 'bg-orange-100 text-orange-800'
+  }
+  return colors[category] || 'bg-gray-100 text-gray-800'
+}
+
 export default function ReportTemplatesPage() {
   const [templates, setTemplates] = useState<ReportTemplate[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<ReportTemplate | null>(null)
 
   useEffect(() => {
@@ -167,13 +189,13 @@ export default function ReportTemplatesPage() {
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
-          <button
-            onClick={() => setShowCreateModal(true)}
+          <Link
+            href="/dashboard/reports/templates/new"
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
           >
             <PlusIcon className="h-4 w-4 mr-2" />
             Nouveau template
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -239,7 +261,7 @@ export default function ReportTemplatesPage() {
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center text-sm text-gray-500">
                     <Square3Stack3DIcon className="h-4 w-4 mr-2" />
-                    {template.layout.format} • {template.layout.orientation} • {template.layout.imagesPerRow} images/ligne
+                    {template.layout.format} • {template.layout.orientation} • {template.layout.imagesPerPage || template.layout.imagesPerRow} photos/page
                   </div>
                   <div className="text-sm text-gray-500">
                     Créé par {template.createdBy.nom} • {new Date(template.createdAt).toLocaleDateString('fr-FR')}
@@ -265,26 +287,26 @@ export default function ReportTemplatesPage() {
                       className="p-1 text-gray-400 hover:text-gray-600"
                       title="Dupliquer"
                     >
-                      <DuplicateIcon className="h-4 w-4" />
+                      <DocumentDuplicateIcon className="h-4 w-4" />
                     </button>
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => {/* TODO: Preview */}}
+                    <Link
+                      href={`/dashboard/reports/templates/${template._id}`}
                       className="p-1 text-gray-400 hover:text-gray-600"
-                      title="Prévisualiser"
+                      title="Voir les détails"
                     >
                       <EyeIcon className="h-4 w-4" />
-                    </button>
+                    </Link>
                     
-                    <button
-                      onClick={() => setEditingTemplate(template)}
+                    <Link
+                      href={`/dashboard/reports/templates/${template._id}/edit`}
                       className="p-1 text-gray-400 hover:text-gray-600"
                       title="Éditer"
                     >
                       <PencilIcon className="h-4 w-4" />
-                    </button>
+                    </Link>
                     
                     <button
                       onClick={() => handleDelete(template._id)}
@@ -313,13 +335,13 @@ export default function ReportTemplatesPage() {
               </p>
               {!filter && (
                 <div className="mt-6">
-                  <button
-                    onClick={() => setShowCreateModal(true)}
+                  <Link
+                    href="/dashboard/reports/templates/new"
                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                   >
                     <PlusIcon className="h-4 w-4 mr-2" />
                     Nouveau template
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>
@@ -327,38 +349,6 @@ export default function ReportTemplatesPage() {
         </div>
       )}
 
-      {/* Modal de création/édition - TODO: Implémenter */}
-      {(showCreateModal || editingTemplate) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                {editingTemplate ? 'Éditer le template' : 'Nouveau template'}
-              </h2>
-              
-              {/* TODO: Formulaire de création/édition */}
-              <div className="text-center py-8 text-gray-500">
-                Formulaire de création/édition à implémenter
-              </div>
-              
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => {
-                    setShowCreateModal(false)
-                    setEditingTemplate(null)
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Annuler
-                </button>
-                <button className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700">
-                  {editingTemplate ? 'Mettre à jour' : 'Créer'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

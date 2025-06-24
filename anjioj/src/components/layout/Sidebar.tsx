@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { 
   HomeIcon, 
   UserGroupIcon, 
@@ -16,7 +16,13 @@ import {
   PlusIcon,
   ClipboardDocumentListIcon,
   ChevronDownIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ShieldCheckIcon,
+  UserIcon,
+  WrenchScrewdriverIcon,
+  CloudArrowUpIcon,
+  ChartBarIcon,
+  CpuChipIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -52,12 +58,43 @@ const navigation = [
       { name: 'Templates', href: '/dashboard/reports/templates', icon: DocumentIcon }
     ]
   },
-  { name: 'Paramètres', href: '/dashboard/settings', icon: Cog6ToothIcon },
+  { 
+    name: 'Paramètres', 
+    href: '/dashboard/settings', 
+    icon: Cog6ToothIcon,
+    subItems: [
+      { name: 'Profil', href: '/dashboard/settings/profile', icon: UserIcon },
+      { name: 'Application', href: '/dashboard/settings/application', icon: WrenchScrewdriverIcon },
+      { name: 'Sécurité', href: '/dashboard/settings/security', icon: ShieldCheckIcon },
+      { name: 'Sauvegarde', href: '/dashboard/settings/backup', icon: CloudArrowUpIcon }
+    ]
+  },
+  { 
+    name: 'Administration', 
+    href: '/dashboard/admin', 
+    icon: CpuChipIcon,
+    subItems: [
+      { name: 'Vue d\'ensemble', href: '/dashboard/admin', icon: ChartBarIcon },
+      { name: 'Utilisateurs', href: '/dashboard/admin/users', icon: UserGroupIcon },
+      { name: 'Statistiques', href: '/dashboard/admin/stats', icon: ChartBarIcon },
+      { name: 'Configuration', href: '/dashboard/admin/config', icon: Cog6ToothIcon }
+    ],
+    requiresAdmin: true
+  },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const [expandedItems, setExpandedItems] = useState<string[]>([])
+  
+  // Filter navigation items based on user role
+  const filteredNavigation = navigation.filter(item => {
+    if (item.requiresAdmin) {
+      return session?.user?.role === 'admin'
+    }
+    return true
+  })
 
   const toggleExpanded = (itemName: string) => {
     setExpandedItems(prev => 
@@ -74,7 +111,7 @@ export default function Sidebar() {
       </div>
       
       <nav className="flex-1 px-2 py-4 space-y-1">
-        {navigation.map((item) => {
+        {filteredNavigation.map((item) => {
           const isActive = pathname.startsWith(item.href)
           const isExpanded = expandedItems.includes(item.name)
           const hasSubItems = item.subItems && item.subItems.length > 0
