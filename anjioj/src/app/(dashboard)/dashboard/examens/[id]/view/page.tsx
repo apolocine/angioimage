@@ -21,7 +21,8 @@ import {
   FunnelIcon,
   Squares2X2Icon,
   ListBulletIcon,
-  AdjustmentsHorizontalIcon
+  AdjustmentsHorizontalIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline'
 
 interface Patient {
@@ -79,6 +80,7 @@ export default function ExamViewPage() {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({})
+  const [generatingReport, setGeneratingReport] = useState(false)
 
   useEffect(() => {
     fetchExam()
@@ -281,6 +283,74 @@ export default function ExamViewPage() {
 
   const handleImageLoadStart = (imageId: string) => {
     setImageLoadingStates(prev => ({ ...prev, [imageId]: true }))
+  }
+
+  const handleGenerateReport = async () => {
+    if (!exam || selectedImages.length === 0) {
+      alert('Veuillez sélectionner au moins une image pour générer le rapport.')
+      return
+    }
+
+    setGeneratingReport(true)
+    try {
+      // Créer un rapport avec les images sélectionnées
+      const reportData = {
+        title: `Rapport - ${exam.type} ${exam.oeil} - ${exam.patientId.nom} ${exam.patientId.prenom}`,
+        patientId: exam.patientId._id,
+        examIds: [exam._id],
+        imageIds: selectedImages,
+        format: 'A4',
+        orientation: 'portrait',
+        content: {
+          introduction: `Rapport d'examen ${exam.type} réalisé le ${formatDate(exam.date)} pour l'œil ${exam.oeil}.`,
+          findings: exam.diagnostic || 'Observations en cours d\'analyse.',
+          conclusion: '',
+          recommendations: ''
+        },
+        layout: {
+          imagesPerRow: 2,
+          includeHeader: true,
+          includeFooter: true,
+          includePageNumbers: true
+        }
+      }
+
+      // Créer le rapport
+      const createResponse = await fetch('/api/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reportData)
+      })
+
+      if (!createResponse.ok) {
+        throw new Error('Erreur lors de la création du rapport')
+      }
+
+      const newReport = await createResponse.json()
+
+      // Générer le PDF
+      const generateResponse = await fetch(`/api/reports/${newReport._id}/generate`, {
+        method: 'POST'
+      })
+
+      if (!generateResponse.ok) {
+        throw new Error('Erreur lors de la génération du PDF')
+      }
+
+      // Rediriger vers le rapport généré
+      window.open(`/dashboard/reports/${newReport._id}`, '_blank')
+      
+      // Déselectionner les images
+      setSelectedImages([])
+      
+    } catch (error) {
+      console.error('Erreur génération rapport:', error)
+      alert('Erreur lors de la génération du rapport PDF')
+    } finally {
+      setGeneratingReport(false)
+    }
   }
 
   const generatePlaceholderSvg = (imageType: string, filename: string, size: 'small' | 'normal' = 'normal') => {
@@ -565,7 +635,11 @@ export default function ExamViewPage() {
 
                 {/* Actions de sélection */}
                 {filteredImages.length > 0 && (
-                  <div className="px-6 py-3 border-b border-gray-200 flex items-center justify-between">
+                  <div className="px-6 py-3 border-b border-gray-200">
+                    <div className="text-xs text-gray-500 mb-2">
+                      💡 Sélectionnez une ou plusieurs images puis cliquez sur "Générer rapport PDF" pour créer un rapport personnalisé
+                    </div>
+                    <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <input
                         type="checkbox"
@@ -584,6 +658,23 @@ export default function ExamViewPage() {
                     {selectedImages.length > 0 && (
                       <div className="flex gap-2">
                         <button
+                          onClick={handleGenerateReport}
+                          disabled={generatingReport}
+                          className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {generatingReport ? (
+                            <>
+                              <div className="animate-spin h-4 w-4 inline mr-1 border-2 border-indigo-700 border-t-transparent rounded-full"></div>
+                              Génération...
+                            </>
+                          ) : (
+                            <>
+                              <DocumentTextIcon className="h-4 w-4 inline mr-1" />
+                              Générer rapport PDF
+                            </>
+                          )}
+                        </button>
+                        <button
                           onClick={handleDeleteSelected}
                           className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
                         >
@@ -592,6 +683,7 @@ export default function ExamViewPage() {
                         </button>
                       </div>
                     )}
+                    </div>
                   </div>
                 )}
 
