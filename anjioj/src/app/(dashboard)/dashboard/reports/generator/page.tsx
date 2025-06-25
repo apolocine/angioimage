@@ -13,7 +13,8 @@ import {
   PhotoIcon,
   Cog6ToothIcon,
   UserIcon,
-  BeakerIcon
+  BeakerIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
 interface Patient {
@@ -91,6 +92,13 @@ export default function ReportGeneratorPage() {
   const [loadingImages, setLoadingImages] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   
+  // États pour l'autocomplétion
+  const [patientSearch, setPatientSearch] = useState('')
+  const [patientSuggestions, setPatientSuggestions] = useState<Patient[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  
   const [reportData, setReportData] = useState<ReportData>({
     title: '',
     patientId: '',
@@ -127,7 +135,6 @@ export default function ReportGeneratorPage() {
   ]
 
   useEffect(() => {
-    fetchPatients()
     fetchTemplates()
     if (editId) {
       loadExistingReport(editId)
@@ -146,16 +153,70 @@ export default function ReportGeneratorPage() {
     }
   }, [reportData.examIds])
 
-  const fetchPatients = async () => {
-    try {
-      const response = await fetch('/api/patients?limit=100')
-      const data = await response.json()
-      if (response.ok) {
-        setPatients(data.data || [])
+  // Effet pour l'autocomplétion des patients
+  useEffect(() => {
+    const searchPatients = async () => {
+      if (patientSearch.length < 2) {
+        setPatientSuggestions([])
+        setShowSuggestions(false)
+        return
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement des patients:', error)
+
+      setSearchLoading(true)
+      try {
+        const response = await fetch(`/api/patients/search?q=${encodeURIComponent(patientSearch)}&limit=10`)
+        const data = await response.json()
+        if (response.ok) {
+          setPatientSuggestions(data.data || [])
+          setShowSuggestions(true)
+        }
+      } catch (error) {
+        console.error('Erreur recherche patients:', error)
+      } finally {
+        setSearchLoading(false)
+      }
     }
+
+    const timeoutId = setTimeout(searchPatients, 300) // Délai de 300ms
+    return () => clearTimeout(timeoutId)
+  }, [patientSearch])
+
+  const handlePatientSearch = (value: string) => {
+    setPatientSearch(value)
+    if (!value.trim()) {
+      setSelectedPatient(null)
+      setReportData(prev => ({ ...prev, patientId: '' }))
+    }
+  }
+
+  const handlePatientSelectFromAutocomplete = (patient: Patient) => {
+    setSelectedPatient(patient)
+    setPatientSearch(`${patient.nom} ${patient.prenom}`)
+    setShowSuggestions(false)
+    setReportData(prev => ({
+      ...prev,
+      patientId: patient._id,
+      examIds: [],
+      imageIds: [],
+      title: `Rapport d'examen - ${patient.nom} ${patient.prenom}`
+    }))
+    setExams([])
+    setImages([])
+  }
+
+  const handlePatientClear = () => {
+    setSelectedPatient(null)
+    setPatientSearch('')
+    setShowSuggestions(false)
+    setReportData(prev => ({
+      ...prev,
+      patientId: '',
+      examIds: [],
+      imageIds: [],
+      title: ''
+    }))
+    setExams([])
+    setImages([])
   }
 
   const fetchExams = async (patientId: string) => {
@@ -263,6 +324,19 @@ export default function ReportGeneratorPage() {
         
         // Charger les examens si un patient est sélectionné
         if (patientId) {
+          // Récupérer les infos du patient pour l'autocomplétion
+          try {
+            const patientResponse = await fetch(`/api/patients/${patientId}`)
+            if (patientResponse.ok) {
+              const patientData = await patientResponse.json()
+              const patient = patientData.data || patientData
+              setSelectedPatient(patient)
+              setPatientSearch(`${patient.nom} ${patient.prenom}`)
+            }
+          } catch (error) {
+            console.error('Erreur chargement patient:', error)
+          }
+          
           await fetchExams(patientId)
         }
         
@@ -296,16 +370,32 @@ export default function ReportGeneratorPage() {
     }
   }
 
-  const handlePatientSelect = (patientId: string) => {
-    setReportData(prev => ({
-      ...prev,
-      patientId,
-      examIds: [],
-      imageIds: [],
-      title: `Rapport d'examen - ${patients.find(p => p._id === patientId)?.nom || ''} ${patients.find(p => p._id === patientId)?.prenom || ''}`
-    }))
-    setExams([])
-    setImages([])
+  const handlePatientSelect = async (patientId: string) => {
+    try {
+      // Récupérer les infos du patient
+      const response = await fetch(`/api/patients/${patientId}`)
+      if (response.ok) {
+        const data = await response.json()
+        const patient = data.data || data
+        
+        // Mettre à jour l'état de l'autocomplétion
+        setSelectedPatient(patient)
+        setPatientSearch(`${patient.nom} ${patient.prenom}`)
+        
+        // Mettre à jour le reportData
+        setReportData(prev => ({
+          ...prev,
+          patientId,
+          examIds: [],
+          imageIds: [],
+          title: `Rapport d'examen - ${patient.nom} ${patient.prenom}`
+        }))
+        setExams([])
+        setImages([])
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du patient:', error)
+    }
   }
 
   const handleExamToggle = (examId: string) => {
@@ -377,27 +467,77 @@ export default function ReportGeneratorPage() {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Sélectionnez un patient</h3>
-              <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
-                {patients.map((patient) => (
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Rechercher un patient</h3>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={patientSearch}
+                  onChange={(e) => handlePatientSearch(e.target.value)}
+                  onFocus={() => patientSuggestions.length > 0 && setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  placeholder="Tapez le nom ou prénom du patient..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                
+                {searchLoading && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin h-5 w-5 border-2 border-gray-300 border-t-indigo-600 rounded-full"></div>
+                  </div>
+                )}
+                
+                {selectedPatient && (
                   <button
-                    key={patient._id}
-                    onClick={() => handlePatientSelect(patient._id)}
-                    className={`p-3 text-left border rounded-lg hover:bg-gray-50 ${
-                      reportData.patientId === patient._id
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-300'
-                    }`}
+                    onClick={handlePatientClear}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    <div className="font-medium text-gray-900">
-                      {patient.nom} {patient.prenom}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Né(e) le {new Date(patient.dateNaissance).toLocaleDateString('fr-FR')}
-                    </div>
+                    <XMarkIcon className="h-5 w-5" />
                   </button>
-                ))}
+                )}
+
+                {/* Liste des suggestions */}
+                {showSuggestions && patientSuggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    {patientSuggestions.map((patient) => (
+                      <button
+                        key={patient._id}
+                        onClick={() => handlePatientSelectFromAutocomplete(patient)}
+                        className="w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="font-medium text-gray-900">
+                          {patient.nom} {patient.prenom}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Né(e) le {new Date(patient.dateNaissance).toLocaleDateString('fr-FR')}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Affichage quand aucun résultat */}
+                {showSuggestions && patientSuggestions.length === 0 && patientSearch.length >= 2 && !searchLoading && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
+                    Aucun patient trouvé pour "{patientSearch}"
+                  </div>
+                )}
               </div>
+
+              {/* Affichage du patient sélectionné */}
+              {selectedPatient && (
+                <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-indigo-900">
+                        Patient sélectionné: {selectedPatient.nom} {selectedPatient.prenom}
+                      </div>
+                      <div className="text-sm text-indigo-700">
+                        Né(e) le {new Date(selectedPatient.dateNaissance).toLocaleDateString('fr-FR')}
+                      </div>
+                    </div>
+                    <CheckIcon className="h-5 w-5 text-indigo-600" />
+                  </div>
+                </div>
+              )}
             </div>
 
             {reportData.patientId && (
@@ -762,7 +902,7 @@ export default function ReportGeneratorPage() {
                   <div className="flex justify-between">
                     <dt className="text-gray-500">Patient:</dt>
                     <dd className="text-gray-900">
-                      {patients.find(p => p._id === reportData.patientId)?.nom} {patients.find(p => p._id === reportData.patientId)?.prenom}
+                      {selectedPatient ? `${selectedPatient.nom} ${selectedPatient.prenom}` : 'Non sélectionné'}
                     </dd>
                   </div>
                   <div className="flex justify-between">
