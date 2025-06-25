@@ -49,7 +49,7 @@ const AppSettingsSchema = new Schema<IAppSettings>({
 
 // Index pour optimiser les recherches
 AppSettingsSchema.index({ category: 1, key: 1 })
-AppSettingsSchema.index({ key: 1 }, { unique: true })
+//  AppSettingsSchema.index({ key: 1 }, { unique: true })  // double déclaration d'index
 
 const AppSettings = models.AppSettings || model<IAppSettings>('AppSettings', AppSettingsSchema)
 
