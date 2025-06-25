@@ -19,12 +19,17 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') || ''
+    const examId = searchParams.get('examId') || ''
 
     // Construction de la requête
     const query: any = {}
     
     if (status) {
       query.status = status
+    }
+    
+    if (examId) {
+      query.examIds = examId
     }
 
     if (search) {

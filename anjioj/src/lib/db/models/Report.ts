@@ -11,6 +11,7 @@ export interface IReport extends Document {
   format: 'A4' | 'A5' | 'Letter'
   orientation: 'portrait' | 'landscape'
   content: {
+    header?: string
     introduction?: string
     conclusion?: string
     findings?: string
@@ -78,6 +79,7 @@ const ReportSchema: Schema = new Schema({
     default: 'portrait'
   },
   content: {
+    header: String,
     introduction: String,
     conclusion: String,
     findings: String,

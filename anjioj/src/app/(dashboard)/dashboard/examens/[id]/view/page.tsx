@@ -67,6 +67,21 @@ interface Exam {
   }
 }
 
+interface Report {
+  _id: string
+  title: string
+  status: 'draft' | 'final' | 'archived'
+  format: string
+  orientation: string
+  metadata?: {
+    generatedAt?: string
+    fileSize?: number
+    pageCount?: number
+  }
+  createdAt: string
+  updatedAt: string
+}
+
 export default function ExamViewPage() {
   const params = useParams()
   const examId = params.id as string
@@ -81,9 +96,12 @@ export default function ExamViewPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({})
   const [generatingReport, setGeneratingReport] = useState(false)
+  const [reports, setReports] = useState<Report[]>([])
+  const [loadingReports, setLoadingReports] = useState(false)
 
   useEffect(() => {
     fetchExam()
+    fetchReports()
   }, [examId])
 
   const fetchExam = async () => {
@@ -106,6 +124,23 @@ export default function ExamViewPage() {
       console.error('Erreur:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchReports = async () => {
+    setLoadingReports(true)
+    try {
+      const response = await fetch(`/api/reports?examId=${examId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setReports(data.data || [])
+      } else {
+        console.error('Erreur lors du chargement des rapports')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+    } finally {
+      setLoadingReports(false)
     }
   }
 
@@ -357,6 +392,9 @@ export default function ExamViewPage() {
       // Déselectionner les images
       setSelectedImages([])
       
+      // Rafraîchir la liste des rapports
+      fetchReports()
+      
     } catch (error) {
       console.error('Erreur génération rapport:', error)
       alert('Erreur lors de la génération du rapport PDF')
@@ -550,7 +588,7 @@ export default function ExamViewPage() {
               </div>
 
               {/* Statistiques des images */}
-              <div className="bg-white shadow rounded-lg p-6">
+              <div className="bg-white shadow rounded-lg p-6 mb-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Statistiques</h2>
                 
                 <div className="space-y-3">
@@ -571,6 +609,92 @@ export default function ExamViewPage() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Rapports générés */}
+              <div className="bg-white shadow rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-medium text-gray-900">Rapports générés</h2>
+                  <Link
+                    href="/dashboard/reports/generator"
+                    className="inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    <PlusIcon className="h-4 w-4 mr-1" />
+                    Nouveau rapport
+                  </Link>
+                </div>
+                
+                {loadingReports ? (
+                  <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  </div>
+                ) : reports.length === 0 ? (
+                  <div className="text-center py-8">
+                    <DocumentTextIcon className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                    <p className="text-sm text-gray-500">Aucun rapport généré pour cet examen</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {reports.map((report) => (
+                      <div key={report._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-gray-900">{report.title}</h4>
+                          <div className="flex items-center space-x-4 mt-1">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              report.status === 'final' ? 'bg-green-100 text-green-800' :
+                              report.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {report.status === 'final' ? 'Finalisé' :
+                               report.status === 'draft' ? 'Brouillon' :
+                               'Archivé'}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(report.createdAt)}
+                            </span>
+                            {report.metadata?.generatedAt && (
+                              <span className="text-xs text-gray-500">
+                                • PDF généré le {formatDate(report.metadata.generatedAt)}
+                              </span>
+                            )}
+                            {report.metadata?.pageCount && (
+                              <span className="text-xs text-gray-500">
+                                • {report.metadata.pageCount} page{report.metadata.pageCount > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-4">
+                          <Link
+                            href={`/dashboard/reports/${report._id}`}
+                            className="p-2 text-gray-400 hover:text-gray-600"
+                            title="Voir le rapport"
+                          >
+                            <EyeIcon className="h-4 w-4" />
+                          </Link>
+                          <Link
+                            href={`/dashboard/reports/generator?id=${report._id}`}
+                            className="p-2 text-gray-400 hover:text-indigo-600"
+                            title="Modifier le rapport"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </Link>
+                          {report.metadata?.generatedAt && (
+                            <a
+                              href={`/api/reports/${report._id}/download`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 text-gray-400 hover:text-green-600"
+                              title="Télécharger le PDF"
+                            >
+                              <DocumentIcon className="h-4 w-4" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

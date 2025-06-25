@@ -469,6 +469,13 @@ async function generatePdfContent(report: any, images: any[]) {
   </div>
   ` : ''}
 
+  ${templateSections.recommendations?.enabled !== false && content.recommendations ? `
+  <div class="section">
+    <div class="section-title">RECOMMANDATIONS</div>
+    <p>${content.recommendations}</p>
+  </div>
+  ` : ''}
+
   ${templateSections.conclusion?.enabled !== false && content.conclusion ? `
   <div class="section">
     <div class="section-title">CONCLUSION</div>
@@ -495,13 +502,6 @@ async function generatePdfContent(report: any, images: any[]) {
       `).join('')}
     </div>
     ` : '<p><em>Aucune image incluse dans ce rapport.</em></p>'}
-  </div>
-  ` : ''}
-
-  ${templateSections.recommendations?.enabled !== false && content.recommendations ? `
-  <div class="section">
-    <div class="section-title">RECOMMANDATIONS</div>
-    <p>${content.recommendations}</p>
   </div>
   ` : ''}
 
