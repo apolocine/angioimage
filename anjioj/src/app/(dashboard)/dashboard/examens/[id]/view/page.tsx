@@ -92,7 +92,13 @@ export default function ExamViewPage() {
       const response = await fetch(`/api/examens/${examId}`)
       if (response.ok) {
         const data = await response.json()
-        setExam(data.data || data)
+        const examData = data.data || data
+        console.log('Exam data loaded:', examData)
+        console.log('Images data:', examData.images)
+        if (examData.images && examData.images.length > 0) {
+          console.log('First image sample:', examData.images[0])
+        }
+        setExam(examData)
       } else {
         console.error('Erreur lors du chargement de l\'examen')
       }
@@ -734,7 +740,7 @@ export default function ExamViewPage() {
                             </div>
                           )}
                           <img
-                            src={`/api/images/${image._id}/preview`}
+                            src={image.thumbnailUrl || image.url || `/api/images/${image._id}/preview`}
                             alt={`Image ${index + 1}`}
                             className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
                             onClick={() => openLightbox(index)}
@@ -747,32 +753,32 @@ export default function ExamViewPage() {
                             }}
                           />
                           
-                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="flex space-x-2">
                               <button
                                 onClick={() => openLightbox(index)}
-                                className="p-2 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100"
+                                className="p-2 bg-white/95 rounded-full hover:bg-white shadow-lg backdrop-blur-sm"
                                 title="Agrandir"
                               >
                                 <MagnifyingGlassIcon className="h-4 w-4 text-gray-700" />
                               </button>
                               <Link
                                 href={`/dashboard/images/${image._id}/edit?examId=${exam._id}`}
-                                className="p-2 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100"
+                                className="p-2 bg-white/95 rounded-full hover:bg-white shadow-lg backdrop-blur-sm"
                                 title="Éditer RGB"
                               >
                                 <AdjustmentsHorizontalIcon className="h-4 w-4 text-gray-700" />
                               </Link>
                               <Link
                                 href={`/dashboard/images/${image._id}?examId=${exam._id}`}
-                                className="p-2 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100"
+                                className="p-2 bg-white/95 rounded-full hover:bg-white shadow-lg backdrop-blur-sm"
                                 title="Voir détails"
                               >
                                 <EyeIcon className="h-4 w-4 text-gray-700" />
                               </Link>
                               <button
                                 onClick={() => handleDeleteImage(image._id)}
-                                className="p-2 bg-red-500 bg-opacity-90 rounded-full hover:bg-opacity-100"
+                                className="p-2 bg-red-500/95 rounded-full hover:bg-red-500 shadow-lg backdrop-blur-sm"
                                 title="Supprimer"
                               >
                                 <TrashIcon className="h-4 w-4 text-white" />
@@ -822,7 +828,7 @@ export default function ExamViewPage() {
                             </div>
                           )}
                           <img
-                            src={`/api/images/${image._id}/preview`}
+                            src={image.thumbnailUrl || image.url || `/api/images/${image._id}/preview`}
                             alt={`Image ${index + 1}`}
                             className="h-16 w-16 object-cover rounded-lg cursor-pointer"
                             onClick={() => openLightbox(index)}
@@ -900,7 +906,7 @@ export default function ExamViewPage() {
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
           <div className="relative max-w-4xl max-h-screen p-4">
             <img
-              src={`/api/images/${filteredImages[lightboxIndex]._id}/full`}
+              src={filteredImages[lightboxIndex].url || `/api/images/${filteredImages[lightboxIndex]._id}/full`}
               alt={`Image ${lightboxIndex + 1}`}
               className="max-w-full max-h-full object-contain"
             />

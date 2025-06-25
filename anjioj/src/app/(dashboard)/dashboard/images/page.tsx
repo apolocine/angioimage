@@ -278,25 +278,25 @@ export default function ImagesPage() {
                       />
                       
                       {/* Overlay d'informations */}
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="flex gap-2">
                           <Link
                             href={`/dashboard/images/${image._id}`}
-                            className="p-2 bg-white rounded-full hover:bg-gray-100"
+                            className="p-2 bg-white/95 rounded-full hover:bg-white shadow-lg backdrop-blur-sm"
                           >
                             <EyeIcon className="h-4 w-4 text-gray-700" />
                           </Link>
                           <Link
                             href={`/dashboard/images/${image._id}/edit`}
-                            className="p-2 bg-white rounded-full hover:bg-gray-100"
+                            className="p-2 bg-white/95 rounded-full hover:bg-white shadow-lg backdrop-blur-sm"
                           >
                             <PencilIcon className="h-4 w-4 text-gray-700" />
                           </Link>
                           <button
                             onClick={() => handleDelete(image._id)}
-                            className="p-2 bg-white rounded-full hover:bg-gray-100"
+                            className="p-2 bg-red-500/95 rounded-full hover:bg-red-500 shadow-lg backdrop-blur-sm"
                           >
-                            <TrashIcon className="h-4 w-4 text-red-600" />
+                            <TrashIcon className="h-4 w-4 text-white" />
                           </button>
                         </div>
                       </div>
