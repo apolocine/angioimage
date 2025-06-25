@@ -6,6 +6,7 @@ import './Exam'
 import './Image'
 import './Report'
 import './ReportTemplate'
+import './AppSettings'
 
 // Re-export for convenience
 export { default as Role } from './Role'
@@ -15,3 +16,4 @@ export { default as Exam } from './Exam'
 export { default as Image } from './Image'
 export { default as Report } from './Report'
 export { default as ReportTemplate } from './ReportTemplate'
+export { default as AppSettings } from './AppSettings'

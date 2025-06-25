@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx --env-file=.env.local src/seeds/index.ts",
+    "seed:install": "tsx --env-file=.env.local src/scripts/install-seed.ts",
     "db:start": "docker-compose -f docker-compose.dev.yml up -d",
     "db:stop": "docker-compose -f docker-compose.dev.yml down",
     "db:reset": "docker-compose -f docker-compose.dev.yml down -v && docker-compose -f docker-compose.dev.yml up -d"

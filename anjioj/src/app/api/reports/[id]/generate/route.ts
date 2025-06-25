@@ -5,6 +5,7 @@ import dbConnect from '@/lib/db/mongodb'
 import Report from '@/lib/db/models/Report'
 import ReportTemplate from '@/lib/db/models/ReportTemplate'
 import Image from '@/lib/db/models/Image'
+import { SettingsService } from '@/lib/services/SettingsService'
 import path from 'path'
 import fs from 'fs'
 import puppeteer from 'puppeteer'
@@ -226,6 +227,8 @@ function generateImagePlaceholder(imageType: string, filename: string) {
 }
 
 async function generatePdfContent(report: any, images: any[]) {
+  // Charger le pied de page personnalisé
+  const customFooter = await SettingsService.getReportFooter()
   // Sécurité pour les données nulles/undefined
   const patient = report.patientId || {}
   const examens = report.examIds || []
@@ -417,6 +420,11 @@ async function generatePdfContent(report: any, images: any[]) {
 <body>
   <div class="report-container">
   ${layout.includeHeader ? `<div class="header">` : '<div>'}
+    ${content.header ? `
+      <div style="margin-bottom: 15px; font-size: ${fontSize.heading}px; color: ${colors.text};">
+        ${content.header.replace(/\n/g, '<br>')}
+      </div>
+    ` : ''}
     <div class="title">RAPPORT D'EXAMEN OPHTALMOLOGIQUE</div>
     <div class="subtitle">${report.title || 'Rapport sans titre'}</div>
   </div>
@@ -461,6 +469,13 @@ async function generatePdfContent(report: any, images: any[]) {
   </div>
   ` : ''}
 
+  ${templateSections.conclusion?.enabled !== false && content.conclusion ? `
+  <div class="section">
+    <div class="section-title">CONCLUSION</div>
+    <p>${content.conclusion}</p>
+  </div>
+  ` : ''}
+
   ${templateSections.images?.enabled !== false ? `
   <div class="section">
     <div class="section-title">IMAGES INCLUSES (${images.length})</div>
@@ -483,13 +498,6 @@ async function generatePdfContent(report: any, images: any[]) {
   </div>
   ` : ''}
 
-  ${templateSections.conclusion?.enabled !== false && content.conclusion ? `
-  <div class="section">
-    <div class="section-title">CONCLUSION</div>
-    <p>${content.conclusion}</p>
-  </div>
-  ` : ''}
-
   ${templateSections.recommendations?.enabled !== false && content.recommendations ? `
   <div class="section">
     <div class="section-title">RECOMMANDATIONS</div>
@@ -499,10 +507,18 @@ async function generatePdfContent(report: any, images: any[]) {
 
   ${layout.includeFooter ? `
   <div class="metadata">
-    Rapport généré automatiquement par Angioimage<br>
-    Format : ${layout.format} • ${layout.orientation}<br>
-    Configuration : ${layout.imagesPerPage} photo${layout.imagesPerPage > 1 ? 's' : ''} par page ${template.name ? `• Template: ${template.name}` : ''}<br>
-    Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}
+    ${customFooter
+      .replace('{date}', new Date().toLocaleDateString('fr-FR'))
+      .replace('{time}', new Date().toLocaleTimeString('fr-FR'))
+      .replace('{format}', layout.format)
+      .replace('{orientation}', layout.orientation)
+      .replace('{imagesCount}', images.length.toString())
+      .replace('{template}', template.name || 'Défaut')
+      .replace(/\n/g, '<br>')
+    }<br>
+    <small style="font-size: ${fontSize.caption - 1}px; color: ${colors.secondary};">
+      Format : ${layout.format} • ${layout.orientation} • ${layout.imagesPerPage} photo${layout.imagesPerPage > 1 ? 's' : ''} par page ${template.name ? `• Template: ${template.name}` : ''}
+    </small>
   </div>
   ` : ''}
   </div>

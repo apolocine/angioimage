@@ -58,6 +58,7 @@ interface ReportData {
   format: 'A4' | 'A5' | 'Letter'
   orientation: 'portrait' | 'landscape'
   content: {
+    header: string
     introduction: string
     conclusion: string
     findings: string
@@ -108,6 +109,7 @@ export default function ReportGeneratorPage() {
     format: 'A4',
     orientation: 'portrait',
     content: {
+      header: '',
       introduction: '',
       conclusion: '',
       findings: '',
@@ -303,6 +305,7 @@ export default function ReportGeneratorPage() {
           format: data.format || 'A4',
           orientation: data.orientation || 'portrait',
           content: {
+            header: data.content?.header || '',
             introduction: data.content?.introduction || '',
             conclusion: data.content?.conclusion || '',
             findings: data.content?.findings || '',
@@ -422,6 +425,7 @@ export default function ReportGeneratorPage() {
       const endpoint = editId ? `/api/reports/${editId}` : '/api/reports'
       const method = editId ? 'PUT' : 'POST'
       
+      // Étape 1: Créer ou mettre à jour le rapport en base
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -433,10 +437,29 @@ export default function ReportGeneratorPage() {
       const data = await response.json()
       
       if (response.ok) {
-        router.push(`/dashboard/reports/${data._id}`)
+        const reportId = data._id || editId
+        
+        // Étape 2: Régénérer le fichier PDF/HTML (toujours nécessaire pour refléter les changements)
+        const generateResponse = await fetch(`/api/reports/${reportId}/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            format: 'pdf' // Format par défaut, peut être modifié plus tard
+          })
+        })
+        
+        if (generateResponse.ok) {
+          router.push(`/dashboard/reports/${reportId}`)
+        } else {
+          console.error('Erreur lors de la génération du fichier')
+          // Même si la génération échoue, on peut toujours voir le rapport
+          router.push(`/dashboard/reports/${reportId}`)
+        }
       } else {
-        console.error('Erreur lors de la génération:', data.message)
-        alert('Erreur lors de la génération du rapport')
+        console.error('Erreur lors de la sauvegarde:', data.message)
+        alert('Erreur lors de la sauvegarde du rapport')
       }
     } catch (error) {
       console.error('Erreur:', error)
@@ -717,6 +740,22 @@ export default function ReportGeneratorPage() {
       case 3:
         return (
           <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                En-tête
+              </label>
+              <textarea
+                value={reportData.content.header}
+                onChange={(e) => setReportData(prev => ({
+                  ...prev,
+                  content: { ...prev.content, header: e.target.value }
+                }))}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                placeholder="En-tête du rapport (titre, informations du cabinet, etc.)..."
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Introduction
@@ -1014,12 +1053,12 @@ export default function ReportGeneratorPage() {
             {generating ? (
               <>
                 <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
-                Génération...
+                {editId ? 'Mise à jour et régénération...' : 'Génération...'}
               </>
             ) : (
               <>
                 <DocumentTextIcon className="h-4 w-4 mr-2" />
-                {editId ? 'Mettre à jour' : 'Générer le rapport'}
+                {editId ? 'Mettre à jour et régénérer' : 'Générer le rapport'}
               </>
             )}
           </button>

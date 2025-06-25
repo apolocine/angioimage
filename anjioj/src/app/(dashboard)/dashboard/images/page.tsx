@@ -126,6 +126,36 @@ export default function ImagesPage() {
     }
   }
 
+  const handleDeleteSelected = async () => {
+    if (selectedImages.length === 0) return
+
+    const confirmMessage = `Êtes-vous sûr de vouloir supprimer ${selectedImages.length} image(s) sélectionnée(s) ?`
+    if (!confirm(confirmMessage)) return
+
+    try {
+      // Supprimer toutes les images sélectionnées en parallèle
+      const deletePromises = selectedImages.map(imageId => 
+        fetch(`/api/images/${imageId}`, { method: 'DELETE' })
+      )
+      
+      const results = await Promise.all(deletePromises)
+      
+      // Vérifier les résultats
+      const failedDeletes = results.filter(result => !result.ok)
+      
+      if (failedDeletes.length > 0) {
+        alert(`Erreur: ${failedDeletes.length} image(s) n'ont pas pu être supprimée(s)`)
+      } else {
+        // Succès complet
+        setSelectedImages([])
+        fetchImages() // Recharger la liste
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression en lot:', error)
+      alert('Erreur lors de la suppression des images')
+    }
+  }
+
   const formatFileSize = (bytes: number) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     if (bytes === 0) return '0 Bytes'
@@ -229,8 +259,11 @@ export default function ImagesPage() {
                 
                 {selectedImages.length > 0 && (
                   <div className="flex gap-2">
-                    <button className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200">
-                      Supprimer la sélection
+                    <button 
+                      onClick={handleDeleteSelected}
+                      className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                    >
+                      Supprimer la sélection ({selectedImages.length})
                     </button>
                   </div>
                 )}

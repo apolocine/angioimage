@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeftIcon,
@@ -10,7 +10,9 @@ import {
   CalendarDaysIcon,
   PhotoIcon,
   CheckIcon,
-  CloudArrowUpIcon
+  CloudArrowUpIcon,
+  DocumentTextIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline'
 
 interface AppSettings {
@@ -21,6 +23,12 @@ interface AppSettings {
   autoSave: {
     enabled: boolean
     interval: number
+  }
+  // Nouveaux paramètres pour les rapports
+  reports: {
+    footer: string
+    cabinetName: string
+    doctorName: string
   }
 }
 
@@ -33,9 +41,64 @@ export default function ApplicationSettingsPage() {
     autoSave: {
       enabled: true,
       interval: 5
+    },
+    reports: {
+      footer: '',
+      cabinetName: '',
+      doctorName: ''
     }
   })
   const [saved, setSaved] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchReportSettings()
+  }, [])
+
+  const fetchReportSettings = async () => {
+    try {
+      const response = await fetch('/api/settings')
+      if (response.ok) {
+        const data = await response.json()
+        setSettings(prev => ({
+          ...prev,
+          reports: {
+            footer: data.data['reports.footer'] || '',
+            cabinetName: data.data['general.cabinetName'] || '',
+            doctorName: data.data['general.doctorName'] || ''
+          }
+        }))
+      }
+    } catch (error) {
+      console.error('Erreur chargement paramètres rapport:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const saveReportSetting = async (key: string, value: string) => {
+    try {
+      const category = key.split('.')[0]
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          key,
+          value,
+          category
+        })
+      })
+
+      if (response.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+      }
+    } catch (error) {
+      console.error('Erreur sauvegarde paramètre:', error)
+    }
+  }
 
   const handleSave = async () => {
     // TODO: API call to save settings
@@ -252,6 +315,123 @@ export default function ApplicationSettingsPage() {
                   </div>
                 </label>
               ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Report Settings */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-6">
+            <DocumentTextIcon className="inline h-5 w-5 mr-2" />
+            Paramètres des rapports
+          </h2>
+          
+          <div className="space-y-6">
+            {/* Cabinet Info */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <BuildingOfficeIcon className="inline h-4 w-4 mr-1" />
+                  Nom du cabinet
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={settings.reports.cabinetName}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      reports: { ...prev.reports, cabinetName: e.target.value }
+                    }))}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Cabinet d'Ophtalmologie"
+                  />
+                  <button
+                    onClick={() => saveReportSetting('general.cabinetName', settings.reports.cabinetName)}
+                    className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm"
+                  >
+                    Sauver
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nom du médecin
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={settings.reports.doctorName}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      reports: { ...prev.reports, doctorName: e.target.value }
+                    }))}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Dr. Nom Prénom"
+                  />
+                  <button
+                    onClick={() => saveReportSetting('general.doctorName', settings.reports.doctorName)}
+                    className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm"
+                  >
+                    Sauver
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Pied de page des rapports
+              </label>
+              <p className="text-sm text-gray-500 mb-3">
+                Variables disponibles : {'{date}'}, {'{time}'}, {'{format}'}, {'{orientation}'}, {'{imagesCount}'}, {'{template}'}
+              </p>
+              <div className="space-y-3">
+                <textarea
+                  value={settings.reports.footer}
+                  onChange={(e) => setSettings(prev => ({
+                    ...prev,
+                    reports: { ...prev.reports, footer: e.target.value }
+                  }))}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  placeholder="Rapport généré automatiquement par Angioimage..."
+                />
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-gray-500">
+                    Le texte apparaîtra en bas de chaque rapport généré
+                  </div>
+                  <button
+                    onClick={() => saveReportSetting('reports.footer', settings.reports.footer)}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  >
+                    Sauvegarder
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Preview */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Aperçu du pied de page
+              </label>
+              <div className="bg-gray-50 p-4 rounded-md border">
+                <div 
+                  className="text-sm text-gray-600"
+                  dangerouslySetInnerHTML={{
+                    __html: settings.reports.footer
+                      .replace('{date}', new Date().toLocaleDateString('fr-FR'))
+                      .replace('{time}', new Date().toLocaleTimeString('fr-FR'))
+                      .replace('{format}', 'A4')
+                      .replace('{orientation}', 'portrait')
+                      .replace('{imagesCount}', '3')
+                      .replace('{template}', 'Défaut')
+                      .replace(/\n/g, '<br>')
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
