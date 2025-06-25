@@ -421,11 +421,10 @@ async function generatePdfContent(report: any, images: any[]) {
   <div class="report-container">
   ${layout.includeHeader ? `<div class="header">` : '<div>'}
     ${content.header ? `
-      <div style="margin-bottom: 15px; font-size: ${fontSize.heading}px; color: ${colors.text};">
-        ${content.header.replace(/\n/g, '<br>')}
-      </div>
-    ` : ''}
-    <div class="title">RAPPORT D'EXAMEN OPHTALMOLOGIQUE</div>
+      <div class="title">${content.header}</div>
+    ` : `
+      <div class="title">RAPPORT D'EXAMEN OPHTALMOLOGIQUE</div>
+    `}
     <div class="subtitle">${report.title || 'Rapport sans titre'}</div>
   </div>
 

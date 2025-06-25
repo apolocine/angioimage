@@ -97,6 +97,7 @@ export async function PUT(
     
     // Gérer le contenu
     if (content) {
+      updateData['content.header'] = content.header
       updateData['content.introduction'] = content.introduction
       updateData['content.conclusion'] = content.conclusion
       updateData['content.findings'] = content.findings

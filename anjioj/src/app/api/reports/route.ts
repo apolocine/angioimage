@@ -122,6 +122,7 @@ export async function POST(request: NextRequest) {
       format: format || 'A4',
       orientation: orientation || 'portrait',
       content: {
+        header: content?.header || '',
         introduction: content?.introduction || '',
         conclusion: content?.conclusion || '',
         findings: content?.findings || '',

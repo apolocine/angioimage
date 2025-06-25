@@ -284,6 +284,8 @@ export default function ReportGeneratorPage() {
       const data = await response.json()
       if (response.ok) {
         console.log('Loaded report:', data)
+        console.log('Report content:', data.content)
+        console.log('Header value:', data.content?.header)
         
         // Extraire les IDs depuis les objets populés
         const patientId = data.patientId?._id || data.patientId
