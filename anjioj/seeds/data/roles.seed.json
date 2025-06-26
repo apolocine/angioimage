@@ -1,0 +1,74 @@
+{
+  "collection": "roles",
+  "timestamp": "2025-06-25T10:00:00.000Z",
+  "count": 3,
+  "data": [
+    {
+      "_id": "60d5ec49f1b2c72d2c8a1234",
+      "name": "admin",
+      "displayName": "Administrateur",
+      "permissions": [
+        "patients.create",
+        "patients.read",
+        "patients.update",
+        "patients.delete",
+        "images.create",
+        "images.read",
+        "images.update",
+        "images.delete",
+        "reports.create",
+        "reports.read",
+        "reports.update",
+        "reports.delete",
+        "users.create",
+        "users.read",
+        "users.update",
+        "users.delete",
+        "roles.manage",
+        "settings.manage"
+      ],
+      "description": "Accès complet à toutes les fonctionnalités du système",
+      "isActive": true,
+      "createdAt": "2025-06-25T10:00:00.000Z",
+      "updatedAt": "2025-06-25T10:00:00.000Z"
+    },
+    {
+      "_id": "60d5ec49f1b2c72d2c8a1235",
+      "name": "doctor",
+      "displayName": "Médecin",
+      "permissions": [
+        "patients.create",
+        "patients.read",
+        "patients.update",
+        "images.create",
+        "images.read",
+        "images.update",
+        "reports.create",
+        "reports.read",
+        "reports.update",
+        "users.read"
+      ],
+      "description": "Accès aux patients, examens et rapports médicaux",
+      "isActive": true,
+      "createdAt": "2025-06-25T10:00:00.000Z",
+      "updatedAt": "2025-06-25T10:00:00.000Z"
+    },
+    {
+      "_id": "60d5ec49f1b2c72d2c8a1236",
+      "name": "assistant",
+      "displayName": "Assistant(e)",
+      "permissions": [
+        "patients.create",
+        "patients.read",
+        "patients.update",
+        "images.create",
+        "images.read",
+        "reports.read"
+      ],
+      "description": "Accès limité pour la saisie de données et consultation",
+      "isActive": true,
+      "createdAt": "2025-06-25T10:00:00.000Z",
+      "updatedAt": "2025-06-25T10:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "description": "Données initiales pour l'installation d'Angioimage",
+  "created": "2024-01-01T00:00:00.000Z",
+  "collections": {
+    "users": {
+      "description": "Compte administrateur par défaut",
+      "credentials": {
+        "email": "admin@angioimage.local",
+        "password": "admin123"
+      }
+    },
+    "appsettings": {
+      "description": "Paramètres par défaut de l'application"
+    },
+    "reporttemplates": {
+      "description": "Templates de rapports pré-configurés"
+    }
+  },
+  "notes": [
+    "Le mot de passe de l'administrateur par défaut est 'admin123'",
+    "Il est fortement recommandé de changer ce mot de passe après la première connexion",
+    "Ces données sont minimales pour permettre le démarrage de l'application"
+  ]
+}

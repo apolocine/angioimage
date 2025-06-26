@@ -1,0 +1,18 @@
+[
+  {
+    "_id": {
+      "$oid": "6500000000000000000001"
+    },
+    "name": "Administrateur",
+    "email": "admin@angioimage.local",
+    "password": "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKyNiGMuRgQIYyC",
+    "role": "admin",
+    "isActive": true,
+    "createdAt": {
+      "$date": "2024-01-01T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2024-01-01T00:00:00.000Z"
+    }
+  }
+]

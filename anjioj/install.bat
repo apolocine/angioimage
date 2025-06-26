@@ -239,17 +239,129 @@ REM Seeding de la base de données
 REM ========================================
 
 :seed_database
-call :print_info "Seeding de la base de données..."
+call :print_info "Initialisation de la base de données..."
 
-if /i "%SEED_SAMPLE_DATA%"=="true" (
-    npm run seed:install
+REM Vérifier si on doit utiliser les données initiales ou un backup existant
+if exist "database\backup\latest" (
+    call :print_info "Backup existant trouvé, restauration en cours..."
+    node scripts\restore-db.js --force
     if errorlevel 1 (
-        call :print_warning "Échec du seeding des données d'exemple"
+        call :print_warning "Échec de la restauration, utilisation des données initiales"
+        call :restore_initial_data
     ) else (
-        call :print_success "Base de données initialisée avec les données d'exemple"
+        call :print_success "Base de données restaurée depuis le backup"
     )
 ) else (
-    call :print_info "Seeding des données d'exemple désactivé"
+    call :print_info "Aucun backup trouvé, utilisation des données initiales"
+    call :restore_initial_data
+)
+goto :eof
+
+REM ========================================
+REM Restaurer les données initiales
+REM ========================================
+
+:restore_initial_data
+call :print_info "Installation des données initiales..."
+
+REM Créer un script temporaire pour restaurer les données initiales
+(
+echo const { MongoClient } = require('mongodb'^);
+echo const fs = require('fs'^);
+echo const path = require('path'^);
+echo require('dotenv'^).config({ path: '.env.local' }^);
+echo.
+echo const INITIAL_DATA_DIR = path.join(__dirname, 'database', 'initial-data'^);
+echo const MONGO_URI = process.env.MONGO_URI ^|^| 'mongodb://localhost:27017/angioimage';
+echo.
+echo async function restoreInitialData(^) {
+echo     const client = new MongoClient(MONGO_URI^);
+echo     
+echo     try {
+echo         await client.connect(^);
+echo         const dbName = new URL(MONGO_URI^).pathname.substring(1^);
+echo         const db = client.db(dbName^);
+echo         
+echo         // Lire tous les fichiers JSON du dossier initial-data
+echo         const files = fs.readdirSync(INITIAL_DATA_DIR^)
+echo             .filter(f =^> f.endsWith('.json'^) ^&^& f !== 'metadata.json'^);
+echo         
+echo         for (const file of files^) {
+echo             const collectionName = path.basename(file, '.json'^);
+echo             console.log(`Installing ${collectionName}...`^);
+echo             
+echo             try {
+echo                 const collection = db.collection(collectionName^);
+echo                 const filePath = path.join(INITIAL_DATA_DIR, file^);
+echo                 const documents = JSON.parse(fs.readFileSync(filePath, 'utf8'^)^);
+echo                 
+echo                 if (documents.length ^> 0^) {
+echo                     // Convertir les ObjectId
+echo                     const processedDocs = documents.map(doc =^> {
+echo                         if (doc._id ^&^& typeof doc._id === 'object' ^&^& doc._id.$oid^) {
+echo                             const { ObjectId } = require('mongodb'^);
+echo                             doc._id = new ObjectId(doc._id.$oid^);
+echo                         }
+echo                         // Convertir les dates
+echo                         Object.keys(doc^).forEach(key =^> {
+echo                             if (doc[key] ^&^& typeof doc[key] === 'object' ^&^& doc[key].$date^) {
+echo                                 doc[key] = new Date(doc[key].$date^);
+echo                             }
+echo                         }^);
+echo                         return doc;
+echo                     }^);
+echo                     
+echo                     // Vérifier si la collection est vide avant d'insérer
+echo                     const count = await collection.countDocuments(^);
+echo                     if (count === 0^) {
+echo                         await collection.insertMany(processedDocs^);
+echo                         console.log(`✅ ${processedDocs.length} documents inserted`^);
+echo                     } else {
+echo                         console.log(`⚠️  Collection not empty, skipping`^);
+echo                     }
+echo                 }
+echo             } catch (error^) {
+echo                 console.error(`❌ Error: ${error.message}`^);
+echo             }
+echo         }
+echo         
+echo         console.log('✅ Initial data installed successfully'^);
+echo         process.exit(0^);
+echo     } catch (error^) {
+echo         console.error('❌ Error:', error^);
+echo         process.exit(1^);
+echo     } finally {
+echo         await client.close(^);
+echo     }
+echo }
+echo.
+echo restoreInitialData(^);
+) > %TEMP%\restore_initial.js
+
+node %TEMP%\restore_initial.js
+if errorlevel 1 (
+    call :print_error "Échec de l'installation des données initiales"
+    del /q %TEMP%\restore_initial.js >nul 2>&1
+    exit /b 1
+) else (
+    call :print_success "Données initiales installées"
+    del /q %TEMP%\restore_initial.js >nul 2>&1
+)
+goto :eof
+
+REM ========================================
+REM Backup de la base de données
+REM ========================================
+
+:backup_database
+call :print_info "Backup de la base de données..."
+
+node scripts\backup-db.js
+if errorlevel 1 (
+    call :print_error "Échec du backup"
+    exit /b 1
+) else (
+    call :print_success "Backup réalisé avec succès"
 )
 goto :eof
 
@@ -319,10 +431,12 @@ echo 4. Tester la connexion MongoDB
 echo 5. Construire l'application
 echo 6. Initialiser la base de données (seeding)
 echo 7. Configurer les paramètres de l'application
-echo 8. Démarrer l'application
-echo 9. Quitter
+echo 8. Backup de la base de données
+echo 9. Restaurer la base de données
+echo 10. Démarrer l'application
+echo 11. Quitter
 echo.
-set /p "choice=Votre choix (0-9): "
+set /p "choice=Votre choix (0-11): "
 goto :eof
 
 REM ========================================
@@ -453,13 +567,49 @@ if "%choice%"=="0" (
     cls
     call :print_header
     call :load_config
+    call :backup_database
+    echo.
+    pause
+    goto :menu_loop
+) else if "%choice%"=="9" (
+    cls
+    call :print_header
+    call :load_config
+    call :print_warning "Cette opération va remplacer toutes les données existantes!"
+    echo.
+    echo Options disponibles:
+    echo 1. Restaurer depuis le dernier backup
+    echo 2. Restaurer depuis les données initiales
+    echo 3. Annuler
+    set /p "restore_choice=Votre choix (1-3): "
+    
+    if "!restore_choice!"=="1" (
+        if exist "database\backup\latest" (
+            node scripts\restore-db.js
+        ) else (
+            call :print_error "Aucun backup trouvé"
+        )
+    ) else if "!restore_choice!"=="2" (
+        call :restore_initial_data
+    ) else if "!restore_choice!"=="3" (
+        call :print_info "Restauration annulée"
+    ) else (
+        call :print_error "Option invalide"
+    )
+    echo.
+    pause
+    goto :menu_loop
+) else if "%choice%"=="10" (
+    cls
+    call :print_header
+    call :load_config
     call :start_application
     goto :end
-) else if "%choice%"=="9" (
+) else if "%choice%"=="11" (
     call :print_info "Au revoir!"
     goto :end
 ) else (
-    call :print_error "Option invalide. Veuillez choisir entre 0 et 9."
+    call :print_error "Option invalide. Veuillez choisir entre 0 et 11."
     timeout /t 2 /nobreak >nul
     goto :menu_loop
 )

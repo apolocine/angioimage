@@ -1,0 +1,158 @@
+[
+  {
+    "_id": {
+      "$oid": "6500000000000000000007"
+    },
+    "name": "Template Standard",
+    "description": "Template par défaut pour les rapports d'examens ophtalmologiques",
+    "category": "standard",
+    "isDefault": true,
+    "layout": {
+      "format": "A4",
+      "orientation": "portrait",
+      "margins": {
+        "top": 20,
+        "right": 20,
+        "bottom": 20,
+        "left": 20
+      },
+      "imagesPerPage": 4,
+      "imagesPerRow": 2
+    },
+    "sections": {
+      "header": {
+        "enabled": true,
+        "content": ""
+      },
+      "patientInfo": {
+        "enabled": true,
+        "fields": ["nom", "prenom", "dateNaissance", "age"]
+      },
+      "examInfo": {
+        "enabled": true,
+        "fields": ["type", "date", "oeil", "indication"]
+      },
+      "introduction": {
+        "enabled": true
+      },
+      "findings": {
+        "enabled": true
+      },
+      "recommendations": {
+        "enabled": true
+      },
+      "conclusion": {
+        "enabled": true
+      },
+      "images": {
+        "enabled": true
+      },
+      "footer": {
+        "enabled": true
+      }
+    },
+    "styling": {
+      "fontFamily": "Arial, sans-serif",
+      "fontSize": {
+        "title": 24,
+        "heading": 16,
+        "body": 12,
+        "caption": 10
+      },
+      "colors": {
+        "primary": "#2563eb",
+        "secondary": "#64748b",
+        "text": "#1f2937",
+        "background": "#ffffff"
+      },
+      "spacing": {
+        "sectionGap": 25,
+        "paragraphGap": 15
+      }
+    },
+    "createdAt": {
+      "$date": "2024-01-01T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2024-01-01T00:00:00.000Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6500000000000000000008"
+    },
+    "name": "Template Compact",
+    "description": "Template compact avec plus d'images par page",
+    "category": "compact",
+    "isDefault": false,
+    "layout": {
+      "format": "A4",
+      "orientation": "portrait",
+      "margins": {
+        "top": 15,
+        "right": 15,
+        "bottom": 15,
+        "left": 15
+      },
+      "imagesPerPage": 6,
+      "imagesPerRow": 2
+    },
+    "sections": {
+      "header": {
+        "enabled": true,
+        "content": ""
+      },
+      "patientInfo": {
+        "enabled": true,
+        "fields": ["nom", "prenom", "age"]
+      },
+      "examInfo": {
+        "enabled": true,
+        "fields": ["type", "date", "oeil"]
+      },
+      "introduction": {
+        "enabled": false
+      },
+      "findings": {
+        "enabled": true
+      },
+      "recommendations": {
+        "enabled": true
+      },
+      "conclusion": {
+        "enabled": true
+      },
+      "images": {
+        "enabled": true
+      },
+      "footer": {
+        "enabled": true
+      }
+    },
+    "styling": {
+      "fontFamily": "Arial, sans-serif",
+      "fontSize": {
+        "title": 20,
+        "heading": 14,
+        "body": 11,
+        "caption": 9
+      },
+      "colors": {
+        "primary": "#2563eb",
+        "secondary": "#64748b",
+        "text": "#1f2937",
+        "background": "#ffffff"
+      },
+      "spacing": {
+        "sectionGap": 20,
+        "paragraphGap": 10
+      }
+    },
+    "createdAt": {
+      "$date": "2024-01-01T00:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2024-01-01T00:00:00.000Z"
+    }
+  }
+]

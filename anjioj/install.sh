@@ -204,16 +204,120 @@ build_application() {
 
 # Seeding de la base de données
 seed_database() {
-    print_info "Seeding de la base de données..."
+    print_info "Initialisation de la base de données..."
     
-    if [ "$SEED_SAMPLE_DATA" = "true" ]; then
-        if npm run seed:install; then
-            print_success "Base de données initialisée avec les données d'exemple"
+    # Vérifier si on doit utiliser les données initiales ou un backup existant
+    if [ -d "database/backup/latest" ]; then
+        print_info "Backup existant trouvé, restauration en cours..."
+        if node scripts/restore-db.js --force; then
+            print_success "Base de données restaurée depuis le backup"
         else
-            print_warning "Échec du seeding des données d'exemple"
+            print_warning "Échec de la restauration, utilisation des données initiales"
+            restore_initial_data
         fi
     else
-        print_info "Seeding des données d'exemple désactivé"
+        print_info "Aucun backup trouvé, utilisation des données initiales"
+        restore_initial_data
+    fi
+}
+
+# Restaurer les données initiales
+restore_initial_data() {
+    print_info "Installation des données initiales..."
+    
+    # Créer un script temporaire pour restaurer les données initiales
+    cat > /tmp/restore_initial.js << 'EOF'
+const { MongoClient } = require('mongodb');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config({ path: '.env.local' });
+
+const INITIAL_DATA_DIR = path.join(__dirname, 'database', 'initial-data');
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/angioimage';
+
+async function restoreInitialData() {
+    const client = new MongoClient(MONGO_URI);
+    
+    try {
+        await client.connect();
+        const dbName = new URL(MONGO_URI).pathname.substring(1);
+        const db = client.db(dbName);
+        
+        // Lire tous les fichiers JSON du dossier initial-data
+        const files = fs.readdirSync(INITIAL_DATA_DIR)
+            .filter(f => f.endsWith('.json') && f !== 'metadata.json');
+        
+        for (const file of files) {
+            const collectionName = path.basename(file, '.json');
+            console.log(`Installing ${collectionName}...`);
+            
+            try {
+                const collection = db.collection(collectionName);
+                const filePath = path.join(INITIAL_DATA_DIR, file);
+                const documents = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                
+                if (documents.length > 0) {
+                    // Convertir les ObjectId
+                    const processedDocs = documents.map(doc => {
+                        if (doc._id && typeof doc._id === 'object' && doc._id.$oid) {
+                            const { ObjectId } = require('mongodb');
+                            doc._id = new ObjectId(doc._id.$oid);
+                        }
+                        // Convertir les dates
+                        Object.keys(doc).forEach(key => {
+                            if (doc[key] && typeof doc[key] === 'object' && doc[key].$date) {
+                                doc[key] = new Date(doc[key].$date);
+                            }
+                        });
+                        return doc;
+                    });
+                    
+                    // Vérifier si la collection est vide avant d'insérer
+                    const count = await collection.countDocuments();
+                    if (count === 0) {
+                        await collection.insertMany(processedDocs);
+                        console.log(`✅ ${processedDocs.length} documents inserted`);
+                    } else {
+                        console.log(`⚠️  Collection not empty, skipping`);
+                    }
+                }
+            } catch (error) {
+                console.error(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        console.log('✅ Initial data installed successfully');
+        process.exit(0);
+    } catch (error) {
+        console.error('❌ Error:', error);
+        process.exit(1);
+    } finally {
+        await client.close();
+    }
+}
+
+restoreInitialData();
+EOF
+    
+    if node /tmp/restore_initial.js; then
+        print_success "Données initiales installées"
+        rm -f /tmp/restore_initial.js
+    else
+        print_error "Échec de l'installation des données initiales"
+        rm -f /tmp/restore_initial.js
+        return 1
+    fi
+}
+
+# Fonction de backup de la base de données
+backup_database() {
+    print_info "Backup de la base de données..."
+    
+    if node scripts/backup-db.js; then
+        print_success "Backup réalisé avec succès"
+    else
+        print_error "Échec du backup"
+        return 1
     fi
 }
 
@@ -280,10 +384,12 @@ show_menu() {
     echo "5. Construire l'application"
     echo "6. Initialiser la base de données (seeding)"
     echo "7. Configurer les paramètres de l'application"
-    echo "8. Démarrer l'application"
-    echo "9. Quitter"
+    echo "8. Backup de la base de données"
+    echo "9. Restaurer la base de données"
+    echo "10. Démarrer l'application"
+    echo "11. Quitter"
     echo ""
-    echo -n "Votre choix (0-9): "
+    echo -n "Votre choix (0-11): "
 }
 
 # Installation complète
@@ -401,15 +507,57 @@ main() {
                 clear
                 print_header
                 load_config
+                backup_database
+                echo ""
+                read -p "Appuyez sur Entrée pour continuer..."
+                ;;
+            9)
+                clear
+                print_header
+                load_config
+                print_warning "Cette opération va remplacer toutes les données existantes!"
+                echo ""
+                echo "Options disponibles:"
+                echo "1. Restaurer depuis le dernier backup"
+                echo "2. Restaurer depuis les données initiales"
+                echo "3. Annuler"
+                echo -n "Votre choix (1-3): "
+                read restore_choice
+                
+                case $restore_choice in
+                    1)
+                        if [ -d "database/backup/latest" ]; then
+                            node scripts/restore-db.js
+                        else
+                            print_error "Aucun backup trouvé"
+                        fi
+                        ;;
+                    2)
+                        restore_initial_data
+                        ;;
+                    3)
+                        print_info "Restauration annulée"
+                        ;;
+                    *)
+                        print_error "Option invalide"
+                        ;;
+                esac
+                echo ""
+                read -p "Appuyez sur Entrée pour continuer..."
+                ;;
+            10)
+                clear
+                print_header
+                load_config
                 start_application
                 break
                 ;;
-            9)
+            11)
                 print_info "Au revoir!"
                 exit 0
                 ;;
             *)
-                print_error "Option invalide. Veuillez choisir entre 0 et 9."
+                print_error "Option invalide. Veuillez choisir entre 0 et 11."
                 sleep 2
                 ;;
         esac
